@@ -12,16 +12,18 @@ import { index, pgTableCreator } from "drizzle-orm/pg-core";
  */
 export const createTable = pgTableCreator((name) => `jeux-girons_${name}`);
 
-export const posts = createTable(
-  "post",
+
+export const groups = createTable(
+  "group",
   (d) => ({
-    id: d.integer().primaryKey().generatedByDefaultAsIdentity(),
-    name: d.varchar({ length: 256 }),
-    createdAt: d
-      .timestamp({ withTimezone: true })
+    id: d.serial("id").primaryKey(),
+    name: d.varchar("name", { length: 256 }).notNull(),
+    contactName: d.text("contact_name"),
+    contactPhone: d.varchar("contact_phone", { length: 50 }),
+    createdAt: d.timestamp("created_at", { withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
-    updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
+    updatedAt: d.timestamp("updated_at", { withTimezone: true }).$onUpdate(() => new Date()),
   }),
   (t) => [index("name_idx").on(t.name)],
 );
