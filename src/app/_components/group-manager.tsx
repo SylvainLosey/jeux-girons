@@ -50,6 +50,8 @@ type Group = RouterOutputs["group"]["getAll"][number];
 export function GroupManager() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<Group | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [groupToDelete, setGroupToDelete] = useState<number | null>(null);
 
   const utils = api.useUtils();
 
@@ -70,10 +72,10 @@ export function GroupManager() {
       setIsDialogOpen(false);
       setEditingGroup(null);
       form.reset();
-      toast.success("Group created successfully.");
+      toast.success("Jeunesse créée avec succès.");
     },
     onError: (error) => {
-      toast.error(`Failed to create group: ${error.message}`);
+      toast.error(`Échec de la création de la jeunesse: ${error.message}`);
     },
   });
 
@@ -83,20 +85,20 @@ export function GroupManager() {
       setIsDialogOpen(false);
       setEditingGroup(null);
       form.reset();
-      toast.success("Group updated successfully.");
+      toast.success("Jeunesse mise à jour avec succès.");
     },
     onError: (error) => {
-      toast.error(`Failed to update group: ${error.message}`);
+      toast.error(`Échec de la mise à jour de la jeunesse: ${error.message}`);
     },
   });
 
   const deleteGroupMutation = api.group.delete.useMutation({
     onSuccess: async () => {
       await utils.group.getAll.invalidate();
-      toast.success("Group deleted successfully.");
+      toast.success("Jeunesse supprimée avec succès.");
     },
     onError: (error) => {
-      toast.error(`Failed to delete group: ${error.message}`);
+      toast.error(`Échec de la suppression de la jeunesse: ${error.message}`);
     },
   });
 
@@ -124,46 +126,47 @@ export function GroupManager() {
   };
 
   const handleDelete = (id: number) => {
+    setGroupToDelete(id);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (groupToDelete === null) return;
+    
     toast.promise(
-      new Promise<void>((resolve, reject) => {
-        if (window.confirm("Are you sure you want to delete this group?")) {
-          deleteGroupMutation.mutate({ id }, {
-            onSuccess: () => resolve(),
-            onError: (err) => reject(err),
-          });
-        } else {
-          reject(new Error("Deletion cancelled"));
-        }
-      }),
+      deleteGroupMutation.mutateAsync({ id: groupToDelete }),
       {
-        loading: 'Deleting group...',
-        success: 'Group deleted successfully!',
-        error: (err) => err instanceof Error ? `Error: ${err.message}` : 'Failed to delete group',
+        loading: 'Suppression de la jeunesse...',
+        success: 'Jeunesse supprimée avec succès !',
+        error: (err) => err instanceof Error ? `Erreur: ${err.message}` : 'Échec de la suppression de la jeunesse',
       }
-    );
+    ).finally(() => {
+      setIsDeleteDialogOpen(false);
+      setGroupToDelete(null);
+    });
   };
 
   const isSubmitting = createGroupMutation.isPending || updateGroupMutation.isPending;
   const isDeleting = deleteGroupMutation.isPending;
 
-  if (isLoading) return <div className="text-center p-4">Loading groups...</div>;
-  if (error) return <div className="text-center p-4 text-red-600">Error loading groups: {error.message}</div>;
+  if (isLoading) return <div className="text-center p-4">Chargement des jeunesses...</div>;
+  if (error) return <div className="text-center p-4 text-red-600">Erreur lors du chargement des jeunesses: {error.message}</div>;
 
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Group Management</h1>
+        <h1 className="text-3xl font-bold">Jeunesses</h1>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => handleOpenDialog()}>
-              <PlusCircle className="mr-2 h-4 w-4" /> Create Group
+              <PlusCircle className="mr-2 h-4 w-4" /> Ajouter une Jeunesse
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>{editingGroup ? "Edit Group" : "Create New Group"}</DialogTitle>
+              <DialogTitle>{editingGroup ? "Modifier la Jeunesse" : "Créer une Nouvelle Jeunesse"}</DialogTitle>
               <DialogDescription>
-                {editingGroup ? "Update the details for this group." : "Fill in the details for the new group."}
+                {editingGroup ? "Mettez à jour les détails de cette jeunesse." : "Remplissez les détails pour la nouvelle jeunesse."}
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
@@ -173,7 +176,7 @@ export function GroupManager() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Group Name <span className="text-red-500">*</span></FormLabel>
+                      <FormLabel>Jeunesse <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input placeholder="e.g., Marketing Team" {...field} />
                       </FormControl>
@@ -186,9 +189,9 @@ export function GroupManager() {
                   name="contactName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Contact Name (Optional)</FormLabel>
+                      <FormLabel>Contact (Optionel)</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., Jane Smith" {...field} value={field.value ?? ''} />
+                        <Input placeholder="Jane Smith" {...field} value={field.value ?? ''} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -199,9 +202,9 @@ export function GroupManager() {
                   name="contactPhone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Contact Phone (Optional)</FormLabel>
+                      <FormLabel>Téléphone (Optionel)</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., 555-0123" {...field} value={field.value ?? ''} />
+                        <Input placeholder="079 273 18 21" {...field} value={field.value ?? ''} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -209,10 +212,10 @@ export function GroupManager() {
                 />
                 <DialogFooter>
                   <DialogClose asChild>
-                    <Button type="button" variant="outline">Cancel</Button>
+                    <Button type="button" variant="outline">Annuler</Button>
                   </DialogClose>
                   <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? (editingGroup ? "Saving..." : "Creating...") : "Save Group"}
+                    {isSubmitting ? (editingGroup ? "Enregistrement..." : "Création...") : "Sauvegarder"}
                   </Button>
                 </DialogFooter>
               </form>
@@ -225,9 +228,9 @@ export function GroupManager() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Group Name</TableHead>
-              <TableHead>Contact Name</TableHead>
-              <TableHead>Contact Phone</TableHead>
+              <TableHead>Jeunesse</TableHead>
+              <TableHead>Contact</TableHead>
+              <TableHead>Téléphone</TableHead>
               <TableHead className="text-right w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -235,7 +238,7 @@ export function GroupManager() {
             {groups?.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
-                  No groups found. Click &quot;Create Group&quot; to add one.
+                  Aucune jeunesse trouvée. Cliquez sur &quot;Ajouter une Jeunesse&quot; pour en créer une.
                 </TableCell>
               </TableRow>
             ) : (
@@ -245,10 +248,10 @@ export function GroupManager() {
                   <TableCell>{group.contactName ?? <span className="text-muted-foreground">-</span>}</TableCell>
                   <TableCell>{group.contactPhone ?? <span className="text-muted-foreground">-</span>}</TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" className="mr-1" onClick={() => handleOpenDialog(group)} aria-label="Edit Group">
+                    <Button variant="ghost" size="icon" className="mr-1" onClick={() => handleOpenDialog(group)} aria-label="Editer">
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(group.id)} disabled={isDeleting} aria-label="Delete Group">
+                    <Button variant="ghost" size="icon" onClick={() => handleDelete(group.id)} disabled={isDeleting} aria-label="Supprimer">
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </TableCell>
@@ -258,6 +261,34 @@ export function GroupManager() {
           </TableBody>
         </Table>
       </div>
+
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Confirmation de suppression</DialogTitle>
+            <DialogDescription>
+              Êtes-vous sûr de vouloir supprimer cette jeunesse? Cette action ne peut pas être annulée.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsDeleteDialogOpen(false)}
+            >
+              Annuler
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={confirmDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Suppression..." : "Supprimer"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 } 
