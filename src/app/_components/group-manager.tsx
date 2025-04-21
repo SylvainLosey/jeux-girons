@@ -133,17 +133,26 @@ export function GroupManager() {
   const confirmDelete = () => {
     if (groupToDelete === null) return;
     
-    toast.promise(
-      deleteGroupMutation.mutateAsync({ id: groupToDelete }),
+    toast.loading('Suppression de la jeunesse...');
+    
+    deleteGroupMutation.mutate(
+      { id: groupToDelete },
       {
-        loading: 'Suppression de la jeunesse...',
-        success: 'Jeunesse supprimée avec succès !',
-        error: (err) => err instanceof Error ? `Erreur: ${err.message}` : 'Échec de la suppression de la jeunesse',
+        onSuccess: () => {
+          toast.success('Jeunesse supprimée avec succès !');
+          setIsDeleteDialogOpen(false);
+          setGroupToDelete(null);
+        },
+        onError: (err) => {
+          const errorMessage = err instanceof Error 
+            ? `Erreur: ${err.message}` 
+            : 'Échec de la suppression de la jeunesse';
+          toast.error(errorMessage);
+          setIsDeleteDialogOpen(false);
+          setGroupToDelete(null);
+        }
       }
-    ).finally(() => {
-      setIsDeleteDialogOpen(false);
-      setGroupToDelete(null);
-    });
+    );
   };
 
   const isSubmitting = createGroupMutation.isPending || updateGroupMutation.isPending;
