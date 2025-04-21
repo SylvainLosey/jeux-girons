@@ -268,8 +268,7 @@ export function GameManager() {
           <TableHeader>
             <TableRow>
               <TableHead>Nom</TableHead>
-              <TableHead>Nombre de Jeunesses</TableHead>
-              <TableHead>Description</TableHead>
+              <TableHead>Participants</TableHead>
               <TableHead className="text-right w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -281,21 +280,44 @@ export function GameManager() {
                 </TableCell>
               </TableRow>
             ) : (
-              games?.map((game) => (
-                <TableRow key={game.id}>
-                  <TableCell className="font-medium">{game.name}</TableCell>
-                  <TableCell>{game.numberOfGroups}</TableCell>
-                  <TableCell>{game.description ?? <span className="text-muted-foreground">-</span>}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" className="mr-1" onClick={() => handleOpenDialog(game)} aria-label="Editer">
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(game.id)} disabled={isDeleting} aria-label="Supprimer">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
+              games?.map((game) => {
+                let badgeText = "";
+                let badgeClasses = "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2";
+                switch (game.numberOfGroups) {
+                  case 1:
+                    badgeText = "1 jeunesse";
+                    badgeClasses += " bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300";
+                    break;
+                  case 2:
+                    badgeText = "2 jeunesses";
+                    badgeClasses += " bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300";
+                    break;
+                  case 3:
+                    badgeText = "3 jeunesses";
+                    badgeClasses += " bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300";
+                    break;
+                  default:
+                    badgeText = `${game.numberOfGroups} jeunesses`; 
+                    badgeClasses += " bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
+                }
+
+                return (
+                  <TableRow key={game.id}>
+                    <TableCell className="font-medium">{game.name}</TableCell>
+                    <TableCell>
+                      <span className={badgeClasses}>{badgeText}</span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="icon" className="mr-1" onClick={() => handleOpenDialog(game)} aria-label="Editer">
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleDelete(game.id)} disabled={isDeleting} aria-label="Supprimer">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>
