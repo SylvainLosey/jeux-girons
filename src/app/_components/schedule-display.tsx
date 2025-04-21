@@ -32,17 +32,14 @@ interface TimeSlot {
 // Define the overall schedule structure
 type Schedule = TimeSlot[];
 
-// Helper function to shuffle an array (Fisher-Yates algorithm)
+// Helper function to shuffle an array (simplified Fisher-Yates algorithm)
 function shuffleArray<T>(array: T[]): T[] {
     const shuffled = [...array];
     for (let i = shuffled.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        if (shuffled[i] !== undefined && shuffled[j] !== undefined) {
-            // Use a temporary variable instead of destructuring to avoid the type error
-            const temp = shuffled[i] as T;
-            shuffled[i] = shuffled[j] as T;
-            shuffled[j] = temp;
-        }
+        const temp = shuffled[i] as T;
+        shuffled[i] = shuffled[j] as T;
+        shuffled[j] = temp;
     }
     return shuffled;
 }
@@ -63,9 +60,6 @@ function generateSchedule(
     startDate: Date,
     formatTimeFn: (date: Date) => string
 ): Schedule | { error: string } {
-    console.log("--- Starting Schedule Generation (New Approach) ---");
-    console.log(`Groups: ${groups.length}, Games: ${games.length}`);
-
     const N = groups.length;
     const M = games.length;
 
@@ -95,27 +89,20 @@ function generateSchedule(
     const groupMap = new Map(groups.map(g => [g.id, g]));
     const gameMap = new Map(games.map(g => [g.id, g]));
 
-    // --- DEBUG: Find ID for the problematic group ---
-    const problematicGroupName = "Jeunesse de Sévaz"; // Adjust if name is different
-    const problematicGroupId = groups.find(g => g.name === problematicGroupName)?.id;
-    console.log(`Targeting problematic group: ${problematicGroupName} (ID: ${problematicGroupId ?? 'Not Found'})`);
-    // --- END DEBUG ---
-
     let currentStartTimeMs = startDate.getTime();
     let slotIndex = 0;
-    const MAX_SLOTS = (N * M) + N; // Adjusted safety break
+    const MAX_SLOTS = (N * M) + N; // Safety break
 
     // Loop until all groups have played all games OR max slots reached
     while (Array.from(needsToPlay.values()).some(gamesSet => gamesSet.size > 0)) {
         slotIndex++;
         if (slotIndex > MAX_SLOTS) {
-             console.error("Schedule generation exceeded MAX_SLOTS.", { needsToPlay });
              const remainingNeedsSummary = Array.from(needsToPlay.entries())
                 .filter(([_, gameSet]) => gameSet.size > 0)
                 .map(([groupId, gameSet]) => {
                     const groupName = groupMap.get(groupId)?.name ?? `ID ${groupId}`;
                     const remainingGameNames = Array.from(gameSet).map(gameId => gameMap.get(gameId)?.name ?? `GameID ${gameId}`).join(', ');
-                    return `${groupName}: ${gameSet.size} jeux restants (${remainingGameNames})`; // Log remaining game names
+                    return `${groupName}: ${gameSet.size} jeux restants (${remainingGameNames})`;
                 })
                 .join('; ');
              return { error: `La génération de l'horaire a dépassé ${MAX_SLOTS} créneaux sans que tous les groupes aient joué à tous les jeux. Vérifiez la configuration ou augmentez MAX_SLOTS. Besoins restants: ${remainingNeedsSummary}` };
@@ -126,8 +113,6 @@ function generateSchedule(
         const timeslotEntries: ScheduleEntry[] = [];
         const groupScheduledInSlot = new Set<number>();
         const gameScheduledInSlot = new Set<number>();
-
-        console.log(`\n--- Slot ${slotIndex} (${formatTimeFn(startTime)}) ---`);
 
         const shuffledGroups = shuffleArray(groups);
 
@@ -169,9 +154,6 @@ function generateSchedule(
 
                 // Check if enough partners are available and need this game
                 if (potentialPartnerIds.length >= partnersNeeded) {
-                    console.log(`  Trying to schedule Game: ${game.name} (${requiredParticipants}) for Group: ${currentGroup.name}`);
-                    console.log(`    Found ${potentialPartnerIds.length} potential partners: [${potentialPartnerIds.map(id => groupMap.get(id)?.name).join(', ')}]`);
-
                     // Select partners (prioritize those with fewer needs overall)
                     potentialPartnerIds.sort((aId, bId) => {
                         const needsA = needsToPlay.get(aId)?.size ?? Infinity;
@@ -182,7 +164,6 @@ function generateSchedule(
 
                     // Schedule the game!
                     const participatingGroupIds = [currentGroupId, ...selectedPartnerIds];
-                    console.log(`    --> Scheduling ${game.name} with: [${participatingGroupIds.map(id => groupMap.get(id)?.name).join(', ')}]`);
 
                     participatingGroupIds.forEach(groupId => {
                         const group = groupMap.get(groupId);
@@ -196,19 +177,11 @@ function generateSchedule(
                     break; // Move to the next group, as this one is now scheduled
                 }
             } // End loop through needed games for currentGroup
-
-            if (!groupHasBeenScheduled) {
-                 // Optional: Log if a group couldn't be scheduled this slot
-                 // console.log(`  Group ${currentGroup.name} could not be scheduled this slot.`);
-            }
-
         } // End loop through shuffledGroups
-
-        // --- End of Timeslot Planning ---
 
         // Add the completed timeslot to the schedule if any games were played
         if (timeslotEntries.length > 0) {
-            // Sort entries for consistent display (optional, but nice)
+            // Sort entries for consistent display
             timeslotEntries.sort((a, b) => {
                 const gameCompare = a.game.name.localeCompare(b.game.name);
                 if (gameCompare !== 0) return gameCompare;
@@ -218,15 +191,12 @@ function generateSchedule(
             schedule.push({ slotIndex, startTime, endTime, entries: timeslotEntries });
 
             // Update the master needsToPlay list
-            console.log(`  Updating needs after Slot ${slotIndex}:`);
             timeslotEntries.forEach(entry => {
                 needsToPlay.get(entry.group.id)?.delete(entry.game.id);
             });
-        } else {
-            console.log(`  Slot ${slotIndex}: No games scheduled.`);
         }
 
-        // --- Deadlock Check & Filler Logic ---
+        // Handle potential deadlock with two groups each needing one last game
         const remainingNeedsEntries = Array.from(needsToPlay.entries())
             .filter(([_, gameSet]) => gameSet.size > 0);
 
@@ -234,88 +204,67 @@ function generateSchedule(
             remainingNeedsEntries.length === 2 && // Exactly two groups left
             remainingNeedsEntries.every(([_, gameSet]) => gameSet.size === 1) // Each needs exactly one game
         ) {
-            // Safe access with proper type checking
-            if (remainingNeedsEntries[0] && remainingNeedsEntries[1]) {
-                const entryA = remainingNeedsEntries[0];
-                const entryB = remainingNeedsEntries[1];
+            // Get the two entries
+            const [entryA, entryB] = remainingNeedsEntries;
+            
+            const [groupAId, gameAIdSet] = entryA;
+            const [groupBId, gameBIdSet] = entryB;
+            
+            // Get the game IDs (we already confirmed there's exactly one per set)
+            const gameAId = Array.from(gameAIdSet)[0];
+            const gameBId = Array.from(gameBIdSet)[0];
+            
+            const gameA = gameMap.get(gameAId);
+            const gameB = gameMap.get(gameBId);
+            
+            // Check if the games are different and both require 2 participants
+            if (gameA && gameB && gameAId !== gameBId && gameA.numberOfGroups === 2 && gameB.numberOfGroups === 2) {
+                // Find two distinct groups that have finished all games
+                const finishedGroupIds = groups
+                    .map(g => g.id)
+                    .filter(id => (needsToPlay.get(id)?.size ?? 0) === 0 && id !== groupAId && id !== groupBId);
                 
-                const groupAId = entryA[0];
-                const gameAIdSet = entryA[1];
-                const gameAId = gameAIdSet.size > 0 ? Array.from(gameAIdSet)[0] : undefined;
-                
-                const groupBId = entryB[0];
-                const gameBIdSet = entryB[1];
-                const gameBId = gameBIdSet.size > 0 ? Array.from(gameBIdSet)[0] : undefined;
-                
-                // Make sure all IDs are defined before proceeding
-                if (groupAId !== undefined && gameAId !== undefined && 
-                    groupBId !== undefined && gameBId !== undefined) {
+                if (finishedGroupIds.length >= 2) {
+                    const fillerPartnerAId = finishedGroupIds[0];
+                    const fillerPartnerBId = finishedGroupIds[1];
                     
-                    const gameA = gameMap.get(gameAId);
-                    const gameB = gameMap.get(gameBId);
+                    const fillerPartnerA = groupMap.get(fillerPartnerAId);
+                    const fillerPartnerB = groupMap.get(fillerPartnerBId);
+                    const groupA = groupMap.get(groupAId);
+                    const groupB = groupMap.get(groupBId);
                     
-                    // Check if the games are different and both require 2 participants
-                    if (gameA && gameB && gameAId !== gameBId && gameA.numberOfGroups === 2 && gameB.numberOfGroups === 2) {
-                        console.log(`  Detected potential deadlock: ${groupMap.get(groupAId)?.name} needs ${gameA.name}, ${groupMap.get(groupBId)?.name} needs ${gameB.name}. Attempting filler slot.`);
-                        
-                        // Find two distinct groups that have finished all games
-                        const finishedGroupIds = groups
-                            .map(g => g.id)
-                            .filter(id => (needsToPlay.get(id)?.size ?? 0) === 0 && id !== groupAId && id !== groupBId);
-                        
-                        if (finishedGroupIds.length >= 2) {
-                            const fillerPartnerAId = finishedGroupIds[0];
-                            const fillerPartnerBId = finishedGroupIds[1];
-                            
-                            // Safe access with proper checking
-                            if (fillerPartnerAId !== undefined && fillerPartnerBId !== undefined) {
-                                const fillerPartnerA = groupMap.get(fillerPartnerAId);
-                                const fillerPartnerB = groupMap.get(fillerPartnerBId);
-                                const groupA = groupMap.get(groupAId);
-                                const groupB = groupMap.get(groupBId);
-                                
-                                if (groupA && groupB && fillerPartnerA && fillerPartnerB) {
-                                    console.log(`    Creating filler slot with partners: ${fillerPartnerA.name} (for ${gameA.name}) and ${fillerPartnerB.name} (for ${gameB.name})`);
+                    if (groupA && groupB && fillerPartnerA && fillerPartnerB) {
+                        // Advance time for the filler slot
+                        currentStartTimeMs += timeslotIntervalMs;
+                        slotIndex++;
+                        const fillerStartTime = new Date(currentStartTimeMs);
+                        const fillerEndTime = new Date(currentStartTimeMs + gameDurationMs);
 
-                                    // Advance time for the filler slot
-                                    currentStartTimeMs += timeslotIntervalMs;
-                                    slotIndex++;
-                                    const fillerStartTime = new Date(currentStartTimeMs);
-                                    const fillerEndTime = new Date(currentStartTimeMs + gameDurationMs);
+                        const fillerEntries: ScheduleEntry[] = [
+                            { group: groupA, game: gameA },
+                            { group: fillerPartnerA, game: gameA }, // Filler partner A plays game A again
+                            { group: groupB, game: gameB },
+                            { group: fillerPartnerB, game: gameB }  // Filler partner B plays game B again
+                        ];
 
-                                    const fillerEntries: ScheduleEntry[] = [
-                                        { group: groupA, game: gameA },
-                                        { group: fillerPartnerA, game: gameA }, // Filler partner A plays game A again
-                                        { group: groupB, game: gameB },
-                                        { group: fillerPartnerB, game: gameB }  // Filler partner B plays game B again
-                                    ];
+                        fillerEntries.sort((a, b) => { // Sort for consistency
+                            const gameCompare = a.game.name.localeCompare(b.game.name);
+                            if (gameCompare !== 0) return gameCompare;
+                            return a.group.name.localeCompare(b.group.name);
+                        });
 
-                                    fillerEntries.sort((a, b) => { // Sort for consistency
-                                        const gameCompare = a.game.name.localeCompare(b.game.name);
-                                        if (gameCompare !== 0) return gameCompare;
-                                        return a.group.name.localeCompare(b.group.name);
-                                    });
+                        schedule.push({ slotIndex, startTime: fillerStartTime, endTime: fillerEndTime, entries: fillerEntries });
 
-                                    schedule.push({ slotIndex, startTime: fillerStartTime, endTime: fillerEndTime, entries: fillerEntries });
-
-                                    // Update needs properly with null checks
-                                    const groupANeeds = needsToPlay.get(groupAId);
-                                    if (groupANeeds) groupANeeds.delete(gameAId);
-                                    
-                                    const groupBNeeds = needsToPlay.get(groupBId);
-                                    if (groupBNeeds) groupBNeeds.delete(gameBId);
-                                }
-                            }
-                        }
+                        // Update needs
+                        needsToPlay.get(groupAId)?.delete(gameAId);
+                        needsToPlay.get(groupBId)?.delete(gameBId);
                     }
                 }
             }
         }
-        // --- End Deadlock Check ---
 
-        // Advance time for the next timeslot (if not broken by filler logic)
+        // Advance time for the next timeslot
         currentStartTimeMs += timeslotIntervalMs;
-
     } // End of main while loop
 
     // Final check
@@ -323,14 +272,12 @@ function generateSchedule(
         .filter(([_, gameSet]) => gameSet.size > 0);
 
     if (remainingNeeds.length > 0) {
-        console.error("Loop finished, but needs remain (unexpected state):", remainingNeeds);
         return { error: `Algorithme terminé mais besoins subsistent (état inattendu).` };
     }
     if (schedule.length === 0 && N > 0 && M > 0) {
         return { error: "Aucun créneau généré malgré données valides." };
     }
 
-    console.log("--- Schedule Generation Successful ---");
     return schedule;
 }
 
