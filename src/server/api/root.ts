@@ -1,5 +1,6 @@
 // import { postRouter } from "~/server/api/routers/post";
 import { groupRouter } from "~/server/api/routers/group";
+import { gameRouter } from "~/server/api/routers/game";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -11,6 +12,7 @@ export const appRouter = createTRPCRouter({
   // Remove the post router registration
   // post: postRouter,
   group: groupRouter,
+  game: gameRouter,
 });
 
 // export type definition of API

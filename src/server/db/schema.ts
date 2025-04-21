@@ -27,3 +27,18 @@ export const groups = createTable(
   }),
   (t) => [index("name_idx").on(t.name)],
 );
+
+export const games = createTable(
+  "game",
+  (d) => ({
+    id: d.serial("id").primaryKey(),
+    name: d.varchar("name", { length: 256 }).notNull(),
+    numberOfGroups: d.integer("number_of_groups").notNull(),
+    description: d.text("description"),
+    createdAt: d.timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: d.timestamp("updated_at", { withTimezone: true }).$onUpdate(() => new Date()),
+  }),
+  (t) => [index("game_name_idx").on(t.name)],
+);
