@@ -37,7 +37,12 @@ function shuffleArray<T>(array: T[]): T[] {
     const shuffled = [...array];
     for (let i = shuffled.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; // Swap elements
+        if (shuffled[i] !== undefined && shuffled[j] !== undefined) {
+            // Use a temporary variable instead of destructuring to avoid the type error
+            const temp = shuffled[i] as T;
+            shuffled[i] = shuffled[j] as T;
+            shuffled[j] = temp;
+        }
     }
     return shuffled;
 }
@@ -229,66 +234,80 @@ function generateSchedule(
             remainingNeedsEntries.length === 2 && // Exactly two groups left
             remainingNeedsEntries.every(([_, gameSet]) => gameSet.size === 1) // Each needs exactly one game
         ) {
-            const [entryA, entryB] = remainingNeedsEntries;
-            const groupAId = entryA[0];
-            const gameAId = Array.from(entryA[1])[0];
-            const groupBId = entryB[0];
-            const gameBId = Array.from(entryB[1])[0];
+            // Safe access with proper type checking
+            if (remainingNeedsEntries[0] && remainingNeedsEntries[1]) {
+                const entryA = remainingNeedsEntries[0];
+                const entryB = remainingNeedsEntries[1];
+                
+                const groupAId = entryA[0];
+                const gameAIdSet = entryA[1];
+                const gameAId = gameAIdSet.size > 0 ? Array.from(gameAIdSet)[0] : undefined;
+                
+                const groupBId = entryB[0];
+                const gameBIdSet = entryB[1];
+                const gameBId = gameBIdSet.size > 0 ? Array.from(gameBIdSet)[0] : undefined;
+                
+                // Make sure all IDs are defined before proceeding
+                if (groupAId !== undefined && gameAId !== undefined && 
+                    groupBId !== undefined && gameBId !== undefined) {
+                    
+                    const gameA = gameMap.get(gameAId);
+                    const gameB = gameMap.get(gameBId);
+                    
+                    // Check if the games are different and both require 2 participants
+                    if (gameA && gameB && gameAId !== gameBId && gameA.numberOfGroups === 2 && gameB.numberOfGroups === 2) {
+                        console.log(`  Detected potential deadlock: ${groupMap.get(groupAId)?.name} needs ${gameA.name}, ${groupMap.get(groupBId)?.name} needs ${gameB.name}. Attempting filler slot.`);
+                        
+                        // Find two distinct groups that have finished all games
+                        const finishedGroupIds = groups
+                            .map(g => g.id)
+                            .filter(id => (needsToPlay.get(id)?.size ?? 0) === 0 && id !== groupAId && id !== groupBId);
+                        
+                        if (finishedGroupIds.length >= 2) {
+                            const fillerPartnerAId = finishedGroupIds[0];
+                            const fillerPartnerBId = finishedGroupIds[1];
+                            
+                            // Safe access with proper checking
+                            if (fillerPartnerAId !== undefined && fillerPartnerBId !== undefined) {
+                                const fillerPartnerA = groupMap.get(fillerPartnerAId);
+                                const fillerPartnerB = groupMap.get(fillerPartnerBId);
+                                const groupA = groupMap.get(groupAId);
+                                const groupB = groupMap.get(groupBId);
+                                
+                                if (groupA && groupB && fillerPartnerA && fillerPartnerB) {
+                                    console.log(`    Creating filler slot with partners: ${fillerPartnerA.name} (for ${gameA.name}) and ${fillerPartnerB.name} (for ${gameB.name})`);
 
-            const gameA = gameMap.get(gameAId);
-            const gameB = gameMap.get(gameBId);
+                                    // Advance time for the filler slot
+                                    currentStartTimeMs += timeslotIntervalMs;
+                                    slotIndex++;
+                                    const fillerStartTime = new Date(currentStartTimeMs);
+                                    const fillerEndTime = new Date(currentStartTimeMs + gameDurationMs);
 
-            // Check if the games are different and both require 2 participants
-            if (gameA && gameB && gameAId !== gameBId && gameA.numberOfGroups === 2 && gameB.numberOfGroups === 2) {
-                console.log(`  Detected potential deadlock: ${groupMap.get(groupAId)?.name} needs ${gameA.name}, ${groupMap.get(groupBId)?.name} needs ${gameB.name}. Attempting filler slot.`);
+                                    const fillerEntries: ScheduleEntry[] = [
+                                        { group: groupA, game: gameA },
+                                        { group: fillerPartnerA, game: gameA }, // Filler partner A plays game A again
+                                        { group: groupB, game: gameB },
+                                        { group: fillerPartnerB, game: gameB }  // Filler partner B plays game B again
+                                    ];
 
-                // Find two distinct groups that have finished all games
-                const finishedGroupIds = groups
-                    .map(g => g.id)
-                    .filter(id => (needsToPlay.get(id)?.size ?? 0) === 0 && id !== groupAId && id !== groupBId);
+                                    fillerEntries.sort((a, b) => { // Sort for consistency
+                                        const gameCompare = a.game.name.localeCompare(b.game.name);
+                                        if (gameCompare !== 0) return gameCompare;
+                                        return a.group.name.localeCompare(b.group.name);
+                                    });
 
-                if (finishedGroupIds.length >= 2) {
-                    const fillerPartnerAId = finishedGroupIds[0];
-                    const fillerPartnerBId = finishedGroupIds[1];
-                    const fillerPartnerA = groupMap.get(fillerPartnerAId);
-                    const fillerPartnerB = groupMap.get(fillerPartnerBId);
-                    const groupA = groupMap.get(groupAId);
-                    const groupB = groupMap.get(groupBId);
+                                    schedule.push({ slotIndex, startTime: fillerStartTime, endTime: fillerEndTime, entries: fillerEntries });
 
-                    if (groupA && groupB && fillerPartnerA && fillerPartnerB) {
-                        console.log(`    Creating filler slot with partners: ${fillerPartnerA.name} (for ${gameA.name}) and ${fillerPartnerB.name} (for ${gameB.name})`);
-
-                        // Advance time for the filler slot
-                        currentStartTimeMs += timeslotIntervalMs;
-                        slotIndex++;
-                        const fillerStartTime = new Date(currentStartTimeMs);
-                        const fillerEndTime = new Date(currentStartTimeMs + gameDurationMs);
-
-                        const fillerEntries: ScheduleEntry[] = [
-                            { group: groupA, game: gameA },
-                            { group: fillerPartnerA, game: gameA }, // Filler partner A plays game A again
-                            { group: groupB, game: gameB },
-                            { group: fillerPartnerB, game: gameB }  // Filler partner B plays game B again
-                        ];
-
-                        fillerEntries.sort((a, b) => { // Sort for consistency
-                            const gameCompare = a.game.name.localeCompare(b.game.name);
-                            if (gameCompare !== 0) return gameCompare;
-                            return a.group.name.localeCompare(b.group.name);
-                        });
-
-                        schedule.push({ slotIndex, startTime: fillerStartTime, endTime: fillerEndTime, entries: fillerEntries });
-
-                        // Clear the needs for the final two groups
-                        needsToPlay.get(groupAId)?.delete(gameAId);
-                        needsToPlay.get(groupBId)?.delete(gameBId);
-
-                        console.log(`  Filler slot created. Final needs cleared.`);
-                        break; // Exit the main while loop, schedule is complete
+                                    // Update needs properly with null checks
+                                    const groupANeeds = needsToPlay.get(groupAId);
+                                    if (groupANeeds) groupANeeds.delete(gameAId);
+                                    
+                                    const groupBNeeds = needsToPlay.get(groupBId);
+                                    if (groupBNeeds) groupBNeeds.delete(gameBId);
+                                }
+                            }
+                        }
                     }
-                } else {
-                    console.warn(`  Deadlock detected but couldn't find 2 finished groups to act as filler partners.`);
-                    // Let the loop continue, it will likely hit MAX_SLOTS
                 }
             }
         }
@@ -323,7 +342,7 @@ export function ScheduleDisplay() {
 
   // Default start date: 2025-08-09 09:00
   // Note: Month is 0-indexed in JS Date (7 = August)
-  const [startDate, setStartDate] = useState(new Date(2025, 7, 9, 9, 0, 0));
+  const [startDate] = useState(new Date(2025, 7, 9, 9, 0, 0));
 
   // Fetch games and groups data using tRPC hooks
   const { data: games, isLoading: isLoadingGames, error: errorGames } = api.game.getAll.useQuery();
@@ -370,14 +389,14 @@ export function ScheduleDisplay() {
 
   // Combine loading and error states
   const isLoading = isLoadingGames || isLoadingGroups;
-  const fetchError = errorGames || errorGroups;
+  const fetchError = errorGames ?? errorGroups; // Using nullish coalescing
 
   // Helper functions for formatting dates and times using date-fns
   const formatDate = (date: Date) => format(date, 'EEEE d MMMM yyyy', { locale: fr });
 
   return (
     <div className="container mx-auto p-4 w-full max-w-4xl"> {/* Added max-width */}
-      <h1 className="text-3xl font-bold mb-4">Générateur d'Horaire</h1>
+      <h1 className="text-3xl font-bold mb-4">Générateur d&apos;Horaire</h1>
 
       {/* Display current parameters */}
       {/* TODO: Add a Date Picker component here later to allow changing the start date */}
@@ -385,7 +404,7 @@ export function ScheduleDisplay() {
          <p className="font-semibold text-lg mb-2">Paramètres Actuels :</p>
          <ul className="list-disc list-inside space-y-1">
             <li>Date de début : <span className="font-medium">{formatDate(startDate)} à {formatTime(startDate)}</span></li>
-            <li>Durée d'un jeu : <span className="font-medium">12 minutes</span></li>
+            <li>Durée d&apos;un jeu : <span className="font-medium">12 minutes</span></li>
             <li>Temps entre les jeux : <span className="font-medium">8 minutes</span></li>
             <li>Intervalle par créneau : <span className="font-medium">20 minutes</span></li>
          </ul>
@@ -413,11 +432,11 @@ export function ScheduleDisplay() {
       )}
 
       {/* Display Generated Schedule or Errors */}
-      {isGenerating && <p className="text-center text-lg font-semibold text-blue-600">Génération de l'horaire en cours...</p>}
+      {isGenerating && <p className="text-center text-lg font-semibold text-blue-600">Génération de l&apos;horaire en cours...</p>}
 
       {scheduleError && (
         <Alert variant="destructive" className="mt-4">
-          <AlertTitle>Erreur de Génération de l'Horaire</AlertTitle>
+          <AlertTitle>Erreur de Génération de l&apos;Horaire</AlertTitle>
           <AlertDescription>{scheduleError}</AlertDescription>
         </Alert>
       )}
@@ -432,8 +451,10 @@ export function ScheduleDisplay() {
               if (!gamesInSlot.has(entry.game.id)) {
                 gamesInSlot.set(entry.game.id, { game: entry.game, groups: [] });
               }
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              gamesInSlot.get(entry.game.id)!.groups.push(entry.group);
+              const gameData = gamesInSlot.get(entry.game.id);
+              if (gameData) {
+                gameData.groups.push(entry.group);
+              }
             });
 
             // Sort groups alphabetically within each game for consistent display
