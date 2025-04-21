@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Users, Gamepad2 } from "lucide-react";
+import { Users, Gamepad2, CalendarClock } from "lucide-react";
 import { cn } from "~/lib/utils";
 
 export function Navbar() {
@@ -20,7 +20,13 @@ export function Navbar() {
       href: "/games",
       icon: Gamepad2,
       active: pathname === "/games"
-    }
+    },
+    {
+      name: "Horaire",
+      href: "/schedule",
+      icon: CalendarClock,
+      active: pathname === "/schedule"
+    },
   ];
 
   return (
