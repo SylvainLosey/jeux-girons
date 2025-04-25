@@ -245,4 +245,23 @@ export const scheduleRouter = createTRPCRouter({
         }))
       };
     }),
+
+  update: publicProcedure
+    .input(z.object({
+      id: z.number(),
+      name: z.string().min(1, "Schedule name cannot be empty"),
+      description: z.string().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .update(schedules)
+        .set({
+          name: input.name,
+          description: input.description || null,
+          // updatedAt is handled automatically by $onUpdate in the schema
+        })
+        .where(eq(schedules.id, input.id));
+      
+      return { success: true };
+    }),
 });

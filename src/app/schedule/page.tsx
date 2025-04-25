@@ -1,4 +1,4 @@
-import { ScheduleDisplay } from "~/app/_components/schedule-display";
+import { ScheduleDisplay } from "~/app/_components/schedule-manager";
 
 export default function SchedulePage() {
   return (

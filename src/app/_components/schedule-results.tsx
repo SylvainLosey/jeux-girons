@@ -10,7 +10,6 @@ interface ScheduleResultsProps {
 export function ScheduleResults({ schedule, groups }: ScheduleResultsProps) {
   return (
     <div className="mt-6 space-y-8">
-      <h2 className="text-2xl font-bold mb-4 text-center">Horaire Généré</h2>
       {schedule.map((slot) => {
         // Group entries by game for this timeslot
         const gamesInSlot = new Map<number, { game: Game; groups: Group[] }>();
