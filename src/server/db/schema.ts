@@ -1,7 +1,7 @@
 // Example model schema from the Drizzle docs
 // https://orm.drizzle.team/docs/sql-schema-declaration
 
-import { sql } from "drizzle-orm";
+import { sql, relations } from "drizzle-orm";
 import { index, pgTableCreator } from "drizzle-orm/pg-core";
 
 /**
@@ -43,3 +43,80 @@ export const games = createTable(
   }),
   (t) => [index("game_name_idx").on(t.name)],
 );
+
+// Add schedule tables
+export const schedules = createTable(
+  "schedule",
+  (d) => ({
+    id: d.serial("id").primaryKey(),
+    name: d.varchar("name", { length: 256 }).notNull(),
+    description: d.text("description"),
+    gameDurationMs: d.integer("game_duration_ms").notNull(),
+    transitionTimeMs: d.integer("transition_time_ms").notNull(),
+    createdAt: d.timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: d.timestamp("updated_at", { withTimezone: true }).$onUpdate(() => new Date()),
+  })
+);
+
+export const timeRanges = createTable(
+  "time_range",
+  (d) => ({
+    id: d.serial("id").primaryKey(),
+    scheduleId: d.integer("schedule_id").notNull().references(() => schedules.id, { onDelete: "cascade" }),
+    startTime: d.timestamp("start_time", { withTimezone: true }).notNull(),
+    endTime: d.timestamp("end_time", { withTimezone: true }).notNull(),
+  })
+);
+
+export const timeSlots = createTable(
+  "time_slot",
+  (d) => ({
+    id: d.serial("id").primaryKey(),
+    scheduleId: d.integer("schedule_id").notNull().references(() => schedules.id, { onDelete: "cascade" }),
+    slotIndex: d.integer("slot_index").notNull(),
+    startTime: d.timestamp("start_time", { withTimezone: true }).notNull(),
+    endTime: d.timestamp("end_time", { withTimezone: true }).notNull(),
+  })
+);
+
+export const scheduleEntries = createTable(
+  "schedule_entry",
+  (d) => ({
+    id: d.serial("id").primaryKey(),
+    timeSlotId: d.integer("time_slot_id").notNull().references(() => timeSlots.id, { onDelete: "cascade" }),
+    groupId: d.integer("group_id").notNull().references(() => groups.id),
+    gameId: d.integer("game_id").notNull().references(() => games.id),
+    round: d.integer("round").notNull().default(1),
+  })
+);
+
+// Define relations
+export const schedulesRelations = relations(schedules, ({ many }) => ({
+  timeRanges: many(timeRanges),
+  timeSlots: many(timeSlots),
+}));
+
+export const timeSlotsRelations = relations(timeSlots, ({ one, many }) => ({
+  schedule: one(schedules, {
+    fields: [timeSlots.scheduleId],
+    references: [schedules.id],
+  }),
+  entries: many(scheduleEntries),
+}));
+
+export const scheduleEntriesRelations = relations(scheduleEntries, ({ one }) => ({
+  timeSlot: one(timeSlots, {
+    fields: [scheduleEntries.timeSlotId],
+    references: [timeSlots.id],
+  }),
+  group: one(groups, {
+    fields: [scheduleEntries.groupId],
+    references: [groups.id],
+  }),
+  game: one(games, {
+    fields: [scheduleEntries.gameId],
+    references: [games.id],
+  }),
+}));

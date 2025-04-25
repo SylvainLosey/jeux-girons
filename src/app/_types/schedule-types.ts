@@ -28,3 +28,39 @@ export interface TimeRange {
   startTime: Date;
   endTime: Date;
 } 
+
+export interface SavedScheduleMetadata {
+    id: number;
+    name: string;
+    description: string | null;
+    gameDurationMs: number;
+    transitionTimeMs: number;
+    createdAt: Date;
+    updatedAt: Date | null;
+  }
+  
+  export interface SavedSchedule extends SavedScheduleMetadata {
+    timeRanges: TimeRange[];
+    schedule: Schedule;
+  }
+  
+  export interface SaveScheduleInput {
+    name: string;
+    description?: string;
+    gameDurationMs: number;
+    transitionTimeMs: number;
+    timeRanges: {
+      startTime: Date;
+      endTime: Date;
+    }[];
+    schedule: {
+      slotIndex: number;
+      startTime: Date;
+      endTime: Date;
+      entries: {
+        groupId: number;
+        gameId: number;
+        round: number;
+      }[];
+    }[];
+  }

@@ -1,268 +1,400 @@
 "use client";
 
+// src/app/_components/schedule-display.tsx
 import { useState } from "react";
-import { Plus } from "lucide-react";
-
+import { Plus, Save, FileDown, FileUp, Calendar } from "lucide-react";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
-import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "~/components/ui/dialog";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import { Textarea } from "~/components/ui/textarea";
+import { TimeRange } from "~/app/_types/schedule-types";
+import { TimeRangeEditor } from "~/app/_components/time-range-editor";
+import { ScheduleResults } from "~/app/_components/schedule-results";
+import { GroupSchedule } from "~/app/_components/group-schedule";
+import { generateSchedule } from "~/app/_utils/schedule-generator";
+import { formatTime } from "~/app/_utils/date-utils";
+import { v4 as uuidv4 } from "uuid";
+import { Alert, AlertDescription } from "~/components/ui/alert";
+import { toast } from "sonner";
 
-import { Schedule, TimeRange } from "../_types/schedule-types";
-import { formatDateTime } from "../_utils/date-utils";
-import { generateSchedule } from "../_utils/schedule-generator";
-import { TimeRangeEditor } from "./time-range-editor";
-import { ScheduleResults } from "./schedule-results";
-import { GroupSchedule } from "./group-schedule";
+// Fixed parameters
+const GAME_DURATION_MINUTES = 12;
+const TRANSITION_TIME_MINUTES = 8;
 
 export function ScheduleDisplay() {
+  // Default start date for August 9, 2025
+  const defaultStartDate = new Date(2025, 7, 9); // Month is 0-indexed
+  
+  // Set up time ranges for August 9-10, 2025
+  const [timeRanges, setTimeRanges] = useState<TimeRange[]>(() => {
+    // Plage 1: Saturday August 9, 2025 08:40 - 12:00
+    const range1Start = new Date(2025, 7, 9);
+    range1Start.setHours(8, 40, 0, 0);
+    const range1End = new Date(2025, 7, 9);
+    range1End.setHours(12, 0, 0, 0);
+    
+    // Plage 2: Saturday August 9, 2025 13:00 - 18:00
+    const range2Start = new Date(2025, 7, 9);
+    range2Start.setHours(13, 0, 0, 0);
+    const range2End = new Date(2025, 7, 9);
+    range2End.setHours(18, 0, 0, 0);
+    
+    // Plage 3: Sunday August 10, 2025 09:00 - 12:00
+    const range3Start = new Date(2025, 7, 10);
+    range3Start.setHours(9, 0, 0, 0);
+    const range3End = new Date(2025, 7, 10);
+    range3End.setHours(12, 0, 0, 0);
+    
+    return [
+      {
+        id: uuidv4(),
+        startTime: range1Start,
+        endTime: range1End
+      },
+      {
+        id: uuidv4(),
+        startTime: range2Start,
+        endTime: range2End
+      },
+      {
+        id: uuidv4(),
+        startTime: range3Start,
+        endTime: range3End
+      }
+    ];
+  });
+  
+  // Generated schedule state
   const [schedule, setSchedule] = useState<Schedule | null>(null);
-  const [scheduleError, setScheduleError] = useState<string | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-
-  // Parameter state variables with defaults
-  const [gameDuration, setGameDuration] = useState(12);
-  const [transitionTime, setTransitionTime] = useState(8);
+  const [generationError, setGenerationError] = useState<string | null>(null);
   
+  // Save dialog state
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [scheduleName, setScheduleName] = useState("");
+  const [scheduleDescription, setScheduleDescription] = useState("");
+  const [savedSchedules, setSavedSchedules] = useState<any[]>([]);
+  const [loadDialogOpen, setLoadDialogOpen] = useState(false);
   
-  // Time ranges state (now with full datetime support)
-  const [timeRanges, setTimeRanges] = useState<TimeRange[]>([
-    {
-      id: "plage-1",
-      startTime: new Date(2025, 7, 9, 8, 40, 0), // 9 août 2025 à 08:40
-      endTime: new Date(2025, 7, 9, 12, 0, 0),   // 9 août 2025 à 12:00
+  // Queries for data
+  const { data: groups } = api.group.getAll.useQuery();
+  const { data: games } = api.game.getAll.useQuery();
+  
+  // tRPC mutations
+  const [isSaving, setIsSaving] = useState(false);
+  const saveScheduleMutation = api.schedule.save.useMutation({
+    onSuccess: () => {
+      setIsSaving(false);
+      toast.success("Schedule saved successfully!");
+      setSaveDialogOpen(false);
+      // Refresh saved schedules list
+      void fetchSavedSchedules();
     },
-    {
-      id: "plage-2",
-      startTime: new Date(2025, 7, 9, 13, 0, 0), // 9 août 2025 à 13:00
-      endTime: new Date(2025, 7, 9, 18, 0, 0),   // 9 août 2025 à 18:00
-    },
-    {
-      id: "plage-3",
-      startTime: new Date(2025, 7, 10, 9, 0, 0), // 10 août 2025 à 09:00
-      endTime: new Date(2025, 7, 10, 13, 0, 0),  // 10 août 2025 à 13:00
+    onError: (error) => {
+      setIsSaving(false);
+      toast.error(`Error saving schedule: ${error.message}`);
     }
-  ]);
-
-  // Fetch games and groups data using tRPC hooks
-  const { data: games, isLoading: isLoadingGames, error: errorGames } = api.game.getAll.useQuery();
-  const { data: groups, isLoading: isLoadingGroups, error: errorGroups } = api.group.getAll.useQuery();
-
-  // Calculate the total time slot interval
-  const timeSlotInterval = gameDuration + transitionTime;
-
-  // Derive loading and error states
-  const isLoading = isLoadingGames || isLoadingGroups;
-  const fetchError = errorGames || errorGroups;
-
-  // Time range management functions
+  });
+  
+  // Query for saved schedules
+  const { data: savedSchedulesList } = api.schedule.getAll.useQuery(undefined, {
+    enabled: loadDialogOpen, // Only fetch when load dialog is opened
+  });
+  
+  // Fetch a specific schedule by ID
+  const fetchScheduleById = api.schedule.getById.useQuery;
+  
+  // Get the query client once, at component initialization
+  const utils = api.useUtils();
+  
+  // Update the fetchSavedSchedules function
+  const fetchSavedSchedules = async () => {
+    try {
+      // Properly invalidate the query using the utils reference
+      await utils.schedule.getAll.invalidate();
+    } catch (error) {
+      console.error("Error fetching saved schedules:", error);
+      toast.error("Failed to refresh saved schedules");
+    }
+  };
+  
+  // Add a new time range
   const addTimeRange = () => {
-    // Create a new time range starting 1 hour after the last range ends
+    // Create a new time range 1 hour after the last one
     const lastRange = timeRanges[timeRanges.length - 1];
-    const newStartTime = new Date(lastRange.endTime.getTime() + 60 * 60 * 1000); // 1 hour after last end
-    const newEndTime = new Date(newStartTime.getTime() + 8 * 60 * 60 * 1000); // 8 hours duration
+    const newStartTime = new Date(lastRange.endTime);
+    newStartTime.setHours(newStartTime.getHours() + 1);
     
-    const newRange: TimeRange = {
-      id: crypto.randomUUID(),
+    const newEndTime = new Date(newStartTime);
+    newEndTime.setHours(newEndTime.getHours() + 4); // Default 4-hour window
+    
+    setTimeRanges([...timeRanges, {
+      id: uuidv4(),
       startTime: newStartTime,
-      endTime: newEndTime,
-    };
-    
-    setTimeRanges([...timeRanges, newRange]);
+      endTime: newEndTime
+    }]);
   };
-
-  // Handle duration change
-  const handleGameDurationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value);
-    if (!isNaN(value) && value > 0) {
-      setGameDuration(value);
-    }
-  };
-
-  // Handle transition time change
-  const handleTransitionTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value);
-    if (!isNaN(value) && value >= 0) {
-      setTransitionTime(value);
-    }
-  };
-
+  
+  // Generate the schedule
   const handleGenerateSchedule = () => {
-    // Ensure data is loaded
-    if (!games || !groups) {
-      setScheduleError("Les données des jeux ou des groupes ne sont pas encore chargées.");
+    setGenerationError(null);
+    
+    if (!groups || !games) {
+      setGenerationError("Unable to generate schedule: missing groups or games data");
       return;
     }
-
-    // Validate time ranges
-    const invalidRanges = timeRanges.filter(
-      range => range.endTime <= range.startTime
+    
+    // Convert duration to milliseconds
+    const gameDurationMs = GAME_DURATION_MINUTES * 60 * 1000;
+    const transitionTimeMs = TRANSITION_TIME_MINUTES * 60 * 1000;
+    
+    // Generate the schedule with all groups and all games
+    const result = generateSchedule(
+      groups,
+      games,
+      defaultStartDate,
+      formatTime,
+      gameDurationMs,
+      transitionTimeMs,
+      timeRanges
     );
     
-    if (invalidRanges.length > 0) {
-      setScheduleError("Certaines plages horaires ont une heure de fin antérieure ou égale à l'heure de début.");
-      return;
+    if ('error' in result) {
+      setGenerationError(result.error);
+      setSchedule(null);
+    } else {
+      setSchedule(result);
+      setGenerationError(null);
     }
-
-    setIsGenerating(true);
-    setSchedule(null);
-    setScheduleError(null);
-
-    // Use setTimeout to allow the UI to update to "Generating..." state
-    setTimeout(() => {
-      try {
-        // Use the current parameter values from state
-        const gameDurationMs = gameDuration * 60 * 1000;
-        const transitionTimeMs = transitionTime * 60 * 1000;
-        
-        // Sort time ranges chronologically
-        const sortedRanges = [...timeRanges].sort(
-          (a, b) => a.startTime.getTime() - b.startTime.getTime()
-        );
-        
-        // Generate the schedule using the form parameters
-        const result = generateSchedule(
-          groups, 
-          games, 
-          sortedRanges[0].startTime, // First range start as reference
-          formatDateTime,
-          gameDurationMs,
-          transitionTimeMs,
-          sortedRanges
-        );
-
-        // Check if the generation function returned an error message
-        if ('error' in result) {
-          setScheduleError(result.error);
-          setSchedule(null);
-        } else {
-          // Success: store the generated schedule
-          setSchedule(result);
-          setScheduleError(null);
-        }
-      } catch (err) {
-        console.error("Schedule generation error:", err);
-        setScheduleError(`Erreur inattendue lors de la génération: ${err instanceof Error ? err.message : String(err)}`);
-        setSchedule(null);
-      } finally {
-        setIsGenerating(false);
-      }
-    }, 100); // Short delay to allow UI updates
+  };
+  
+  // Handle saving the current schedule
+  const handleSaveSchedule = () => {
+    if (!schedule || !scheduleName || isSaving) return;
+    
+    // Set the local loading state
+    setIsSaving(true);
+    
+    // Prepare the data for saving
+    saveScheduleMutation.mutate({
+      name: scheduleName,
+      description: scheduleDescription,
+      gameDurationMs: GAME_DURATION_MINUTES * 60 * 1000,
+      transitionTimeMs: TRANSITION_TIME_MINUTES * 60 * 1000,
+      timeRanges: timeRanges.map(range => ({
+        startTime: range.startTime,
+        endTime: range.endTime,
+      })),
+      schedule: schedule.map(slot => ({
+        slotIndex: slot.slotIndex,
+        startTime: slot.startTime,
+        endTime: slot.endTime,
+        entries: slot.entries.map(entry => ({
+          groupId: entry.group.id,
+          gameId: entry.game.id,
+          round: entry.round || 1,
+        }))
+      }))
+    });
+  };
+  
+  // Load a saved schedule
+  const handleLoadSchedule = async (scheduleId: number) => {
+    try {
+      const savedSchedule = await fetchScheduleById({ id: scheduleId });
+      
+      // Set the time ranges from the saved schedule
+      setTimeRanges(savedSchedule.timeRanges);
+      setSchedule(savedSchedule.schedule);
+      
+      // Close the dialog
+      setLoadDialogOpen(false);
+    } catch (error) {
+      console.error("Error loading schedule:", error);
+    }
   };
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-center mb-8">Générateur d&apos;Horaire de Jeux</h1>
+      <h1 className="text-3xl font-bold mb-6">Schedule Generator</h1>
       
-      {/* Config Section */}
-      <div className="mb-6 p-4 border rounded-md bg-card text-card-foreground shadow-sm">
-        <h2 className="text-xl font-semibold mb-4">Configuration</h2>
+      {/* Schedule Time Ranges */}
+      <div className="space-y-6 mb-8 p-6 border rounded-lg bg-card">
+        <h2 className="text-xl font-semibold mb-4">Schedule Parameters</h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div>
-            <label htmlFor="game-duration" className="block text-sm font-medium mb-2">
-              Durée du Jeu (minutes)
-            </label>
-            <input
-              id="game-duration"
-              type="number"
-              min="1"
-              value={gameDuration}
-              onChange={handleGameDurationChange}
-              className="w-full p-2 border rounded-md"
-            />
+        {/* Time Ranges */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <Label>Available Time Ranges</Label>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={addTimeRange}
+              className="flex items-center gap-1"
+            >
+              <Plus className="h-4 w-4" /> Add Range
+            </Button>
           </div>
-          
-          <div>
-            <label htmlFor="transition-time" className="block text-sm font-medium mb-2">
-              Temps de Transition (minutes)
-            </label>
-            <input
-              id="transition-time"
-              type="number"
-              min="0"
-              value={transitionTime}
-              onChange={handleTransitionTimeChange}
-              className="w-full p-2 border rounded-md"
-            />
-          </div>
+          <TimeRangeEditor 
+            timeRanges={timeRanges} 
+            onUpdateTimeRanges={setTimeRanges}
+          />
         </div>
       </div>
-
-      {/* Time Ranges Section */}
-      <div className="mb-4 p-4 border rounded-md bg-card text-card-foreground shadow-sm">
-        <div className="flex justify-between items-center mb-4">
-          <p className="font-semibold text-lg">Plages Horaires :</p>
-          <Button 
-            size="sm" 
-            variant="outline" 
-            onClick={addTimeRange}
-            className="flex items-center gap-1"
-          >
-            <Plus className="h-4 w-4" />
-            Ajouter une plage
-          </Button>
-        </div>
-
-        <TimeRangeEditor timeRanges={timeRanges} onUpdateTimeRanges={setTimeRanges} />
-      </div>
-
-      {/* Summary Section */}
-      <div className="mt-4 mb-6 p-3 bg-muted/50 rounded-md">
-        <p className="text-sm">
-          <span className="font-medium">Résumé :</span> Chaque jeu durera {gameDuration} minutes avec {transitionTime} minutes de transition.
-          L&apos;intervalle total par créneau sera de {timeSlotInterval} minutes.
-          {timeRanges.length > 0 && (
-            <>
-              <br />
-              <span className="font-medium">Plages horaires :</span>
-              <ul className="mt-1 list-disc list-inside">
-                {timeRanges.map((range) => (
-                  <li key={range.id}>
-                    {formatDateTime(range.startTime)} - {formatDateTime(range.endTime)}
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-        </p>
-      </div>
-
+      
       {/* Generate Button */}
-      <Button
-        onClick={handleGenerateSchedule}
-        disabled={isLoading || isGenerating || !!fetchError}
-        className="mb-6"
-        size="lg"
-      >
-        {isGenerating ? "Génération en cours..." : "Générer l'Horaire"}
-      </Button>
-
-      {/* Display states */}
-      {isLoading && <p className="text-muted-foreground">Chargement des groupes et des jeux...</p>}
-
-      {fetchError && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertTitle>Erreur de Chargement des Données</AlertTitle>
-          <AlertDescription>Impossible de charger les données nécessaires : {fetchError.message}</AlertDescription>
+      <div className="flex justify-center mb-8">
+        <Button 
+          onClick={handleGenerateSchedule}
+          size="lg"
+          className="w-full md:w-1/2 flex items-center justify-center gap-2"
+        >
+          <Calendar className="h-5 w-5" />
+          Generate Schedule
+        </Button>
+      </div>
+      
+      {/* Generation Error */}
+      {generationError && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertDescription>{generationError}</AlertDescription>
         </Alert>
       )}
-
-      {isGenerating && <p className="text-center text-lg font-semibold text-blue-600">Génération de l&apos;horaire en cours...</p>}
-
-      {scheduleError && (
-        <Alert variant="destructive" className="mt-4">
-          <AlertTitle>Erreur de Génération de l&apos;Horaire</AlertTitle>
-          <AlertDescription>{scheduleError}</AlertDescription>
-        </Alert>
-      )}
-
-      {/* Schedule Results Section */}
-      {schedule && schedule.length > 0 && games && groups && (
+      
+      {/* Schedule Results */}
+      {schedule && schedule.length > 0 && (
         <>
-          <ScheduleResults schedule={schedule} groups={groups} />
-          <GroupSchedule schedule={schedule} groups={groups} />
+          <ScheduleResults 
+            schedule={schedule} 
+            groups={groups || []}
+          />
+          
+          <GroupSchedule 
+            schedule={schedule} 
+            groups={groups || []}
+          />
+          
+          {/* Schedule Actions */}
+          <div className="mt-6 flex space-x-2 justify-center">
+            <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="secondary" className="flex items-center gap-2">
+                  <Save className="h-4 w-4" />
+                  Save Schedule
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Save Schedule</DialogTitle>
+                  <DialogDescription>
+                    Enter a name and optional description for your schedule.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="name">Schedule Name</Label>
+                    <Input
+                      id="name"
+                      value={scheduleName}
+                      onChange={(e) => setScheduleName(e.target.value)}
+                      placeholder="Enter a name for this schedule"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="description">Description (optional)</Label>
+                    <Textarea
+                      id="description"
+                      value={scheduleDescription}
+                      onChange={(e) => setScheduleDescription(e.target.value)}
+                      placeholder="Add any notes about this schedule"
+                    />
+                  </div>
+                </div>
+                <Button 
+                  onClick={handleSaveSchedule}
+                  disabled={isSaving || !scheduleName}
+                  className="w-full flex items-center justify-center gap-2"
+                >
+                  {isSaving ? (
+                    <>
+                      <span className="animate-spin mr-2">◌</span>
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4" />
+                      Save
+                    </>
+                  )}
+                </Button>
+              </DialogContent>
+            </Dialog>
+            
+            <Dialog open={loadDialogOpen} onOpenChange={setLoadDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="flex items-center gap-2">
+                  <FileUp className="h-4 w-4" />
+                  Load Schedule
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Load Saved Schedule</DialogTitle>
+                  <DialogDescription>
+                    Select a previously saved schedule to load.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="max-h-[400px] overflow-y-auto">
+                  {!savedSchedulesList ? (
+                    <p>Loading saved schedules...</p>
+                  ) : savedSchedulesList.length === 0 ? (
+                    <p>No saved schedules found.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {savedSchedulesList.map(saved => (
+                        <div 
+                          key={saved.id} 
+                          className="p-3 border rounded-md cursor-pointer hover:bg-muted"
+                          onClick={() => handleLoadSchedule(saved.id)}
+                        >
+                          <h3 className="font-medium">{saved.name}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {saved.description || "No description"}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Saved: {new Date(saved.createdAt).toLocaleString()}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
+            
+            <Button 
+              variant="outline" 
+              className="flex items-center gap-2"
+              onClick={() => {
+                const json = JSON.stringify(schedule, null, 2);
+                const blob = new Blob([json], { type: 'application/json' });
+                const href = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = href;
+                link.download = `schedule-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(href);
+              }}
+            >
+              <FileDown className="h-4 w-4" />
+              Export
+            </Button>
+          </div>
         </>
       )}
     </div>
   );
-} 
+}
