@@ -1,15 +1,15 @@
 "use client";
 
 // src/app/_components/schedule-display.tsx
-import { useState } from "react";
-import { Plus, Save, FileDown, FileUp, Calendar } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, Save, FileDown, FileUp, Calendar, CheckCircle } from "lucide-react";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
-import { TimeRange } from "~/app/_types/schedule-types";
+import { TimeRange, SavedScheduleMetadata } from "~/app/_types/schedule-types";
 import { TimeRangeEditor } from "~/app/_components/time-range-editor";
 import { ScheduleResults } from "~/app/_components/schedule-results";
 import { GroupSchedule } from "~/app/_components/group-schedule";
@@ -18,6 +18,8 @@ import { formatTime } from "~/app/_utils/date-utils";
 import { v4 as uuidv4 } from "uuid";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { toast } from "sonner";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "~/components/ui/card";
+import { Badge } from "~/components/ui/badge";
 
 // Fixed parameters
 const GAME_DURATION_MINUTES = 12;
@@ -74,14 +76,19 @@ export function ScheduleDisplay() {
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [scheduleName, setScheduleName] = useState("");
   const [scheduleDescription, setScheduleDescription] = useState("");
-  const [savedSchedules, setSavedSchedules] = useState<any[]>([]);
   const [loadDialogOpen, setLoadDialogOpen] = useState(false);
   
   // Queries for data
   const { data: groups } = api.group.getAll.useQuery();
   const { data: games } = api.game.getAll.useQuery();
   
-  // tRPC mutations
+  // Query for saved schedules - always enabled now
+  const { data: savedSchedulesList, isLoading: isLoadingSchedules } = api.schedule.getAll.useQuery();
+  
+  // Query for the live schedule
+  const { data: liveSchedule, isLoading: isLoadingLive } = api.schedule.getLive.useQuery();
+  
+  // Mutations
   const [isSaving, setIsSaving] = useState(false);
   const saveScheduleMutation = api.schedule.save.useMutation({
     onSuccess: () => {
@@ -97,13 +104,27 @@ export function ScheduleDisplay() {
     }
   });
   
-  // Query for saved schedules
-  const { data: savedSchedulesList } = api.schedule.getAll.useQuery(undefined, {
-    enabled: loadDialogOpen, // Only fetch when load dialog is opened
+  const setLiveMutation = api.schedule.setLive.useMutation({
+    onSuccess: () => {
+      toast.success("Schedule set as live successfully!");
+      // Refresh the schedules list
+      void fetchSavedSchedules();
+    },
+    onError: (error) => {
+      toast.error(`Error setting schedule as live: ${error.message}`);
+    }
   });
   
-  // Fetch a specific schedule by ID
-  const fetchScheduleById = api.schedule.getById.useQuery;
+  const deleteScheduleMutation = api.schedule.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Schedule deleted successfully!");
+      // Refresh the schedules list
+      void fetchSavedSchedules();
+    },
+    onError: (error) => {
+      toast.error(`Error deleting schedule: ${error.message}`);
+    }
+  });
   
   // Get the query client once, at component initialization
   const utils = api.useUtils();
@@ -111,13 +132,17 @@ export function ScheduleDisplay() {
   // Update the fetchSavedSchedules function
   const fetchSavedSchedules = async () => {
     try {
-      // Properly invalidate the query using the utils reference
+      // Properly invalidate the queries
       await utils.schedule.getAll.invalidate();
+      await utils.schedule.getLive.invalidate();
     } catch (error) {
       console.error("Error fetching saved schedules:", error);
       toast.error("Failed to refresh saved schedules");
     }
   };
+  
+  // Fetch a specific schedule by ID
+  const fetchScheduleById = api.schedule.getById.useQuery;
   
   // Add a new time range
   const addTimeRange = () => {
@@ -214,14 +239,119 @@ export function ScheduleDisplay() {
       console.error("Error loading schedule:", error);
     }
   };
+  
+  // Set a schedule as live
+  const handleSetLive = (scheduleId: number) => {
+    setLiveMutation.mutate({ id: scheduleId });
+  };
+
+  const handleDeleteSchedule = (scheduleId: number) => {
+    if (confirm("Are you sure you want to delete this schedule? This action cannot be undone.")) {
+      deleteScheduleMutation.mutate({ id: scheduleId });
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Schedule Generator</h1>
+      <h1 className="text-3xl font-bold mb-6">Schedule Manager</h1>
+      
+      {/* Saved Schedules List */}
+      <div className="mb-10">
+        <h2 className="text-2xl font-semibold mb-4">Saved Schedules</h2>
+        
+        {isLoadingSchedules ? (
+          <div className="flex justify-center">
+            <p>Loading saved schedules...</p>
+          </div>
+        ) : !savedSchedulesList || savedSchedulesList.length === 0 ? (
+          <Alert className="mb-6">
+            <AlertDescription>No saved schedules found. Generate and save a schedule below.</AlertDescription>
+          </Alert>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {savedSchedulesList.map(schedule => (
+              <Card key={schedule.id} className={schedule.isLive ? "border-primary" : ""}>
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <CardTitle>{schedule.name}</CardTitle>
+                      <CardDescription>{schedule.description || "No description"}</CardDescription>
+                    </div>
+                    {schedule.isLive && (
+                      <Badge variant="default" className="bg-primary">
+                        <CheckCircle className="h-3 w-3 mr-1" /> Live
+                      </Badge>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Created: {new Date(schedule.createdAt).toLocaleString()}
+                  </p>
+                  <div className="flex justify-between mt-2">
+                    <div className="text-sm text-muted-foreground">
+                      <span className="font-medium">{schedule.slotCount || 0}</span> slots
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex gap-2 justify-end">
+                  {!schedule.isLive && (
+                    <Button 
+                      variant="destructive" 
+                      size="sm"
+                      onClick={() => handleDeleteSchedule(schedule.id)}
+                    >
+                      Delete
+                    </Button>
+                  )}
+                  
+                  {!schedule.isLive && (
+                    <Button 
+                      variant="default" 
+                      size="sm"
+                      onClick={() => handleSetLive(schedule.id)}
+                    >
+                      Set as Live
+                    </Button>
+                  )}
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+      
+      <div className="divider my-8 border-t"></div>
+      
+      {/* Live Schedule Display - If there is one */}
+      {liveSchedule && (
+        <div className="mb-10">
+          <h2 className="text-2xl font-semibold mb-4 flex items-center">
+            <CheckCircle className="h-5 w-5 mr-2 text-primary" />
+            Live Schedule: {liveSchedule.name}
+          </h2>
+          <p className="mb-4 text-muted-foreground">{liveSchedule.description}</p>
+          
+          <ScheduleResults 
+            schedule={liveSchedule.schedule} 
+            groups={groups || []}
+          />
+          
+          <GroupSchedule 
+            schedule={liveSchedule.schedule} 
+            groups={groups || []}
+          />
+        </div>
+      )}
+      
+      <div className="divider my-8 border-t"></div>
+      
+      {/* Schedule Generator Section */}
+      <h2 className="text-2xl font-semibold mb-6">Generate New Schedule</h2>
       
       {/* Schedule Time Ranges */}
       <div className="space-y-6 mb-8 p-6 border rounded-lg bg-card">
-        <h2 className="text-xl font-semibold mb-4">Schedule Parameters</h2>
+        <h3 className="text-xl font-semibold mb-4">Schedule Parameters</h3>
         
         {/* Time Ranges */}
         <div className="space-y-3">
@@ -275,11 +405,11 @@ export function ScheduleDisplay() {
             groups={groups || []}
           />
           
-          {/* Schedule Actions */}
-          <div className="mt-6 flex space-x-2 justify-center">
+          {/* Save button only for newly generated schedule */}
+          <div className="mt-6 flex justify-center">
             <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="secondary" className="flex items-center gap-2">
+                <Button variant="secondary" className="flex items-center gap-2 w-full md:w-1/2">
                   <Save className="h-4 w-4" />
                   Save Schedule
                 </Button>
@@ -330,52 +460,13 @@ export function ScheduleDisplay() {
                 </Button>
               </DialogContent>
             </Dialog>
-            
-            <Dialog open={loadDialogOpen} onOpenChange={setLoadDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2">
-                  <FileUp className="h-4 w-4" />
-                  Load Schedule
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Load Saved Schedule</DialogTitle>
-                  <DialogDescription>
-                    Select a previously saved schedule to load.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="max-h-[400px] overflow-y-auto">
-                  {!savedSchedulesList ? (
-                    <p>Loading saved schedules...</p>
-                  ) : savedSchedulesList.length === 0 ? (
-                    <p>No saved schedules found.</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {savedSchedulesList.map(saved => (
-                        <div 
-                          key={saved.id} 
-                          className="p-3 border rounded-md cursor-pointer hover:bg-muted"
-                          onClick={() => handleLoadSchedule(saved.id)}
-                        >
-                          <h3 className="font-medium">{saved.name}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            {saved.description || "No description"}
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Saved: {new Date(saved.createdAt).toLocaleString()}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </DialogContent>
-            </Dialog>
-            
+          </div>
+          
+          {/* Export Button */}
+          <div className="mt-4 flex justify-center">
             <Button 
               variant="outline" 
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 w-full md:w-1/2"
               onClick={() => {
                 const json = JSON.stringify(schedule, null, 2);
                 const blob = new Blob([json], { type: 'application/json' });
@@ -390,7 +481,7 @@ export function ScheduleDisplay() {
               }}
             >
               <FileDown className="h-4 w-4" />
-              Export
+              Export JSON
             </Button>
           </div>
         </>

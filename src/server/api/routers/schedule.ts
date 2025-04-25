@@ -2,7 +2,8 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { schedules, timeRanges, timeSlots, scheduleEntries } from "~/server/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, count } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 
 // Schema for saving a schedule
 const saveScheduleSchema = z.object({
@@ -27,11 +28,32 @@ const saveScheduleSchema = z.object({
 });
 
 export const scheduleRouter = createTRPCRouter({
-  getAll: publicProcedure
+    getAll: publicProcedure
     .query(async ({ ctx }) => {
-      return ctx.db.query.schedules.findMany({
+      // First, get all schedules
+      const allSchedules = await ctx.db.query.schedules.findMany({
         orderBy: (schedules, { desc }) => [desc(schedules.createdAt)],
       });
+      
+      // For each schedule, fetch the counts separately
+      const schedulesWithCounts = await Promise.all(
+        allSchedules.map(async (schedule) => {
+          // Get time slot count with proper count() import
+          const slotCountResult = await ctx.db
+            .select({ count: count() })
+            .from(timeSlots)
+            .where(eq(timeSlots.scheduleId, schedule.id));
+          
+
+          
+          return {
+            ...schedule,
+            slotCount: Number(slotCountResult[0]?.count ?? 0),
+          };
+        })
+      );
+      
+      return schedulesWithCounts;
     }),
 
   getById: publicProcedure
@@ -136,5 +158,91 @@ export const scheduleRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       await ctx.db.delete(schedules).where(eq(schedules.id, input.id));
       return { success: true };
+    }),
+
+  setLive: publicProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db.transaction(async (tx) => {
+        // First, set all schedules to not live
+        await tx
+          .update(schedules)
+          .set({ isLive: false });
+        
+        // Then set the selected schedule to live
+        await tx
+          .update(schedules)
+          .set({ isLive: true })
+          .where(eq(schedules.id, input.id));
+        
+        return { success: true };
+      });
+    }),
+
+  getLive: publicProcedure
+    .query(async ({ ctx }) => {
+      // First find the live schedule
+      const liveSched = await ctx.db.query.schedules.findFirst({
+        where: eq(schedules.isLive, true),
+      });
+      
+      if (!liveSched) {
+        return null;
+      }
+      
+      // Now fetch all related data separately
+      const timeRangesData = await ctx.db.query.timeRanges.findMany({
+        where: eq(timeRanges.scheduleId, liveSched.id),
+      });
+      
+      const timeSlotData = await ctx.db.query.timeSlots.findMany({
+        where: eq(timeSlots.scheduleId, liveSched.id),
+      });
+      
+      // Get all entries for these time slots
+      const slotIds = timeSlotData.map(slot => slot.id);
+      const entriesData = slotIds.length > 0 
+        ? await ctx.db.query.scheduleEntries.findMany({
+            where: (entries, { inArray }) => inArray(entries.timeSlotId, slotIds),
+            with: {
+              group: true,
+              game: true,
+            },
+          })
+        : [];
+      
+      // Group entries by timeSlotId
+      const entriesBySlot = entriesData.reduce((acc, entry) => {
+        if (!acc[entry.timeSlotId]) {
+          acc[entry.timeSlotId] = [];
+        }
+        acc[entry.timeSlotId].push(entry);
+        return acc;
+      }, {} as Record<number, typeof entriesData>);
+      
+      // Construct the return data
+      return {
+        id: liveSched.id,
+        name: liveSched.name,
+        description: liveSched.description,
+        gameDurationMs: liveSched.gameDurationMs,
+        transitionTimeMs: liveSched.transitionTimeMs,
+        isLive: liveSched.isLive,
+        timeRanges: timeRangesData.map(range => ({
+          id: String(range.id),
+          startTime: range.startTime,
+          endTime: range.endTime,
+        })),
+        schedule: timeSlotData.map(slot => ({
+          slotIndex: slot.slotIndex,
+          startTime: slot.startTime,
+          endTime: slot.endTime,
+          entries: (entriesBySlot[slot.id] || []).map(entry => ({
+            group: entry.group,
+            game: entry.game,
+            round: entry.round,
+          }))
+        }))
+      };
     }),
 });

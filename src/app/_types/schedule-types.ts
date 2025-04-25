@@ -35,6 +35,7 @@ export interface SavedScheduleMetadata {
     description: string | null;
     gameDurationMs: number;
     transitionTimeMs: number;
+    isLive: boolean;
     createdAt: Date;
     updatedAt: Date | null;
   }

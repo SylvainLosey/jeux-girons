@@ -53,6 +53,7 @@ export const schedules = createTable(
     description: d.text("description"),
     gameDurationMs: d.integer("game_duration_ms").notNull(),
     transitionTimeMs: d.integer("transition_time_ms").notNull(),
+    isLive: d.boolean("is_live").default(false).notNull(),
     createdAt: d.timestamp("created_at", { withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
