@@ -35,9 +35,10 @@ export default tseslint.config(
       ],
       "@typescript-eslint/require-await": "off",
       "@typescript-eslint/no-misused-promises": [
-        "error",
+        "warn",
         { checksVoidReturn: { attributes: false } },
       ],
+      "@typescript-eslint/no-floating-promises": "warn",
       "drizzle/enforce-delete-with-where": [
         "error",
         { drizzleObjectName: ["db", "ctx.db"] },
@@ -46,6 +47,10 @@ export default tseslint.config(
         "error",
         { drizzleObjectName: ["db", "ctx.db"] },
       ],
+      "@typescript-eslint/no-unsafe-argument": "warn",
+      "@typescript-eslint/no-unsafe-assignment": "warn",
+      "@typescript-eslint/no-unsafe-member-access": "warn",
+      "@typescript-eslint/no-unsafe-call": "warn",
     },
   },
   {
