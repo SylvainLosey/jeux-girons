@@ -188,6 +188,11 @@ export function PlanningView() {
             {selectedGame.name}
           </h2>
           
+          {/* Add game description if available */}
+          {selectedGame.description && (
+            <p className="mb-4 text-muted-foreground">{selectedGame.description}</p>
+          )}
+          
           {isLoadingLive ? (
             <div className="text-center p-4">Chargement de l'horaire...</div>
           ) : !liveSchedule ? (
@@ -268,25 +273,60 @@ function GroupScheduleView({ schedule, group }) {
         <div key={day}>
           <h3 className="text-lg font-medium mb-2 capitalize border-b pb-1">{day}</h3>
           <div className="rounded-md border">
-            <Table>
-              <TableBody>
-                {entries.map((entry, index) => (
-                  <TableRow key={index} className={cn(
-                    index % 2 === 0 ? "bg-muted/50" : ""
-                  )}>
-                    <TableCell className="py-2">
-                      <div className="font-medium">
-                        {entry.game.name}
-                        {entry.round && entry.round > 1 ? ` (Tour ${entry.round})` : ''}
+            <div className="divide-y">
+              {entries.map((entry, index) => {
+                // Find potential opponents (other groups playing the same game at the same time)
+                const opponents = schedule
+                  .flatMap(slot => 
+                    slot.entries.filter(e => 
+                      // Same game, same start time, different group
+                      e.game.id === entry.game.id && 
+                      slot.startTime.getTime() === entry.startTime.getTime() &&
+                      e.group.id !== group.id
+                    )
+                  )
+                  .map(e => e.group);
+
+                return (
+                  <div 
+                    key={index} 
+                    className={cn(
+                      "flex p-2",
+                      index % 2 === 0 ? "bg-muted/50" : ""
+                    )}
+                  >
+                    <div className="py-2 w-16 text-muted-foreground shrink-0 font-medium text-right pr-3">
+                      {formatTime(entry.startTime)}
+                    </div>
+                    <div className="py-2 min-w-0 flex-1">
+                      <div>
+                        <div className="font-medium">
+                          {entry.game.name}
+                          {entry.round && entry.round > 1 ? ` (Tour ${entry.round})` : ''}
+                        </div>
+                        {entry.game.description && (
+                          <p className="text-sm text-muted-foreground mt-0.5 line-clamp-3">
+                            {entry.game.description}
+                          </p>
+                        )}
+                        {opponents.length > 0 && (
+                          <div className="mt-1.5 flex flex-wrap gap-1">
+                            {opponents.map(opponent => (
+                              <div key={opponent.id} className="inline-flex items-center text-xs bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300 rounded px-2 py-0.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
+                                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"></path>
+                                </svg>
+                                Contre: {opponent.name}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                    </TableCell>
-                    <TableCell className="text-right py-2 whitespace-nowrap">
-                      {formatTime(entry.startTime)} - {formatTime(entry.endTime)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       ))}
