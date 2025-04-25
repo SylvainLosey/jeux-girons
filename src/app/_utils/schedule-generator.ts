@@ -263,7 +263,7 @@ export function generateSchedule(
           
           // If enough partners found, schedule them!
           if (potentialPartners.length >= partnersNeeded) {
-            const selectedPartners = potentialPartners.slice(0, partnersNeeded);
+            const selectedPartners = shuffleArray([...potentialPartners]).slice(0, partnersNeeded);
             const allParticipants = [currentGroup, ...selectedPartners];
             
             // Add entries for all participating groups
@@ -329,12 +329,12 @@ export function generateSchedule(
         const partnersNeeded = game.numberOfGroups - 1;
         
         // Check if we have enough unscheduled groups to play this game
-        const availablePartners = groups
-          .filter(g => 
+        const availablePartners = shuffleArray(
+          groups.filter(g => 
             !groupScheduledInSlot.has(g.id) && // Not scheduled yet
             g.id !== group.id // Not the current group
           )
-          .slice(0, partnersNeeded); // Take just what we need
+        ).slice(0, partnersNeeded); // Take randomly selected partners
         
         if (availablePartners.length >= partnersNeeded) {
           // We can schedule this game!
