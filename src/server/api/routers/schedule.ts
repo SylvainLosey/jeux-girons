@@ -56,52 +56,81 @@ export const scheduleRouter = createTRPCRouter({
       return schedulesWithCounts;
     }),
 
-  getById: publicProcedure
+    getById: publicProcedure
     .input(z.object({ id: z.number() }))
     .query(async ({ ctx, input }) => {
-      const scheduleData = await ctx.db.query.schedules.findFirst({
+      // Find the requested schedule
+      const schedule = await ctx.db.query.schedules.findFirst({
         where: eq(schedules.id, input.id),
-        with: {
-          timeRanges: true,
-          timeSlots: {
-            with: {
-              entries: {
-                with: {
-                  group: true,
-                  game: true,
-                }
-              }
-            }
-          }
-        }
       });
-
-      if (!scheduleData) {
+      
+      if (!schedule) {
         throw new Error("Schedule not found");
       }
-
-      // Transform database data to match your Schedule type
-      return {
-        id: scheduleData.id,
-        name: scheduleData.name,
-        description: scheduleData.description,
-        gameDurationMs: scheduleData.gameDurationMs,
-        transitionTimeMs: scheduleData.transitionTimeMs,
-        timeRanges: scheduleData.timeRanges.map(range => ({
-          id: String(range.id),
-          startTime: range.startTime,
-          endTime: range.endTime,
-        })),
-        schedule: scheduleData.timeSlots.map(slot => ({
+      
+      // Now fetch all related data separately
+      const timeRangesData = await ctx.db.query.timeRanges.findMany({
+        where: eq(timeRanges.scheduleId, schedule.id),
+      });
+      
+      const timeSlotData = await ctx.db.query.timeSlots.findMany({
+        where: eq(timeSlots.scheduleId, schedule.id),
+      });
+      
+      // Get all entries for these time slots
+      const slotIds = timeSlotData.map(slot => slot.id);
+      const entriesData = slotIds.length > 0 
+        ? await ctx.db.query.scheduleEntries.findMany({
+            where: (entries, { inArray }) => inArray(entries.timeSlotId, slotIds),
+            with: {
+              group: true,
+              game: true,
+            },
+          })
+        : [];
+      
+      // Group entries by timeSlotId
+      const entriesBySlot = entriesData.reduce((acc, entry) => {
+        if (!acc[entry.timeSlotId]) {
+          acc[entry.timeSlotId] = [];
+        }
+        acc[entry.timeSlotId].push(entry);
+        return acc;
+      }, {} as Record<number, typeof entriesData>);
+      
+      // Reconstruct the full schedule structure
+      const formattedTimeSlots = timeSlotData.map(slot => {
+        const entries = entriesBySlot[slot.id] || [];
+        return {
           slotIndex: slot.slotIndex,
           startTime: slot.startTime,
           endTime: slot.endTime,
-          entries: slot.entries.map(entry => ({
+          entries: entries.map(entry => ({
+            id: entry.id,
             group: entry.group,
             game: entry.game,
             round: entry.round,
-          }))
-        }))
+            timeSlotId: entry.timeSlotId,
+          })),
+        };
+      });
+      
+      // Sort the time slots by start time
+      formattedTimeSlots.sort((a, b) => {
+        return new Date(a.startTime).getTime() - new Date(b.startTime).getTime();
+      });
+      
+      // Build the final response
+      return {
+        id: schedule.id,
+        name: schedule.name,
+        description: schedule.description,
+        gameDurationMs: schedule.gameDurationMs,
+        transitionTimeMs: schedule.transitionTimeMs,
+        isLive: schedule.isLive,
+        createdAt: schedule.createdAt,
+        updatedAt: schedule.updatedAt,
+        schedule: formattedTimeSlots,
       };
     }),
 

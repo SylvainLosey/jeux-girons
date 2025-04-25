@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { cn } from "~/lib/utils";
 
 // Fixed parameters
 const GAME_DURATION_MINUTES = 12;
@@ -271,6 +272,42 @@ export function ScheduleDisplay() {
     }
   }, [activeTab]);
 
+  // In the ScheduleDisplay function, add new state
+  const [selectedScheduleId, setSelectedScheduleId] = useState<number | null>(null);
+  const [selectedSchedule, setSelectedSchedule] = useState<typeof liveSchedule | null>(null);
+  const [isLoadingScheduleDetails, setIsLoadingScheduleDetails] = useState(false);
+
+  // After fetching the live schedule, set it as the default selection
+  useEffect(() => {
+    if (liveSchedule && !selectedScheduleId) {
+      setSelectedScheduleId(liveSchedule.id);
+      setSelectedSchedule(liveSchedule);
+    }
+  }, [liveSchedule, selectedScheduleId]);
+
+  // Add a function to handle schedule selection
+  const handleSelectSchedule = async (scheduleId: number) => {
+    setSelectedScheduleId(scheduleId);
+    
+    // If the selected schedule is the live one, use it directly
+    if (liveSchedule && liveSchedule.id === scheduleId) {
+      setSelectedSchedule(liveSchedule);
+      return;
+    }
+    
+    // Otherwise, fetch the selected schedule details
+    setIsLoadingScheduleDetails(true);
+    try {
+      const result = await utils.schedule.getById.fetch({ id: scheduleId });
+      setSelectedSchedule(result);
+    } catch (error) {
+      console.error("Error fetching schedule details:", error);
+      toast.error("Échec du chargement des détails du planning");
+    } finally {
+      setIsLoadingScheduleDetails(false);
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Gestion des Plannings</h1>
@@ -300,18 +337,33 @@ export function ScheduleDisplay() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {savedSchedulesList.map(schedule => (
-                  <Card key={schedule.id} className={schedule.isLive ? "border-primary" : ""}>
+                  <Card 
+                    key={schedule.id} 
+                    className={cn(
+                      "cursor-pointer transition-all",
+                      schedule.isLive ? "border-primary" : "",
+                      selectedScheduleId === schedule.id ? "ring-2 ring-primary shadow-lg" : ""
+                    )}
+                    onClick={() => handleSelectSchedule(schedule.id)}
+                  >
                     <CardHeader>
                       <div className="flex justify-between items-start">
                         <div>
                           <CardTitle>{schedule.name}</CardTitle>
                           <CardDescription>{schedule.description || "Aucune description"}</CardDescription>
                         </div>
-                        {schedule.isLive && (
-                          <Badge variant="default" className="bg-primary">
-                            <CheckCircle className="h-3 w-3 mr-1" /> Actif
-                          </Badge>
-                        )}
+                        <div className="flex gap-1">
+                          {schedule.isLive && (
+                            <Badge variant="default" className="bg-primary">
+                              <CheckCircle className="h-3 w-3 mr-1" /> Actif
+                            </Badge>
+                          )}
+                          {selectedScheduleId === schedule.id && schedule.id !== liveSchedule?.id && (
+                            <Badge variant="outline" className="border-primary text-primary">
+                              Sélectionné
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     </CardHeader>
                     <CardContent>
@@ -328,7 +380,10 @@ export function ScheduleDisplay() {
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => handleEditSchedule(schedule)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditSchedule(schedule);
+                        }}
                       >
                         Modifier
                       </Button>
@@ -337,7 +392,10 @@ export function ScheduleDisplay() {
                         <Button 
                           variant="destructive" 
                           size="sm"
-                          onClick={() => handleDeleteSchedule(schedule.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteSchedule(schedule.id);
+                          }}
                         >
                           Supprimer
                         </Button>
@@ -347,7 +405,10 @@ export function ScheduleDisplay() {
                         <Button 
                           variant="default" 
                           size="sm"
-                          onClick={() => handleSetLive(schedule.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSetLive(schedule.id);
+                          }}
                         >
                           Définir comme actif
                         </Button>
@@ -362,21 +423,27 @@ export function ScheduleDisplay() {
           {/* Divider */}
           <div className="divider my-8 border-t"></div>
           
-          {/* Live Schedule Display */}
-          {liveSchedule && (
+          {/* Selected Schedule Display */}
+          {selectedSchedule ? (
             <div>
               <h2 className="text-2xl font-semibold mb-4 flex items-center">
-                <CheckCircle className="h-5 w-5 mr-2 text-primary" />
-                Planning Actif : {liveSchedule.name}
+                {selectedSchedule.isLive ? (
+                  <CheckCircle className="h-5 w-5 mr-2 text-primary" />
+                ) : null}
+                Planning {selectedSchedule.isLive ? "Actif" : "Sélectionné"} : {selectedSchedule.name}
               </h2>
-              <p className="mb-4 text-muted-foreground">{liveSchedule.description}</p>
+              <p className="mb-4 text-muted-foreground">{selectedSchedule.description}</p>
               
               <ScheduleResults 
-                schedule={liveSchedule.schedule} 
+                schedule={selectedSchedule.schedule} 
                 groups={groups || []}
               />
             </div>
-          )}
+          ) : isLoadingScheduleDetails ? (
+            <div className="text-center py-8">
+              <p>Chargement des détails du planning...</p>
+            </div>
+          ) : null}
         </TabsContent>
         
         {/* New Schedule Tab */}
