@@ -35,6 +35,7 @@ export const games = createTable(
     name: d.varchar("name", { length: 256 }).notNull(),
     numberOfGroups: d.integer("number_of_groups").notNull(),
     description: d.text("description"),
+    rounds: d.integer("rounds").notNull().default(1),
     createdAt: d.timestamp("created_at", { withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),

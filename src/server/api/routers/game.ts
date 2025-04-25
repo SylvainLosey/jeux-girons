@@ -8,6 +8,7 @@ const gameInputSchema = z.object({
   name: z.string().min(1, "Game name cannot be empty"),
   numberOfGroups: z.number().int().min(1).max(3),
   description: z.string().nullish(), // Allow null or undefined
+  rounds: z.number().int().min(1).max(2).default(1),
 });
 
 export const gameRouter = createTRPCRouter({
@@ -18,6 +19,7 @@ export const gameRouter = createTRPCRouter({
         name: input.name,
         numberOfGroups: input.numberOfGroups,
         description: input.description,
+        rounds: input.rounds,
       });
     }),
 
@@ -41,6 +43,7 @@ export const gameRouter = createTRPCRouter({
           name: input.name,
           numberOfGroups: input.numberOfGroups,
           description: input.description,
+          rounds: input.rounds,
           // updatedAt is handled by $onUpdate in the schema
         })
         .where(eq(games.id, input.id));

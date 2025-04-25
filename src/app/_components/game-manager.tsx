@@ -51,6 +51,7 @@ const gameFormSchema = z.object({
   name: z.string().min(1, "Nom du jeu est requis"),
   numberOfGroups: z.coerce.number().int().min(1).max(3),
   description: z.string().optional(),
+  rounds: z.coerce.number().int().min(1).max(2).default(1),
 });
 
 type GameFormValues = z.infer<typeof gameFormSchema>;
@@ -72,6 +73,7 @@ export function GameManager() {
       name: "",
       numberOfGroups: 1,
       description: "",
+      rounds: 1,
     },
   });
 
@@ -119,9 +121,15 @@ export function GameManager() {
         name: game.name,
         numberOfGroups: game.numberOfGroups,
         description: game.description ?? "",
+        rounds: game.rounds ?? 1,
       });
     } else {
-      form.reset({ name: "", numberOfGroups: 1, description: "" });
+      form.reset({ 
+        name: "", 
+        numberOfGroups: 1, 
+        description: "", 
+        rounds: 1 
+      });
     }
     setIsDialogOpen(true);
   };
@@ -233,6 +241,34 @@ export function GameManager() {
                 />
                 <FormField
                   control={form.control}
+                  name="rounds"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nombre de Tours <span className="text-red-500">*</span></FormLabel>
+                      <Select 
+                        onValueChange={(value) => field.onChange(parseInt(value))}
+                        defaultValue={field.value.toString()}
+                        value={field.value.toString()}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Sélectionner" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="1">1</SelectItem>
+                          <SelectItem value="2">2</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        Nombre de fois que chaque groupe doit jouer à ce jeu
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
                   name="description"
                   render={({ field }) => (
                     <FormItem>
@@ -269,6 +305,7 @@ export function GameManager() {
             <TableRow>
               <TableHead>Nom</TableHead>
               <TableHead>Participants</TableHead>
+              <TableHead>Tours</TableHead>
               <TableHead className="text-right w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -307,6 +344,7 @@ export function GameManager() {
                     <TableCell>
                       <span className={badgeClasses}>{badgeText}</span>
                     </TableCell>
+                    <TableCell>{game.rounds > 1 ? `${game.rounds} tours` : "1 tour"}</TableCell>
                     <TableCell className="text-right">
                       <Button variant="ghost" size="icon" className="mr-1" onClick={() => handleOpenDialog(game)} aria-label="Editer">
                         <Pencil className="h-4 w-4" />
