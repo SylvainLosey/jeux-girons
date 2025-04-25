@@ -1,77 +1,130 @@
+import React, { useState } from 'react';
 import { Game, Group, Schedule } from "../_types/schedule-types";
-import { formatTime } from "../_utils/date-utils";
+import { formatTime, formatDate } from "../_utils/date-utils";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table";
+import { Calendar, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { Button } from "~/components/ui/button";
 
 interface ScheduleResultsProps {
   schedule: Schedule;
   groups: Group[];
 }
 
-export function ScheduleResults({ schedule, groups }: ScheduleResultsProps) {
+export function ScheduleResults({ schedule }: ScheduleResultsProps) {
+  const [showAllTables, setShowAllTables] = useState(true);
+  
   return (
-    <div className="mt-6 space-y-8">
-      {schedule.map((slot) => {
-        // Group entries by game for this timeslot
-        const gamesInSlot = new Map<number, { game: Game; groups: Group[] }>();
-        slot.entries.forEach(entry => {
-          if (!gamesInSlot.has(entry.game.id)) {
-            gamesInSlot.set(entry.game.id, { game: entry.game, groups: [] });
-          }
-          const gameData = gamesInSlot.get(entry.game.id);
-          if (gameData) {
-            gameData.groups.push(entry.group);
-          }
-        });
+    <>
+      {/* Global toggle button */}
+      <div className="flex justify-end mb-4">
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => setShowAllTables(!showAllTables)}
+          className="flex items-center gap-1"
+        >
+          {showAllTables ? (
+            <>
+              <ChevronUp className="h-4 w-4" />
+              Masquer les détails
+            </>
+          ) : (
+            <>
+              <ChevronDown className="h-4 w-4" />
+              Afficher les détails
+            </>
+          )}
+        </Button>
+      </div>
+      
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {schedule.map((slot) => {
+          // Group entries by game for this timeslot, storing the round number
+          const gamesInSlot = new Map<number, { game: Game; groups: Group[]; round: number | undefined }>();
+          slot.entries.forEach(entry => {
+            if (!gamesInSlot.has(entry.game.id)) {
+              // Store the round from the *first* entry encountered for this game in this slot
+              gamesInSlot.set(entry.game.id, { game: entry.game, groups: [], round: entry.round });
+            }
+            const gameData = gamesInSlot.get(entry.game.id);
+            if (gameData) {
+              gameData.groups.push(entry.group);
+              // Note: This assumes all entries for the same game in a slot have the same round number.
+              // The generator logic should ensure this.
+            }
+          });
 
-        // Sort groups alphabetically within each game for consistent display
-        gamesInSlot.forEach(gameData => {
-          gameData.groups.sort((a, b) => a.name.localeCompare(b.name));
-        });
+          // Sort groups alphabetically within each game for consistent display
+          gamesInSlot.forEach(gameData => {
+            gameData.groups.sort((a, b) => a.name.localeCompare(b.name));
+          });
 
-        // Convert map to array and sort games alphabetically for consistent display
-        const sortedGamesData = Array.from(gamesInSlot.values()).sort((a, b) =>
-          a.game.name.localeCompare(b.game.name)
-        );
+          // Convert map to array and sort games alphabetically for consistent display
+          const sortedGamesData = Array.from(gamesInSlot.values()).sort((a, b) =>
+            a.game.name.localeCompare(b.game.name)
+          );
 
-        return (
-          <div key={slot.slotIndex} className="p-4 border rounded-lg shadow-md bg-card">
-            <h3 className="text-xl font-semibold mb-3 text-center">
-              Créneau {slot.slotIndex} ({formatTime(slot.startTime)} - {formatTime(slot.endTime)})
-            </h3>
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[40%]">Jeu</TableHead>
-                    <TableHead>Participants</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sortedGamesData.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={2} className="h-16 text-center text-muted-foreground">
-                        Aucune affectation pour ce créneau.
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    sortedGamesData.map(({ game, groups }) => (
-                      <TableRow key={game.id}>
-                        <TableCell className="font-medium">
-                          {game.name}
-                          {slot.entries.find(entry => entry.game.id === game.id && entry.group.id === groups[0].id)?.round > 1 
-                            ? ` (Tour ${slot.entries.find(entry => entry.game.id === game.id && entry.group.id === groups[0].id)?.round})` 
-                            : ''}
-                        </TableCell>
-                        <TableCell>{groups.map(g => g.name).join(', ')}</TableCell>
-                      </TableRow>
-                    ))
+          return (
+            <div key={slot.slotIndex} className="p-4 border rounded-lg shadow-md bg-card">
+              <div className="mb-4">
+                <h3 className="text-xl font-semibold text-left">
+                  Créneau {slot.slotIndex}
+                </h3>
+                <div className="mt-2 space-y-1 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    <span>{formatDate(slot.startTime)}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    <span>{formatTime(slot.startTime)} - {formatTime(slot.endTime)}</span>
+                  </div>
+                </div>
+              </div>
+              
+              {sortedGamesData.length === 0 ? (
+                <p className="text-center text-muted-foreground py-4">
+                  Aucune affectation pour ce créneau.
+                </p>
+              ) : (
+                <>
+                  {/* Counter showing number of games/groups */}
+                  <div className="mb-2 text-sm font-medium">
+                    {sortedGamesData.length} jeu{sortedGamesData.length > 1 ? 'x' : ''}, 
+                    {' '}
+                    {sortedGamesData.reduce((sum, curr) => sum + curr.groups.length, 0)} groupe{sortedGamesData.reduce((sum, curr) => sum + curr.groups.length, 0) > 1 ? 's' : ''}
+                  </div>
+                  
+                  {/* Show table only if showAllTables is true */}
+                  {showAllTables && (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-1/3">Jeu</TableHead>
+                          <TableHead className="w-2/3">Participants</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {sortedGamesData.map(({ game, groups, round }) => (
+                          <TableRow key={game.id}>
+                            <TableCell className="font-medium">
+                              {game.name}
+                              {round && round > 1 ? ` (Tour ${round})` : ''}
+                            </TableCell>
+                            <TableCell>
+                              {groups.map(g => g.name).join(', ')}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   )}
-                </TableBody>
-              </Table>
+                </>
+              )}
             </div>
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
+    </>
   );
 } 
