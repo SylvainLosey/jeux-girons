@@ -89,7 +89,8 @@ function generateSchedule(
     }
     
     // Validate time ranges, use default if none provided
-    if (timeRanges.length === 0) {
+    let validatedTimeRanges = [...timeRanges]; // Create a mutable copy
+    if (validatedTimeRanges.length === 0) {
         // Use a default range from 9 AM to 5 PM
         const defaultStart = new Date(startDate);
         defaultStart.setHours(9, 0, 0, 0);
@@ -97,7 +98,7 @@ function generateSchedule(
         const defaultEnd = new Date(startDate);
         defaultEnd.setHours(17, 0, 0, 0);
         
-        timeRanges = [{
+        validatedTimeRanges = [{ // Assign to the new variable
             id: 'default',
             startTime: defaultStart,
             endTime: defaultEnd
@@ -118,8 +119,16 @@ function generateSchedule(
     const groupMap = new Map(groups.map(g => [g.id, g]));
     const gameMap = new Map(games.map(g => [g.id, g]));
 
+    // Get the first time range safely. We know validatedTimeRanges has at least one element here.
+    const firstRange = validatedTimeRanges[0];
+    if (!firstRange) {
+        // This should be theoretically impossible due to the default assignment above,
+        // but it satisfies TypeScript and handles potential future refactoring issues.
+        return { error: "Erreur interne: Impossible de déterminer la plage horaire initiale." };
+    }
+    
     // Start with the first time range's start time
-    let currentStartTimeMs = timeRanges[0].startTime.getTime();
+    let currentStartTimeMs = firstRange.startTime.getTime();
     let currentRangeIndex = 0;
     let slotIndex = 0;
     const MAX_SLOTS = (N * M) + N; // Safety break
@@ -141,12 +150,18 @@ function generateSchedule(
 
         // Check if current time is outside the current range
         let currentTimeInRange = false;
-        let currentRange = timeRanges[currentRangeIndex];
+        // Use validatedTimeRanges from now on
+        let currentRange = validatedTimeRanges[currentRangeIndex]; 
         
         // Try to find a valid time range
-        while (!currentTimeInRange && currentRangeIndex < timeRanges.length) {
-            currentRange = timeRanges[currentRangeIndex];
+        while (!currentTimeInRange && currentRangeIndex < validatedTimeRanges.length) {
+            currentRange = validatedTimeRanges[currentRangeIndex];
             
+            // If currentRange is potentially undefined here, add a check
+            if (!currentRange) { 
+                 return { error: "Erreur interne: Plage horaire inattendue non définie." };
+            }
+
             // If current time is before the range starts, move to range start
             if (currentStartTimeMs < currentRange.startTime.getTime()) {
                 currentStartTimeMs = currentRange.startTime.getTime();
@@ -158,8 +173,16 @@ function generateSchedule(
             } else {
                 // Try the next range
                 currentRangeIndex++;
-                if (currentRangeIndex < timeRanges.length) {
-                    currentStartTimeMs = timeRanges[currentRangeIndex].startTime.getTime();
+                if (currentRangeIndex < validatedTimeRanges.length) {
+                    // Safely get the next start time
+                    const nextRange = validatedTimeRanges[currentRangeIndex];
+                    if (nextRange) {
+                       currentStartTimeMs = nextRange.startTime.getTime();
+                    } else {
+                       // Should not happen if loop condition is correct, but good for safety
+                       currentTimeInRange = false; 
+                       break; 
+                    }
                 }
             }
         }
