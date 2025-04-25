@@ -1,18 +1,17 @@
 "use client";
 
 // src/app/_components/schedule-display.tsx
-import { useState, useEffect } from "react";
-import { Plus, Save, FileDown, FileUp, Calendar, CheckCircle } from "lucide-react";
+import { useState } from "react";
+import { Plus, Save, FileDown, Calendar, CheckCircle } from "lucide-react";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
-import { TimeRange, SavedScheduleMetadata } from "~/app/_types/schedule-types";
+import { TimeRange } from "~/app/_types/schedule-types";
 import { TimeRangeEditor } from "~/app/_components/time-range-editor";
 import { ScheduleResults } from "~/app/_components/schedule-results";
-import { GroupSchedule } from "~/app/_components/group-schedule";
 import { generateSchedule } from "~/app/_utils/schedule-generator";
 import { formatTime } from "~/app/_utils/date-utils";
 import { v4 as uuidv4 } from "uuid";
@@ -336,11 +335,6 @@ export function ScheduleDisplay() {
             schedule={liveSchedule.schedule} 
             groups={groups || []}
           />
-          
-          <GroupSchedule 
-            schedule={liveSchedule.schedule} 
-            groups={groups || []}
-          />
         </div>
       )}
       
@@ -396,11 +390,6 @@ export function ScheduleDisplay() {
       {schedule && schedule.length > 0 && (
         <>
           <ScheduleResults 
-            schedule={schedule} 
-            groups={groups || []}
-          />
-          
-          <GroupSchedule 
             schedule={schedule} 
             groups={groups || []}
           />

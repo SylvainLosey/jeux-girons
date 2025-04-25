@@ -45,8 +45,6 @@ export function ScheduleResults({ schedule, groups }: ScheduleResultsProps) {
                   <TableRow>
                     <TableHead className="w-[40%]">Jeu</TableHead>
                     <TableHead>Participants</TableHead>
-                    <TableHead>Tours</TableHead>
-                    <TableHead className="text-right w-[100px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -66,10 +64,6 @@ export function ScheduleResults({ schedule, groups }: ScheduleResultsProps) {
                             : ''}
                         </TableCell>
                         <TableCell>{groups.map(g => g.name).join(', ')}</TableCell>
-                        <TableCell>{game.rounds > 1 ? `${game.rounds} tours` : "1 tour"}</TableCell>
-                        <TableCell className="text-right">
-                          {/* Action buttons */}
-                        </TableCell>
                       </TableRow>
                     ))
                   )}
