@@ -8,7 +8,7 @@ import { TRPCReactProvider } from "~/trpc/react";
 import { Navbar } from "~/app/_components/navbar";
 
 export const metadata: Metadata = {
-  title: "Jeux-Girons",
+  title: "Jeux Murist 25",
   description: "Application de gestion des jeux-girons",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };

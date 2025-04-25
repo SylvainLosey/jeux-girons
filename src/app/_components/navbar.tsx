@@ -11,9 +11,9 @@ export function Navbar() {
   const navItems = [
     {
       name: "Jeunesses Admin",
-      href: "/",
+      href: "/groups",
       icon: Users,
-      active: pathname === "/"
+      active: pathname === "/groups"
     },
     {
       name: "Jeux Admin",
@@ -27,12 +27,6 @@ export function Navbar() {
       icon: CalendarClock,
       active: pathname === "/schedule"
     },
-    {
-      name: "Planning",
-      href: "/planning",
-      icon: ClipboardList,
-      active: pathname === "/planning"
-    },
   ];
 
   return (
@@ -41,7 +35,7 @@ export function Navbar() {
         <div className="flex items-center h-16">
           <div className="flex space-x-4">
             <Link href="/" className="flex items-center px-2 text-xl font-bold">
-              Jeux-Girons
+              Jeux Murist 25
             </Link>
             
             <div className="hidden md:flex md:items-center md:space-x-1">

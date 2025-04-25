@@ -1,9 +1,5 @@
-import { GroupManager } from "~/app/_components/group-manager";
+import { PlanningView } from "./_components/planning-view";
 
-export default function Home() {
-  return (
-    <main className="flex min-h-screen flex-col items-center pt-8">
-      <GroupManager />
-    </main>
-  );
+export default function HomePage() {
+  return <PlanningView />;
 }
