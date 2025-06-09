@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { scores } from "~/server/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 
 export const scoreRouter = createTRPCRouter({
   // Get scores for a specific group-game-round combination
@@ -57,6 +57,22 @@ export const scoreRouter = createTRPCRouter({
       return await ctx.db
         .select()
         .from(scores);
+    }),
+
+  // Get recent scores for live display
+  getRecent: publicProcedure
+    .input(z.object({
+      limit: z.number().default(20),
+    }))
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.query.scores.findMany({
+        limit: input.limit,
+        orderBy: desc(scores.updatedAt),
+        with: {
+          group: true,
+          game: true,
+        },
+      });
     }),
 
   // Set or update a score
