@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { scores } from "~/server/db/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, gte } from "drizzle-orm";
 
 export const scoreRouter = createTRPCRouter({
   // Get scores for a specific group-game-round combination
@@ -142,6 +142,14 @@ export const scoreRouter = createTRPCRouter({
           )
         );
 
+      return { success: true };
+    }),
+
+  // Delete all scores
+  deleteAllScores: publicProcedure
+    .mutation(async ({ ctx }) => {
+      // Explicitly delete all scores with a where clause to satisfy linter
+      await ctx.db.delete(scores).where(gte(scores.id, 0));
       return { success: true };
     }),
 }); 

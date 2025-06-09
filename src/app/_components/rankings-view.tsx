@@ -27,6 +27,9 @@ type GroupScore = {
   gamesPlayed: number;
   previousRank?: number;
   scoreChange?: number;
+  actualRank: number;
+  isTied: boolean;
+  tiedWith?: number; // Number of teams tied at this rank
 };
 
 type RecentScore = {
@@ -166,9 +169,8 @@ function RecentScoresSidebar() {
 }
 
 // Animated Ranking Row Component
-function RankingRow({ groupData, rank, rankingsUpdateId, isNew = false }: { 
+function RankingRow({ groupData, rankingsUpdateId, isNew = false }: { 
   groupData: GroupScore; 
-  rank: number; 
   rankingsUpdateId: string;
   isNew?: boolean;
 }) {
@@ -186,16 +188,16 @@ function RankingRow({ groupData, rank, rankingsUpdateId, isNew = false }: {
   const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   useEffect(() => {
-    const timer = setTimeout(() => setMounted(true), rank * 50);
+    const timer = setTimeout(() => setMounted(true), groupData.actualRank * 50);
     return () => clearTimeout(timer);
-  }, [rank]);
+  }, [groupData.actualRank]);
 
   // Animation trigger - only when rankings update ID changes AND there's a rank change
   useEffect(() => {
     // Only proceed if mounted and we have previous rank data and actual rank change
     if (!mounted || 
         groupData.previousRank === undefined || 
-        groupData.previousRank === rank || 
+        groupData.previousRank === groupData.actualRank || 
         rankingsUpdateId === animationState.updateId ||
         !rankingsUpdateId) {
       return;
@@ -207,7 +209,7 @@ function RankingRow({ groupData, rank, rankingsUpdateId, isNew = false }: {
     }
 
     // Determine animation type
-    const isImprovement = groupData.previousRank > rank;
+    const isImprovement = groupData.previousRank > groupData.actualRank;
     const animationType: 'improvement' | 'decline' = isImprovement ? 'improvement' : 'decline';
     
     // Start new animation
@@ -226,7 +228,7 @@ function RankingRow({ groupData, rank, rankingsUpdateId, isNew = false }: {
       animationTimeoutRef.current = null;
     }, 3000);
 
-  }, [mounted, groupData.previousRank, rank, rankingsUpdateId, animationState.updateId]);
+  }, [mounted, groupData.previousRank, groupData.actualRank, rankingsUpdateId, animationState.updateId]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -244,9 +246,9 @@ function RankingRow({ groupData, rank, rankingsUpdateId, isNew = false }: {
       case 2:
         return <Medal className="h-5 w-5 text-gray-400" />;
       case 3:
-        return <Award className="h-5 w-5 text-amber-600" />;
+        return <Award className="h-5 w-5 text-orange-600" />;
       default:
-        return <span className="h-5 w-5 flex items-center justify-center text-sm font-bold text-muted-foreground">{rank}</span>;
+        return null;
     }
   };
 
@@ -261,7 +263,7 @@ function RankingRow({ groupData, rank, rankingsUpdateId, isNew = false }: {
         baseStyle = "bg-gray-50 border-gray-200 dark:bg-gray-900/20 dark:border-gray-800";
         break;
       case 3:
-        baseStyle = "bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800";
+        baseStyle = "bg-orange-50 border-orange-300 dark:bg-orange-900/20 dark:border-orange-700";
         break;
       default:
         baseStyle = "";
@@ -281,12 +283,51 @@ function RankingRow({ groupData, rank, rankingsUpdateId, isNew = false }: {
   const getRankChangeIcon = () => {
     if (!groupData.previousRank || !mounted) return null;
     
-    if (groupData.previousRank > rank) {
+    if (groupData.previousRank > groupData.actualRank) {
       return <ArrowUp className="h-4 w-4 text-green-500 ml-1" />;
-    } else if (groupData.previousRank < rank) {
+    } else if (groupData.previousRank < groupData.actualRank) {
       return <ArrowDown className="h-4 w-4 text-red-500 ml-1" />;
     }
     return null;
+  };
+
+  const getRankDisplay = () => {
+    if (groupData.isTied && groupData.tiedWith && groupData.tiedWith > 1) {
+      return (
+        <div className="flex flex-col items-center justify-center h-12">
+          <div className="flex items-center">
+            <span className="text-sm font-bold">
+              {groupData.actualRank}
+            </span>
+            {getRankChangeIcon()}
+          </div>
+          <span className="text-xs text-muted-foreground">ex æquo</span>
+        </div>
+      );
+    }
+    return (
+      <div className="flex items-center justify-center h-12">
+        <span className="text-sm font-bold">
+          {groupData.actualRank}
+        </span>
+        {getRankChangeIcon()}
+      </div>
+    );
+  };
+
+  const getTeamNameWithIcon = () => {
+    const icon = getRankIcon(groupData.actualRank);
+    return (
+      <div className="flex items-center gap-2">
+        {icon}
+        <Link 
+          href={`/teams/${createSlug(groupData.group.name)}`}
+          className="hover:text-blue-600 hover:underline transition-colors"
+        >
+          {groupData.group.name}
+        </Link>
+      </div>
+    );
   };
 
   return (
@@ -294,24 +335,16 @@ function RankingRow({ groupData, rank, rankingsUpdateId, isNew = false }: {
       ref={rowRef}
       className={cn(
         "transition-colors duration-300",
-        getRankStyling(rank),
+        getRankStyling(groupData.actualRank),
         mounted ? "opacity-100" : "opacity-0",
         animationState.isActive && "animate-pulse"
       )}
     >
       <TableCell className="font-medium">
-        <div className="flex items-center justify-center">
-          {getRankIcon(rank)}
-          {getRankChangeIcon()}
-        </div>
+        {getRankDisplay()}
       </TableCell>
       <TableCell className="font-medium">
-        <Link 
-          href={`/teams/${createSlug(groupData.group.name)}`}
-          className="hover:text-blue-600 hover:underline transition-colors"
-        >
-          {groupData.group.name}
-        </Link>
+        {getTeamNameWithIcon()}
       </TableCell>
       <TableCell className="text-center">
         {groupData.gamesPlayed}
@@ -341,6 +374,27 @@ export function RankingsView() {
     refetchInterval: 3000, // Refresh every 3 seconds for live updates
   });
   const { data: groups, isLoading: isLoadingGroups } = api.group.getAll.useQuery();
+  
+  // Fetch live schedule to get the first timeslot for empty state
+  const { data: liveSchedule } = api.schedule.getLive.useQuery();
+
+  // Check if any scores have been entered
+  const hasAnyScores = scores && scores.length > 0;
+
+  // Get first timeslot from live schedule for empty state
+  const getFirstTimeslot = () => {
+    if (!liveSchedule?.schedule || liveSchedule.schedule.length === 0) {
+      return null;
+    }
+    
+    const sortedSlots = [...liveSchedule.schedule].sort((a, b) => 
+      new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
+    );
+    
+    return sortedSlots[0];
+  };
+
+  const firstTimeslot = getFirstTimeslot();
 
   // Calculate total scores for each group
   const groupScores: GroupScore[] = groups?.map((group) => {
@@ -357,15 +411,58 @@ export function RankingsView() {
       gamesPlayed,
       previousRank: previousData?.rank,
       scoreChange: scoreChange && scoreChange > 0 ? scoreChange : undefined,
+      actualRank: 0, // Will be calculated later
+      isTied: false, // Will be calculated later
     };
   }) ?? [];
 
-  // Sort by total score (descending), then by games played (descending for tiebreaker)
-  const rankedGroups = groupScores.sort((a, b) => {
+  // Sort by total score (descending), then by games played (ascending for tiebreaker - fewer games = better efficiency)
+  const sortedGroups = groupScores.sort((a, b) => {
     if (a.totalScore !== b.totalScore) {
       return b.totalScore - a.totalScore;
     }
-    return b.gamesPlayed - a.gamesPlayed;
+    return a.gamesPlayed - b.gamesPlayed;
+  });
+
+  // Calculate actual ranks with proper tie handling
+  const rankedGroups: GroupScore[] = [];
+  
+  sortedGroups.forEach((group, index) => {
+    if (index === 0) {
+      // First group gets rank 1
+      group.actualRank = 1;
+      group.isTied = false;
+    } else {
+      const previousGroup = rankedGroups[rankedGroups.length - 1]; // Get the last added group
+      
+      // Check if this group is tied with the previous group
+      if (previousGroup && 
+          group.totalScore === previousGroup.totalScore && 
+          group.gamesPlayed === previousGroup.gamesPlayed) {
+        // Same rank as previous group (tied)
+        group.actualRank = previousGroup.actualRank;
+        group.isTied = true;
+        
+        // Mark previous group as tied too if it wasn't already
+        if (!previousGroup.isTied) {
+          previousGroup.isTied = true;
+        }
+      } else {
+        // Different score, get next rank (which is current position + 1)
+        group.actualRank = index + 1;
+        group.isTied = false;
+      }
+    }
+    
+    rankedGroups.push(group);
+  });
+
+  // Calculate how many teams are tied at each rank
+  rankedGroups.forEach(group => {
+    if (group.isTied) {
+      const tiedTeams = rankedGroups.filter(g => g.actualRank === group.actualRank);
+      group.tiedWith = tiedTeams.length;
+    }
   });
 
   // Update previous rankings and create update ID when rankings actually change
@@ -374,17 +471,16 @@ export function RankingsView() {
       const newRankings: Record<number, { rank: number; score: number }> = {};
       let hasRankingChanged = false;
       
-      rankedGroups.forEach((groupData, index) => {
-        const newRank = index + 1;
+      rankedGroups.forEach((groupData) => {
         const oldData = previousRankings[groupData.group.id];
         
         newRankings[groupData.group.id] = {
-          rank: newRank,
+          rank: groupData.actualRank,
           score: groupData.totalScore,
         };
         
         // Check if any rank actually changed
-        if (!oldData || oldData.rank !== newRank) {
+        if (!oldData || oldData.rank !== groupData.actualRank) {
           hasRankingChanged = true;
         }
       });
@@ -417,6 +513,51 @@ export function RankingsView() {
           <Alert>
             <AlertDescription>Impossible de charger les données de classement.</AlertDescription>
           </Alert>
+        </div>
+        <div className="lg:col-span-1">
+          <RecentScoresSidebar />
+        </div>
+      </div>
+    );
+  }
+
+  // Show empty state if no scores have been entered yet
+  if (!hasAnyScores) {
+    const formatDateTime = (date: Date) => {
+      return new Date(date).toLocaleDateString('fr-FR', {
+        weekday: 'long',
+        day: 'numeric', 
+        month: 'long',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    };
+
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="lg:col-span-3">
+          <div className="flex items-center gap-2 mb-6">
+            <Trophy className="h-6 w-6 text-yellow-500" />
+            <h2 className="text-2xl font-semibold">Classement en direct</h2>
+            <div className="h-2 w-2 bg-gray-400 rounded-full ml-2"></div>
+          </div>
+          
+          <div className="text-center py-16">
+            <Trophy className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" />
+            <h3 className="text-xl font-semibold mb-2">Les jeux n'ont pas encore commencé</h3>
+            {firstTimeslot ? (
+              <p className="text-muted-foreground mb-4">
+                Les jeux commencent le {formatDateTime(new Date(firstTimeslot.startTime))}
+              </p>
+            ) : (
+              <p className="text-muted-foreground mb-4">
+                En attente du planning des jeux
+              </p>
+            )}
+            <p className="text-sm text-muted-foreground">
+              Le classement apparaîtra dès qu'un premier score sera enregistré.
+            </p>
+          </div>
         </div>
         <div className="lg:col-span-1">
           <RecentScoresSidebar />
@@ -465,7 +606,6 @@ export function RankingsView() {
                 <RankingRow
                   key={groupData.group.id}
                   groupData={groupData}
-                  rank={index + 1}
                   rankingsUpdateId={rankingsUpdateId}
                 />
               ))}
@@ -475,7 +615,7 @@ export function RankingsView() {
         
         <div className="text-xs text-muted-foreground text-center mt-4 flex items-center justify-center gap-2">
           <div className="h-1.5 w-1.5 bg-green-500 rounded-full animate-pulse"></div>
-          Classement mis à jour en temps réel - basé sur le score total, puis sur le nombre de jeux joués
+          Classement mis à jour en temps réel - basé sur le score total, puis sur le nombre de jeux joués. Équipes avec le même score classées ex æquo.
         </div>
       </div>
 

@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { Game, Group, Schedule } from "../_types/schedule-types";
 import { formatTime, formatDate } from "../_utils/date-utils";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table";
-import { Calendar, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { Calendar, Clock, ChevronDown, ChevronUp, RotateCcw } from "lucide-react";
 import { Button } from "~/components/ui/button";
+import { api } from "~/trpc/react";
+import { toast } from "sonner";
 
 interface ScheduleResultsProps {
   schedule: Schedule;
@@ -13,10 +15,40 @@ interface ScheduleResultsProps {
 export function ScheduleResults({ schedule }: ScheduleResultsProps) {
   const [showAllTables, setShowAllTables] = useState(true);
   
+  // Mutation for deleting all scores
+  const deleteAllScoresMutation = api.score.deleteAllScores.useMutation({
+    onSuccess: () => {
+      toast.success("Tous les scores ont été remis à zéro !");
+    },
+    onError: (error) => {
+      toast.error(`Erreur lors de la remise à zéro des scores : ${error.message}`);
+    }
+  });
+
+  const handleResetAllScores = () => {
+    const confirmReset = confirm(
+      "Êtes-vous sûr de vouloir remettre à zéro TOUS les scores ? Cette action est irréversible."
+    );
+    
+    if (confirmReset) {
+      deleteAllScoresMutation.mutate();
+    }
+  };
+  
   return (
     <>
-      {/* Global toggle button */}
-      <div className="flex justify-end mb-4">
+      {/* Global buttons */}
+      <div className="flex justify-end gap-2 mb-4">
+        <Button 
+          variant="destructive" 
+          size="sm"
+          onClick={handleResetAllScores}
+          disabled={deleteAllScoresMutation.isPending}
+          className="flex items-center gap-1"
+        >
+          <RotateCcw className="h-4 w-4" />
+          {deleteAllScoresMutation.isPending ? "Remise à zéro..." : "Remettre à zéro tous les scores"}
+        </Button>
         <Button 
           variant="outline" 
           size="sm"

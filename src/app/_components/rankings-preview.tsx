@@ -21,6 +21,15 @@ function createSlug(name: string): string {
     .replace(/^-|-$/g, ""); // Remove leading/trailing hyphens
 }
 
+type GroupScore = {
+  group: { id: number; name: string };
+  totalScore: number;
+  gamesPlayed: number;
+  actualRank: number;
+  isTied: boolean;
+  tiedWith?: number;
+};
+
 export function RankingsPreview() {
   // Fetch all scores and groups
   const { data: scores, isLoading: isLoadingScores } = api.score.getAll.useQuery();
@@ -54,8 +63,14 @@ export function RankingsPreview() {
     );
   }
 
+  // Don't show rankings preview if no scores have been entered
+  const hasAnyScores = scores && scores.length > 0;
+  if (!hasAnyScores) {
+    return null; // Don't render anything if no scores
+  }
+
   // Calculate total scores for each group
-  const groupScores = groups.map((group) => {
+  const groupScores: GroupScore[] = groups.map((group) => {
     const groupScoreEntries = scores.filter((score) => score.groupId === group.id);
     const totalScore = groupScoreEntries.reduce((sum, score) => sum + score.score, 0);
     const gamesPlayed = groupScoreEntries.length;
@@ -64,35 +79,77 @@ export function RankingsPreview() {
       group,
       totalScore,
       gamesPlayed,
+      actualRank: 0, // Will be calculated later
+      isTied: false, // Will be calculated later
     };
   });
 
-  // Sort by total score (descending), then by games played (descending for tiebreaker)
-  const rankedGroups = groupScores.sort((a, b) => {
+  // Sort by total score (descending), then by games played (ascending for tiebreaker - fewer games = better efficiency)
+  const sortedGroups = groupScores.sort((a, b) => {
     if (a.totalScore !== b.totalScore) {
       return b.totalScore - a.totalScore;
     }
-    return b.gamesPlayed - a.gamesPlayed;
+    return a.gamesPlayed - b.gamesPlayed;
   });
 
-  // Take only top 5
+  // Calculate actual ranks with proper tie handling (same logic as RankingsView)
+  const rankedGroups: GroupScore[] = [];
+  
+  sortedGroups.forEach((group, index) => {
+    if (index === 0) {
+      // First group gets rank 1
+      group.actualRank = 1;
+      group.isTied = false;
+    } else {
+      const previousGroup = rankedGroups[rankedGroups.length - 1];
+      
+      // Check if this group is tied with the previous group
+      if (previousGroup && 
+          group.totalScore === previousGroup.totalScore && 
+          group.gamesPlayed === previousGroup.gamesPlayed) {
+        // Same rank as previous group (tied)
+        group.actualRank = previousGroup.actualRank;
+        group.isTied = true;
+        
+        // Mark previous group as tied too if it wasn't already
+        if (!previousGroup.isTied) {
+          previousGroup.isTied = true;
+        }
+      } else {
+        // Different score, get next rank (which is current position + 1)
+        group.actualRank = index + 1;
+        group.isTied = false;
+      }
+    }
+    
+    rankedGroups.push(group);
+  });
+
+  // Calculate how many teams are tied at each rank
+  rankedGroups.forEach(group => {
+    if (group.isTied) {
+      const tiedTeams = rankedGroups.filter(g => g.actualRank === group.actualRank);
+      group.tiedWith = tiedTeams.length;
+    }
+  });
+
+  // Take only top 5 for preview
   const top5 = rankedGroups.slice(0, 5);
 
-  // Helper function to get rank icon
+  // Helper functions (same as RankingsView)
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1:
-        return <Trophy className="h-4 w-4 text-yellow-500" />;
+        return <Trophy className="h-5 w-5 text-yellow-500" />;
       case 2:
-        return <Medal className="h-4 w-4 text-gray-400" />;
+        return <Medal className="h-5 w-5 text-gray-400" />;
       case 3:
-        return <Award className="h-4 w-4 text-amber-600" />;
+        return <Award className="h-5 w-5 text-orange-600" />;
       default:
-        return <span className="h-4 w-4 flex items-center justify-center text-xs font-bold text-muted-foreground">{rank}</span>;
+        return null;
     }
   };
 
-  // Helper function to get rank styling
   const getRankStyling = (rank: number) => {
     switch (rank) {
       case 1:
@@ -100,10 +157,45 @@ export function RankingsPreview() {
       case 2:
         return "bg-gray-50 border-gray-200 dark:bg-gray-900/20 dark:border-gray-800";
       case 3:
-        return "bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800";
+        return "bg-orange-50 border-orange-300 dark:bg-orange-900/20 dark:border-orange-700";
       default:
         return "";
     }
+  };
+
+  const getRankDisplay = (groupData: GroupScore) => {
+    if (groupData.isTied && groupData.tiedWith && groupData.tiedWith > 1) {
+      return (
+        <div className="flex flex-col items-center justify-center h-12">
+          <span className="text-sm font-bold">
+            {groupData.actualRank}
+          </span>
+          <span className="text-xs text-muted-foreground">ex æquo</span>
+        </div>
+      );
+    }
+    return (
+      <div className="flex items-center justify-center h-12">
+        <span className="text-sm font-bold">
+          {groupData.actualRank}
+        </span>
+      </div>
+    );
+  };
+
+  const getTeamNameWithIcon = (groupData: GroupScore) => {
+    const icon = getRankIcon(groupData.actualRank);
+    return (
+      <div className="flex items-center gap-2">
+        {icon}
+        <Link 
+          href={`/teams/${createSlug(groupData.group.name)}`}
+          className="hover:text-blue-600 hover:underline transition-colors"
+        >
+          {groupData.group.name}
+        </Link>
+      </div>
+    );
   };
 
   if (top5.length === 0) {
@@ -127,49 +219,39 @@ export function RankingsPreview() {
         <h2 className="text-xl font-semibold">Classement</h2>
       </div>
       
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-12">Rang</TableHead>
+              <TableHead className="w-16">Rang</TableHead>
               <TableHead>Jeunesse</TableHead>
-              <TableHead className="text-center w-20">Jeux</TableHead>
-              <TableHead className="text-center w-24">Score</TableHead>
+              <TableHead className="text-center">Jeux joués</TableHead>
+              <TableHead className="text-center">Score total</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {top5.map((groupData, index) => {
-              const rank = index + 1;
-              return (
-                <TableRow 
-                  key={groupData.group.id} 
-                  className={cn(
-                    "transition-colors",
-                    getRankStyling(rank)
-                  )}
-                >
-                  <TableCell className="font-medium">
-                    <div className="flex items-center justify-center">
-                      {getRankIcon(rank)}
-                    </div>
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    <Link 
-                      href={`/teams/${createSlug(groupData.group.name)}`}
-                      className="hover:text-blue-600 hover:underline transition-colors"
-                    >
-                      {groupData.group.name}
-                    </Link>
-                  </TableCell>
-                  <TableCell className="text-center text-muted-foreground text-sm">
-                    {groupData.gamesPlayed}
-                  </TableCell>
-                  <TableCell className="text-center font-bold">
-                    {groupData.totalScore} pts
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+            {top5.map((groupData) => (
+              <TableRow 
+                key={groupData.group.id} 
+                className={cn(
+                  "transition-colors",
+                  getRankStyling(groupData.actualRank)
+                )}
+              >
+                <TableCell className="font-medium">
+                  {getRankDisplay(groupData)}
+                </TableCell>
+                <TableCell className="font-medium">
+                  {getTeamNameWithIcon(groupData)}
+                </TableCell>
+                <TableCell className="text-center">
+                  {groupData.gamesPlayed}
+                </TableCell>
+                <TableCell className="text-center font-bold">
+                  {groupData.totalScore} pts
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </div>
@@ -178,7 +260,7 @@ export function RankingsPreview() {
         <div className="text-center">
           <Link href="/rankings">
             <Button variant="outline" size="sm">
-              Voir les {rankedGroups.length - 5} autres équipes
+              Voir le classement complet
               <ChevronRight className="h-3 w-3 ml-1" />
             </Button>
           </Link>
