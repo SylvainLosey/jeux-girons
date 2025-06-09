@@ -11,7 +11,11 @@ function createGameRoundKey(gameId: number, round: number): GameRoundKey {
 
 // Helper function to parse a game-round key
 function parseGameRoundKey(key: GameRoundKey): { gameId: number, round: number } {
-  const [gameIdStr, roundStr] = key.split("-");
+  const parts = key.split("-");
+  if (parts.length !== 2) {
+    throw new Error(`Invalid game-round key format: ${key}`);
+  }
+  const [gameIdStr, roundStr] = parts;
   return {
     gameId: parseInt(gameIdStr),
     round: parseInt(roundStr)
@@ -511,6 +515,33 @@ function markGroupAsScheduled(
 }
 
 /**
+ * Calculates all possible time slots within the given time ranges
+ */
+function calculateAllTimeSlots(
+  validatedTimeRanges: TimeRange[],
+  gameDurationMs: number,
+  transitionTimeMs: number
+): { startTime: Date, endTime: Date }[] {
+  const timeslotIntervalMs = gameDurationMs + transitionTimeMs;
+  const allSlots: { startTime: Date, endTime: Date }[] = [];
+
+  for (const range of validatedTimeRanges) {
+    let currentStartTimeMs = range.startTime.getTime();
+    const rangeEndTimeMs = range.endTime.getTime();
+
+    while (currentStartTimeMs <= rangeEndTimeMs - gameDurationMs) {
+      const startTime = new Date(currentStartTimeMs);
+      const endTime = new Date(currentStartTimeMs + gameDurationMs);
+      
+      allSlots.push({ startTime, endTime });
+      currentStartTimeMs += timeslotIntervalMs;
+    }
+  }
+
+  return allSlots;
+}
+
+/**
  * Main schedule generation function (internal implementation)
  */
 function generateScheduleInternal(
@@ -526,68 +557,62 @@ function generateScheduleInternal(
 ): Schedule | { error: string } {
   const N = groups.length;
   const schedule: Schedule = [];
-  const timeslotIntervalMs = gameDurationMs + transitionTimeMs;
 
-  // Get the first time range safely
-  const firstRange = validatedTimeRanges[0];
-  if (!firstRange) {
-    return { error: "Erreur interne: Impossible de déterminer la plage horaire initiale." };
+  // Calculate all possible time slots
+  const allTimeSlots = calculateAllTimeSlots(validatedTimeRanges, gameDurationMs, transitionTimeMs);
+  
+  if (allTimeSlots.length === 0) {
+    return { error: "Aucun créneau horaire disponible dans les plages définies." };
   }
-  
-  // Start with the first time range's start time
-  let currentStartTimeMs = firstRange.startTime.getTime();
-  let currentRangeIndex = 0;
-  let slotIndex = 0;
-  
+
   // Calculate a more generous MAX_SLOTS since we now have rounds
   const totalGameRounds = games.reduce((sum, game) => sum + (game.rounds ?? 1), 0);
-  const MAX_SLOTS = (N * totalGameRounds) + N; // Safety break
+  const MAX_SLOTS = Math.min(allTimeSlots.length, (N * totalGameRounds) + N); // Safety break
+  
+  let slotsUsed = 0;
 
-  // Loop until all groups have played all games/rounds OR max slots reached
-  while (Array.from(needsToPlay.values()).some(gameRoundSet => gameRoundSet.size > 0)) {
-    slotIndex++;
-    if (slotIndex > MAX_SLOTS) {
-      return { error: buildErrorMessage(needsToPlay, groupMap, gameMap) };
+  // Iterate through time slots in REVERSE order (from end to beginning)
+  for (let i = allTimeSlots.length - 1; i >= 0 && slotsUsed < MAX_SLOTS; i--) {
+    // Check if we still have groups that need to play games
+    const hasRemainingNeeds = Array.from(needsToPlay.values()).some(gameRoundSet => gameRoundSet.size > 0);
+    if (!hasRemainingNeeds) {
+      break; // All groups have played all games
     }
 
-    // Time range management logic
-    const timeResult = advanceToNextValidTimeSlot(
-      currentStartTimeMs,
-      currentRangeIndex, 
-      validatedTimeRanges,
-      gameDurationMs
-    );
+    slotsUsed++;
+    const timeSlot = allTimeSlots[i];
+    if (!timeSlot) continue; // Safety check
     
-    // Update our time tracking variables
-    currentStartTimeMs = timeResult.currentStartTimeMs;
-    currentRangeIndex = timeResult.currentRangeIndex;
-    
-    // If we couldn't find a valid time range, we're done
-    if (!timeResult.isValid) {
-      return { error: "Plus de plages horaires disponibles, mais tous les groupes n'ont pas joué à tous les jeux." };
-    }
-
-    // Create timeslot with current time
-    const startTime = new Date(currentStartTimeMs);
-    const endTime = new Date(currentStartTimeMs + gameDurationMs);
-    
-    // Update currentStartTimeMs for next iteration
-    currentStartTimeMs += timeslotIntervalMs;
-
     // Schedule this time slot
     const { entries, hasScheduledGames } = scheduleTimeSlot(
       groups,
       needsToPlay,
       gameRoundMap,
-      startTime,
-      endTime
+      timeSlot.startTime,
+      timeSlot.endTime
     );
 
     // Add the completed timeslot to the schedule if any games were played
     if (hasScheduledGames) {
-      schedule.push({ slotIndex, startTime, endTime, entries });
+      // Calculate the slot index based on the original order (not reversed)
+      const slotIndex = i + 1; // 1-based indexing
+      schedule.push({ 
+        slotIndex, 
+        startTime: timeSlot.startTime, 
+        endTime: timeSlot.endTime, 
+        entries 
+      });
     }
   }
+
+  // Check if all groups completed all games
+  const remainingNeeds = Array.from(needsToPlay.values()).some(gameRoundSet => gameRoundSet.size > 0);
+  if (remainingNeeds) {
+    return { error: buildErrorMessage(needsToPlay, groupMap, gameMap) };
+  }
+
+  // Sort the schedule by start time for proper display (earliest first)
+  schedule.sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
 
   return schedule;
 }
@@ -645,4 +670,4 @@ function buildErrorMessage(
     .join('; ');
     
   return `La génération de l'horaire a dépassé le nombre maximum de créneaux sans que tous les groupes aient joué à tous les jeux. Vérifiez la configuration. Besoins restants: ${remainingNeedsSummary}`;
-} 
+}
