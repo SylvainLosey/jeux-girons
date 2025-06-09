@@ -8,8 +8,7 @@ import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
-import { Clock, Users, Gamepad2, Trophy, Edit3, CheckCircle, Clock3, Play, Pencil } from "lucide-react";
-import { cn } from "~/lib/utils";
+import { Clock, Users, Gamepad2, CheckCircle, Clock3, Pencil } from "lucide-react";
 import { formatTime } from "~/app/_utils/date-utils";
 import { DirectScoreEditor } from "./score-editor";
 

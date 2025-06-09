@@ -269,7 +269,7 @@ export function UnifiedScheduleView({ schedule, entity, viewType, showAdmin = fa
               {day}
             </h3>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-1">
-              {dayEntries.map((entry, index) => (
+              {dayEntries.map((entry, _index) => (
                 <ScheduleCard
                   key={`${entry.slotIndex}-${entry.group.id}-${entry.game.id}-${entry.round}`}
                   entry={entry}
@@ -336,7 +336,7 @@ export function UnifiedScheduleView({ schedule, entity, viewType, showAdmin = fa
               {day}
             </h3>
             <div className="grid gap-4">
-              {daySlots.map((slot, index) => (
+              {daySlots.map((slot, _index) => (
                 <GameTimeSlotCard
                   key={`${slot.slotIndex}-${slot.round}`}
                   slot={slot}

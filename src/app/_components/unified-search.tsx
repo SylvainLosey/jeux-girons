@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { api } from "~/trpc/react";
 import { Game, Group } from "~/app/_types/schedule-types";
 import { Search, Users, Gamepad2, Calendar } from "lucide-react";
-import { cn } from "~/lib/utils";
 
 // Helper function to create URL-friendly slugs
 function createSlug(name: string): string {

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Users, Gamepad2, CalendarClock, Menu, Trophy, Settings } from "lucide-react";
+import { Users, Gamepad2, CalendarClock, Menu, Settings } from "lucide-react";
 import { cn } from "~/lib/utils";
 import {
   NavigationMenu,
