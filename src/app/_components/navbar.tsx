@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Users, Gamepad2, CalendarClock, Menu } from "lucide-react";
+import { Users, Gamepad2, CalendarClock, Menu, Trophy, Settings } from "lucide-react";
 import { cn } from "~/lib/utils";
 import {
   NavigationMenu,
@@ -11,11 +11,37 @@ import {
   NavigationMenuList,
 } from "~/components/ui/navigation-menu";
 import { Button } from "~/components/ui/button";
-import { useState } from "react";
+import { Switch } from "~/components/ui/switch";
+import { Label } from "~/components/ui/label";
+import { useState, createContext, useContext } from "react";
+
+// Create admin context
+const AdminContext = createContext<{
+  isAdmin: boolean;
+  setIsAdmin: (admin: boolean) => void;
+}>({
+  isAdmin: false,
+  setIsAdmin: () => {
+    // Default empty implementation
+  },
+});
+
+export const useAdmin = () => useContext(AdminContext);
+
+export function AdminProvider({ children }: { children: React.ReactNode }) {
+  const [isAdmin, setIsAdmin] = useState(false);
+  
+  return (
+    <AdminContext.Provider value={{ isAdmin, setIsAdmin }}>
+      {children}
+    </AdminContext.Provider>
+  );
+}
 
 export function Navbar() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { isAdmin, setIsAdmin } = useAdmin();
   
   const navItems = [
     {
@@ -39,7 +65,12 @@ export function Navbar() {
   ];
 
   // Custom component for navlink compatibility with Next.js Link
-  const NavMenuLink = ({ href, active, className, children, ...props }) => (
+  const NavMenuLink = ({ href, active, className, children, ...props }: {
+    href: string;
+    active: boolean;
+    className?: string;
+    children: React.ReactNode;
+  }) => (
     <Link
       href={href}
       legacyBehavior
@@ -72,19 +103,34 @@ export function Navbar() {
           </Link>
           
           {/* Desktop Navigation */}
-          <div className="hidden md:flex">
-            <NavigationMenu>
-              <NavigationMenuList>
-                {navItems.map((item) => (
-                  <NavigationMenuItem key={item.href}>
-                    <NavMenuLink href={item.href} active={item.active} className="px-3 py-2">
-                      <item.icon className="mr-2 h-4 w-4 flex-shrink-0" />
-                      {item.name}
-                    </NavMenuLink>
-                  </NavigationMenuItem>
-                ))}
-              </NavigationMenuList>
-            </NavigationMenu>
+          <div className="hidden md:flex items-center space-x-4">
+            {isAdmin && (
+              <NavigationMenu>
+                <NavigationMenuList>
+                  {navItems.map((item) => (
+                    <NavigationMenuItem key={item.href}>
+                      <NavMenuLink href={item.href} active={item.active} className="px-3 py-2">
+                        <item.icon className="mr-2 h-4 w-4 flex-shrink-0" />
+                        {item.name}
+                      </NavMenuLink>
+                    </NavigationMenuItem>
+                  ))}
+                </NavigationMenuList>
+              </NavigationMenu>
+            )}
+            
+            {/* Admin Toggle */}
+            <div className="flex items-center space-x-2 ml-4 pl-4 border-l">
+              <Settings className="h-4 w-4 text-muted-foreground" />
+              <Label htmlFor="admin-mode" className="text-sm font-medium">
+                Admin
+              </Label>
+              <Switch
+                id="admin-mode"
+                checked={isAdmin}
+                onCheckedChange={setIsAdmin}
+              />
+            </div>
           </div>
           
           {/* Mobile Navigation Button */}
@@ -104,7 +150,7 @@ export function Navbar() {
         {mobileMenuOpen && (
           <div className="md:hidden px-2 pb-3">
             <div className="flex flex-col space-y-1">
-              {navItems.map((item) => (
+              {isAdmin && navItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
@@ -120,6 +166,21 @@ export function Navbar() {
                   {item.name}
                 </Link>
               ))}
+              
+              {/* Mobile Admin Toggle */}
+              <div className="flex items-center justify-between px-3 py-2 border-t mt-2 pt-3">
+                <div className="flex items-center space-x-2">
+                  <Settings className="h-4 w-4 text-muted-foreground" />
+                  <Label htmlFor="admin-mode-mobile" className="text-sm font-medium">
+                    Mode Admin
+                  </Label>
+                </div>
+                <Switch
+                  id="admin-mode-mobile"
+                  checked={isAdmin}
+                  onCheckedChange={setIsAdmin}
+                />
+              </div>
             </div>
           </div>
         )}

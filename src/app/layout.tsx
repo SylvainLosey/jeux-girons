@@ -2,21 +2,22 @@ import "~/styles/globals.css";
 
 import { type Metadata } from "next";
 import { Geist } from "next/font/google";
-import { Toaster } from "~/components/ui/sonner";
 
 import { TRPCReactProvider } from "~/trpc/react";
-import { Navbar } from "~/app/_components/navbar";
-
-export const metadata: Metadata = {
-  title: "Jeux Murist 25",
-  description: "Application de gestion des jeux-girons",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
-};
+import { Navbar } from "./_components/navbar";
+import { AdminProvider } from "./_components/navbar";
+import { Toaster } from "~/components/ui/sonner";
 
 const geist = Geist({
   subsets: ["latin"],
   variable: "--font-geist-sans",
 });
+
+export const metadata: Metadata = {
+  title: "Jeux Murist 25",
+  description: "Site officiel des Jeux de Murist 2025",
+  icons: [{ rel: "icon", url: "/favicon.ico" }],
+};
 
 export default function RootLayout({
   children,
@@ -25,9 +26,11 @@ export default function RootLayout({
     <html lang="fr" className={`${geist.variable}`}>
       <body>
         <TRPCReactProvider>
-          <Navbar />
-          {children}
-          <Toaster />
+          <AdminProvider>
+            <Navbar />
+            {children}
+            <Toaster />
+          </AdminProvider>
         </TRPCReactProvider>
       </body>
     </html>

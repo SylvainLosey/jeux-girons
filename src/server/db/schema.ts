@@ -93,6 +93,26 @@ export const scheduleEntries = createTable(
   })
 );
 
+// Add scores table
+export const scores = createTable(
+  "score",
+  (d) => ({
+    id: d.serial("id").primaryKey(),
+    groupId: d.integer("group_id").notNull().references(() => groups.id, { onDelete: "cascade" }),
+    gameId: d.integer("game_id").notNull().references(() => games.id, { onDelete: "cascade" }),
+    round: d.integer("round").notNull().default(1),
+    score: d.integer("score").notNull().default(0),
+    createdAt: d.timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: d.timestamp("updated_at", { withTimezone: true }).$onUpdate(() => new Date()),
+  }),
+  (t) => [
+    // Ensure unique combination of group, game, and round
+    index("score_group_game_round_idx").on(t.groupId, t.gameId, t.round),
+  ]
+);
+
 // Define relations
 export const schedulesRelations = relations(schedules, ({ many }) => ({
   timeRanges: many(timeRanges),
@@ -120,4 +140,27 @@ export const scheduleEntriesRelations = relations(scheduleEntries, ({ one }) => 
     fields: [scheduleEntries.gameId],
     references: [games.id],
   }),
+}));
+
+// Add scores relations
+export const scoresRelations = relations(scores, ({ one }) => ({
+  group: one(groups, {
+    fields: [scores.groupId],
+    references: [groups.id],
+  }),
+  game: one(games, {
+    fields: [scores.gameId],
+    references: [games.id],
+  }),
+}));
+
+// Add relations to groups and games for scores
+export const groupsRelations = relations(groups, ({ many }) => ({
+  scheduleEntries: many(scheduleEntries),
+  scores: many(scores),
+}));
+
+export const gamesRelations = relations(games, ({ many }) => ({
+  scheduleEntries: many(scheduleEntries),
+  scores: many(scores),
 }));
