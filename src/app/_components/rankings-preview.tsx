@@ -166,17 +166,19 @@ export function RankingsPreview() {
   const getRankDisplay = (groupData: GroupScore) => {
     if (groupData.isTied && groupData.tiedWith && groupData.tiedWith > 1) {
       return (
-        <div className="flex flex-col items-center justify-center h-12">
-          <span className="text-sm font-bold">
-            {groupData.actualRank}
-          </span>
-          <span className="text-xs text-muted-foreground">ex æquo</span>
+        <div className="flex flex-col items-center">
+          <div className="flex items-center">
+            <span className="h-5 w-5 flex items-center justify-center text-sm font-bold">
+              {groupData.actualRank}
+            </span>
+          </div>
+          <span className="text-xs text-muted-foreground mt-1">ex æquo</span>
         </div>
       );
     }
     return (
-      <div className="flex items-center justify-center h-12">
-        <span className="text-sm font-bold">
+      <div className="flex items-center justify-center">
+        <span className="h-5 w-5 flex items-center justify-center text-sm font-bold">
           {groupData.actualRank}
         </span>
       </div>
