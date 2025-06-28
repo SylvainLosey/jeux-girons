@@ -105,12 +105,12 @@ function RecentScoreItem({ score, index }: { score: RecentScore; index: number }
       </div>
       <div className="flex items-center gap-2">
         <div className="text-right">
-          <div className="font-bold text-lg text-green-600 dark:text-green-400">
+          <div className="font-bold text-lg text-gray-700 dark:text-gray-300">
             {score.score}
           </div>
           <div className="text-xs text-muted-foreground">pts</div>
         </div>
-        <TrendingUp className="h-4 w-4 text-green-500" />
+        <TrendingUp className="h-4 w-4 text-gray-600" />
       </div>
     </div>
   );
@@ -272,8 +272,8 @@ function RankingRow({ groupData, rankingsUpdateId, isNew = false }: {
     // Animation overlay styling
     if (animationState.isActive) {
       const animationStyle = animationState.type === 'improvement' 
-        ? "bg-green-100 border-green-300 dark:bg-green-900/30 dark:border-green-700" 
-        : "bg-red-100 border-red-300 dark:bg-red-900/30 dark:border-red-700";
+        ? "bg-gray-100 border-gray-300 dark:bg-gray-800 dark:border-gray-700" 
+        : "bg-gray-100 border-gray-300 dark:bg-gray-800 dark:border-gray-700";
       return animationStyle;
     }
 
@@ -284,9 +284,9 @@ function RankingRow({ groupData, rankingsUpdateId, isNew = false }: {
     if (!groupData.previousRank || !mounted) return null;
     
     if (groupData.previousRank > groupData.actualRank) {
-      return <ArrowUp className="h-4 w-4 text-green-500 ml-1" />;
+      return <ArrowUp className="h-4 w-4 text-gray-600 ml-1" />;
     } else if (groupData.previousRank < groupData.actualRank) {
-      return <ArrowDown className="h-4 w-4 text-red-500 ml-1" />;
+      return <ArrowDown className="h-4 w-4 text-gray-600 ml-1" />;
     }
     return null;
   };
@@ -322,7 +322,7 @@ function RankingRow({ groupData, rankingsUpdateId, isNew = false }: {
         {icon}
         <Link 
           href={`/teams/${createSlug(groupData.group.name)}`}
-          className="hover:text-blue-600 hover:underline transition-colors"
+          className="hover:text-gray-700 hover:underline transition-colors"
         >
           {groupData.group.name}
         </Link>
@@ -352,10 +352,12 @@ function RankingRow({ groupData, rankingsUpdateId, isNew = false }: {
       <TableCell className="text-center font-bold">
         <div className="flex items-center justify-center gap-1">
           <span className="transition-colors duration-300">
-            {groupData.totalScore} pts
+            <div className="font-bold text-lg text-gray-700 dark:text-gray-300">
+              {groupData.totalScore} pts
+            </div>
           </span>
           {groupData.scoreChange && (
-            <span className="text-xs text-green-600 dark:text-green-400 font-normal">
+            <span className="text-xs text-gray-600 dark:text-gray-400 font-normal">
               (+{groupData.scoreChange})
             </span>
           )}
@@ -539,7 +541,7 @@ export function RankingsView() {
           <div className="flex items-center gap-2 mb-6">
             <Trophy className="h-6 w-6 text-yellow-500" />
             <h2 className="text-2xl font-semibold">Classement en direct</h2>
-            <div className="h-2 w-2 bg-gray-400 rounded-full ml-2"></div>
+            <div className="h-2 w-2 bg-gray-600 rounded-full ml-2"></div>
           </div>
           
           <div className="text-center py-16">
@@ -588,7 +590,7 @@ export function RankingsView() {
         <div className="flex items-center gap-2 mb-6">
           <Trophy className="h-6 w-6 text-yellow-500" />
           <h2 className="text-2xl font-semibold">Classement en direct</h2>
-          <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse ml-2"></div>
+          <div className="h-2 w-2 bg-gray-600 rounded-full animate-pulse ml-2"></div>
         </div>
         
         <div className="rounded-md border overflow-hidden">
@@ -614,7 +616,7 @@ export function RankingsView() {
         </div>
         
         <div className="text-xs text-muted-foreground text-center mt-4 flex items-center justify-center gap-2">
-          <div className="h-1.5 w-1.5 bg-green-500 rounded-full animate-pulse"></div>
+          <div className="h-1.5 w-1.5 bg-gray-600 rounded-full animate-pulse"></div>
           Classement mis à jour en temps réel - basé sur le score total, puis sur le nombre de jeux joués. Équipes avec le même score classées ex æquo.
         </div>
       </div>

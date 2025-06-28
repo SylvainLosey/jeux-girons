@@ -82,9 +82,9 @@ function GameTimeSlotCard({ slot, showAdmin = false }: { slot: GameTimeSlot; sho
                 <div key={group.id} className="flex items-center justify-between p-2 bg-muted/50 rounded">
                   <Link 
                     href={`/teams/${createSlug(group.name)}`}
-                    className="group flex items-center gap-2 hover:text-blue-600 transition-colors"
+                    className="group flex items-center gap-2 hover:text-gray-700 transition-colors"
                   >
-                    <Users className="h-4 w-4 text-blue-500" />
+                    <Users className="h-4 w-4 text-gray-600" />
                     <span className="font-medium group-hover:underline">
                       {group.name}
                     </span>
@@ -168,8 +168,8 @@ function ScoreDisplayForGroup({ groupId, gameId, round, groupName, gameName, sho
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-1">
-        <CheckCircle className="h-3 w-3 text-green-500" />
-        <span className="text-sm font-bold text-green-700 dark:text-green-400">
+        <CheckCircle className="h-3 w-3 text-gray-600" />
+        <span className="text-sm font-bold text-gray-700 dark:text-gray-300">
           {score.score} pts
         </span>
       </div>

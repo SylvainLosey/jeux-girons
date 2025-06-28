@@ -97,8 +97,8 @@ function ScoreDisplay({ groupId, gameId, round, groupName, gameName, showAdmin =
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-1">
-        <CheckCircle className="h-3 w-3 text-green-500" />
-        <span className="text-sm font-bold text-green-700 dark:text-green-400">
+        <CheckCircle className="h-3 w-3 text-gray-600" />
+        <span className="text-sm font-bold text-gray-700 dark:text-gray-300">
           {score.score} pts
         </span>
       </div>
@@ -169,8 +169,8 @@ export function ScheduleCard({ entry, viewType, showAdmin = false }: ScheduleCar
                   href={`/games/${createSlug(entry.game.name)}`}
                   className="group"
                 >
-                  <div className="flex items-center gap-2 hover:text-green-600 transition-colors">
-                    <Gamepad2 className="h-4 w-4 text-green-500" />
+                  <div className="flex items-center gap-2 hover:text-gray-700 transition-colors">
+                    <Gamepad2 className="h-4 w-4 text-gray-600" />
                     <span className="font-semibold group-hover:underline">
                       {entry.game.name}
                     </span>
@@ -189,8 +189,8 @@ export function ScheduleCard({ entry, viewType, showAdmin = false }: ScheduleCar
                   href={`/teams/${createSlug(entry.group.name)}`}
                   className="group"
                 >
-                  <div className="flex items-center gap-2 hover:text-blue-600 transition-colors">
-                    <Users className="h-4 w-4 text-blue-500" />
+                  <div className="flex items-center gap-2 hover:text-gray-700 transition-colors">
+                    <Users className="h-4 w-4 text-gray-600" />
                     <span className="font-semibold group-hover:underline">
                       {entry.group.name}
                     </span>
@@ -214,7 +214,7 @@ export function ScheduleCard({ entry, viewType, showAdmin = false }: ScheduleCar
                   >
                     <Badge 
                       variant="secondary" 
-                      className="text-xs hover:bg-red-100 hover:text-red-700 dark:hover:bg-red-900/30 dark:hover:text-red-300 transition-colors cursor-pointer"
+                      className="text-xs hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-300 transition-colors cursor-pointer"
                     >
                       {opponent.name}
                     </Badge>

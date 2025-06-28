@@ -23,7 +23,7 @@ export function AdminAwareGamePage({ game, liveSchedule }: AdminAwareGamePagePro
       <div className="container mx-auto px-4 pb-4 max-w-4xl">
         <div className="mb-6">
           <h1 className="text-3xl font-bold mb-2 flex items-center">
-            <Gamepad2 className="mr-3 h-8 w-8 text-green-500" />
+            <Gamepad2 className="mr-3 h-8 w-8 text-gray-600" />
             {game.name}
           </h1>
           {game.description && (

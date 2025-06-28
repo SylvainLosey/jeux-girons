@@ -80,17 +80,17 @@ export function UnifiedSearch() {
 
   const getItemIcon = (type: "team" | "game") => {
     return type === "team" ? 
-      <Users className="mr-2 h-4 w-4 text-blue-500" /> : 
-      <Gamepad2 className="mr-2 h-4 w-4 text-green-500" />;
+      <Users className="mr-2 h-4 w-4 text-gray-600" /> : 
+      <Gamepad2 className="mr-2 h-4 w-4 text-gray-600" />;
   };
 
   const getItemBadge = (type: "team" | "game") => {
     return type === "team" ? (
-      <span className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 px-2 py-0.5 rounded">
+      <span className="text-xs bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300 px-2 py-0.5 rounded">
         Jeunesse
       </span>
     ) : (
-      <span className="text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 px-2 py-0.5 rounded">
+      <span className="text-xs bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300 px-2 py-0.5 rounded">
         Jeu
       </span>
     );
@@ -100,7 +100,7 @@ export function UnifiedSearch() {
     <div className="space-y-6">
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <Calendar className="h-5 w-5 text-blue-500" />
+          <Calendar className="h-5 w-5 text-gray-600" />
           <h2 className="text-xl font-semibold">Rechercher un horaire</h2>
         </div>
         <p className="text-muted-foreground text-sm">
