@@ -115,7 +115,7 @@ export function Navbar() {
           "flex flex-row items-center px-3 py-2 text-sm font-medium transition-colors", 
           active 
             ? "bg-primary/10 text-primary" 
-            : "text-foreground/70 hover:bg-accent hover:text-accent-foreground",
+            : "text-foreground/70 hover:bg-[#ECB365]/20 hover:text-[#ECB365]",
           "p-0 gap-0", 
           className
         )}
@@ -143,7 +143,7 @@ export function Navbar() {
                   {navItems.map((item) => (
                     <NavigationMenuItem key={item.href}>
                       <NavMenuLink href={item.href} active={item.active} className="px-3 py-2">
-                        <item.icon className="mr-2 h-4 w-4 flex-shrink-0" />
+                        <item.icon className="mr-2 h-4 w-4 flex-shrink-0" style={{ color: item.name === 'Jeux' || item.name === 'Jeunesses' ? '#ECB365' : undefined }} />
                         {item.name}
                       </NavMenuLink>
                     </NavigationMenuItem>
@@ -151,15 +151,6 @@ export function Navbar() {
                 </NavigationMenuList>
               </NavigationMenu>
             )}
-            {/* Dark Mode Toggle */}
-            <button
-              onClick={toggleDark}
-              className="ml-4 pl-4 border-l flex items-center gap-2 text-xl focus:outline-none"
-              aria-label="Toggle dark mode"
-              title="Basculer le mode sombre"
-            >
-              {isDark ? "🌙" : "☀️"}
-            </button>
             {/* Admin Toggle */}
             <div className="flex items-center space-x-2 ml-4 pl-4 border-l">
               <Settings className="h-4 w-4 text-muted-foreground" />

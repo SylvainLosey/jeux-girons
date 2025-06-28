@@ -47,70 +47,70 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.984 0.003 247.858);
-  --sidebar-foreground: oklch(0.129 0.042 264.695);
-  --sidebar-primary: oklch(0.208 0.042 265.755);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.968 0.007 247.896);
-  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
-  --sidebar-border: oklch(0.929 0.013 255.508);
-  --sidebar-ring: oklch(0.704 0.04 256.788);
+  --background: #0A222C;
+  --foreground: #ECB365;
+  --card: #1A2F3A;
+  --card-foreground: #ECB365;
+  --popover: #1A2F3A;
+  --popover-foreground: #ECB365;
+  --primary: #ECB365;
+  --primary-foreground: #0A222C;
+  --secondary: #A88754;
+  --secondary-foreground: #0A222C;
+  --muted: #58543F;
+  --muted-foreground: #A88754;
+  --accent: #A88754;
+  --accent-foreground: #0A222C;
+  --destructive: #ef4444;
+  --border: #58543F;
+  --input: #58543F;
+  --ring: #ECB365;
+  --chart-1: #ECB365;
+  --chart-2: #A88754;
+  --chart-3: #58543F;
+  --chart-4: #1A2F3A;
+  --chart-5: #0A222C;
+  --sidebar: #1A2F3A;
+  --sidebar-foreground: #ECB365;
+  --sidebar-primary: #ECB365;
+  --sidebar-primary-foreground: #0A222C;
+  --sidebar-accent: #A88754;
+  --sidebar-accent-foreground: #0A222C;
+  --sidebar-border: #58543F;
+  --sidebar-ring: #ECB365;
 }
 
 .dark {
-  --background: #0b2329; /* deep blue-green, almost black */
-  --foreground: #f6e7c1; /* soft light gold for main text */
-  --card: #10262c; /* slightly lighter than background for cards */
-  --card-foreground: #f6e7c1;
-  --popover: #10262c;
-  --popover-foreground: #f6e7c1;
-  --primary: #ECB365; /* gold/orange */
-  --primary-foreground: #142E3A; /* dark blue for text on gold */
-  --secondary: #142E3A; /* dark blue */
-  --secondary-foreground: #f6e7c1;
-  --muted: #142E3A; /* use secondary for muted */
-  --muted-foreground: #A08E6D; /* soft blue/gray for muted text */
-  --accent: #ECB365; /* gold/orange accent */
-  --accent-foreground: #142E3A;
-  --destructive: #8B4513; /* strong brown */
-  --border: #A08E6D; /* soft blue/gray for borders */
-  --input: #A08E6D;
+  --background: #0A222C;
+  --foreground: #ECB365;
+  --card: #1A2F3A;
+  --card-foreground: #ECB365;
+  --popover: #1A2F3A;
+  --popover-foreground: #ECB365;
+  --primary: #ECB365;
+  --primary-foreground: #0A222C;
+  --secondary: #A88754;
+  --secondary-foreground: #0A222C;
+  --muted: #58543F;
+  --muted-foreground: #A88754;
+  --accent: #A88754;
+  --accent-foreground: #0A222C;
+  --destructive: #ef4444;
+  --border: #58543F;
+  --input: #58543F;
   --ring: #ECB365;
   --chart-1: #ECB365;
-  --chart-2: #142E3A;
-  --chart-3: #A08E6D;
-  --chart-4: #8B4513;
-  --chart-5: #f6e7c1;
-  --sidebar: #10262c;
-  --sidebar-foreground: #f6e7c1;
+  --chart-2: #A88754;
+  --chart-3: #58543F;
+  --chart-4: #1A2F3A;
+  --chart-5: #0A222C;
+  --sidebar: #1A2F3A;
+  --sidebar-foreground: #ECB365;
   --sidebar-primary: #ECB365;
-  --sidebar-primary-foreground: #142E3A;
-  --sidebar-accent: #8B4513;
-  --sidebar-accent-foreground: #f6e7c1;
-  --sidebar-border: #A08E6D;
+  --sidebar-primary-foreground: #0A222C;
+  --sidebar-accent: #A88754;
+  --sidebar-accent-foreground: #0A222C;
+  --sidebar-border: #58543F;
   --sidebar-ring: #ECB365;
 }
 
@@ -120,5 +120,203 @@
   }
   body {
     @apply bg-background text-foreground;
+    background-image: 
+      radial-gradient(circle at 20% 80%, rgba(236, 179, 101, 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(236, 179, 101, 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(168, 135, 84, 0.02) 0%, transparent 50%);
+    background-attachment: fixed;
   }
+}
+
+/* Oriental theme custom styles */
+.oriental-border {
+  border: 2px solid #ECB365;
+  border-radius: 8px;
+  position: relative;
+}
+
+.oriental-border::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border: 1px solid #A88754;
+  border-radius: 12px;
+  z-index: -1;
+}
+
+.oriental-card {
+  background: linear-gradient(135deg, #1A2F3A 0%, #0A222C 100%);
+  border: 1px solid #58543F;
+  border-radius: 8px;
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.3),
+    0 2px 4px -1px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(236, 179, 101, 0.1);
+}
+
+.oriental-pattern {
+  background-image: 
+    linear-gradient(45deg, #58543F 25%, transparent 25%),
+    linear-gradient(-45deg, #58543F 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #58543F 75%),
+    linear-gradient(-45deg, transparent 75%, #58543F 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  opacity: 0.1;
+}
+
+/* Enhanced oriental styling */
+.oriental-header {
+  position: relative;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.oriental-header::before,
+.oriental-header::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(to right, transparent, #ECB365, transparent);
+}
+
+.oriental-header::before {
+  left: -80px;
+}
+
+.oriental-header::after {
+  right: -80px;
+}
+
+.oriental-divider {
+  display: flex;
+  align-items: center;
+  margin: 2rem 0;
+}
+
+.oriental-divider::before,
+.oriental-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #A88754, transparent);
+}
+
+.oriental-divider::before {
+  margin-right: 1rem;
+}
+
+.oriental-divider::after {
+  margin-left: 1rem;
+}
+
+.oriental-divider-center {
+  width: 12px;
+  height: 12px;
+  border: 2px solid #A88754;
+  transform: rotate(45deg);
+  background: #0A222C;
+}
+
+/* Table styling for oriental theme */
+.oriental-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+}
+
+.oriental-table th {
+  background: linear-gradient(135deg, #1A2F3A 0%, #0A222C 100%);
+  border-bottom: 2px solid #58543F;
+  color: #ECB365;
+  font-weight: 600;
+  padding: 1rem;
+  text-align: left;
+}
+
+.oriental-table td {
+  border-bottom: 1px solid #58543F;
+  padding: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.oriental-table tr:hover td {
+  background: rgba(236, 179, 101, 0.05);
+}
+
+/* Input styling for oriental theme */
+.oriental-input {
+  background: rgba(26, 47, 58, 0.8);
+  border: 1px solid #58543F;
+  border-radius: 6px;
+  color: #ECB365;
+  padding: 0.75rem 1rem;
+  transition: all 0.2s ease;
+}
+
+.oriental-input:focus {
+  border-color: #ECB365;
+  box-shadow: 0 0 0 2px rgba(236, 179, 101, 0.2);
+  outline: none;
+}
+
+.oriental-input::placeholder {
+  color: #A88754;
+  opacity: 0.7;
+}
+
+/* Button enhancements for oriental theme */
+.oriental-button {
+  background: linear-gradient(135deg, #ECB365 0%, #A88754 100%);
+  border: 1px solid #58543F;
+  border-radius: 6px;
+  color: #0A222C;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.oriental-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.oriental-button:hover::before {
+  left: 100%;
+}
+
+.oriental-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Scrollbar styling for oriental theme */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0A222C;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #58543F 0%, #A88754 100%);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #A88754 0%, #ECB365 100%);
 }

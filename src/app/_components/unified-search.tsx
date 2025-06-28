@@ -80,8 +80,8 @@ export function UnifiedSearch() {
 
   const getItemIcon = (type: "team" | "game") => {
     return type === "team" ? 
-      <Users className="mr-2 h-4 w-4 text-gray-600" /> : 
-      <Gamepad2 className="mr-2 h-4 w-4 text-gray-600" />;
+      <Users className="mr-2 h-4 w-4" style={{ color: '#A88754' }} /> : 
+      <Gamepad2 className="mr-2 h-4 w-4" style={{ color: '#A88754' }} />;
   };
 
   const getItemBadge = (type: "team" | "game") => {

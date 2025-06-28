@@ -47,11 +47,11 @@ export function PlanningView() {
         <Tabs defaultValue="groups" className="mb-4">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="groups" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
+              <Users className="h-4 w-4" style={{ color: '#A88754' }} />
               Jeunesses
             </TabsTrigger>
             <TabsTrigger value="games" className="flex items-center gap-2">
-              <Gamepad2 className="h-4 w-4" />
+              <Gamepad2 className="h-4 w-4" style={{ color: '#A88754' }} />
               Jeux
             </TabsTrigger>
           </TabsList>
@@ -95,7 +95,7 @@ export function PlanningView() {
                             className="px-2 py-1.5 flex items-center hover:bg-accent cursor-pointer"
                             onMouseDown={() => handleSelectGroup(group)}
                           >
-                            <Users className="mr-2 h-4 w-4" />
+                            <Users className="mr-2 h-4 w-4" style={{ color: '#A88754' }} />
                             <span>{group.name}</span>
                           </li>
                         ))
@@ -145,7 +145,7 @@ export function PlanningView() {
                             className="px-2 py-1.5 flex items-center hover:bg-accent cursor-pointer"
                             onMouseDown={() => handleSelectGame(game)}
                           >
-                            <Gamepad2 className="mr-2 h-4 w-4" />
+                            <Gamepad2 className="mr-2 h-4 w-4" style={{ color: '#A88754' }} />
                             <span>{game.name}</span>
                           </li>
                         ))
@@ -162,7 +162,7 @@ export function PlanningView() {
       {selectedGroup && (
         <div>
           <h2 className="text-2xl font-semibold mb-4 border-b pb-2 flex items-center">
-            <Users className="mr-2 h-5 w-5" />
+            <Users className="mr-2 h-5 w-5" style={{ color: '#A88754' }} />
             {selectedGroup.name}
           </h2>
           
@@ -189,7 +189,7 @@ export function PlanningView() {
       {selectedGame && (
         <div>
           <h2 className="text-2xl font-semibold mb-4 border-b pb-2 flex items-center">
-            <Gamepad2 className="mr-2 h-5 w-5" />
+            <Gamepad2 className="mr-2 h-5 w-5" style={{ color: '#A88754' }} />
             {selectedGame.name}
           </h2>
           
@@ -221,8 +221,8 @@ export function PlanningView() {
       {!selectedGroup && !selectedGame && isAdmin && (
         <div className="text-center p-5 bg-muted rounded-lg border">
           <div className="flex justify-center space-x-3 mb-3">
-            <Users className="h-8 w-8 text-muted-foreground" />
-            <Gamepad2 className="h-8 w-8 text-muted-foreground" />
+            <Users className="h-8 w-8" style={{ color: '#A88754' }} />
+            <Gamepad2 className="h-8 w-8" style={{ color: '#A88754' }} />
           </div>
           <h3 className="text-lg font-medium mb-2">Sélectionnez une Jeunesse ou un Jeu</h3>
           <p className="text-muted-foreground text-sm">
