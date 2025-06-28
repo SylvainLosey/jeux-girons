@@ -323,7 +323,7 @@ export function GameManager() {
                 switch (game.numberOfGroups) {
                   case 1:
                     badgeText = "1 jeunesse";
-                    badgeClasses += " bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300";
+                    badgeClasses += " bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
                     break;
                   case 2:
                     badgeText = "2 jeunesses";

@@ -192,7 +192,7 @@ export function RankingsPreview() {
         {icon}
         <Link 
           href={`/teams/${createSlug(groupData.group.name)}`}
-          className="hover:text-blue-600 hover:underline transition-colors"
+          className="hover:text-gray-700 hover:underline transition-colors"
         >
           {groupData.group.name}
         </Link>

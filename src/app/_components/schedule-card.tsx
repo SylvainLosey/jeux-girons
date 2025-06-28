@@ -54,53 +54,48 @@ function ScoreDisplay({ groupId, gameId, round, groupName, gameName, showAdmin =
   const [isEditing, setIsEditing] = useState(false);
   
   if (!score) {
-    // Unplayed state
+    // If no score and not admin, show nothing
+    if (!showAdmin) {
+      return null;
+    }
+    
+    // If no score and admin, show edit icon
     return (
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1 text-muted-foreground">
-          <Clock3 className="h-3 w-3" />
-          <span className="text-xs font-medium">Non joué</span>
-        </div>
-        {showAdmin && (
-          <Dialog open={isEditing} onOpenChange={setIsEditing}>
-            <DialogTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 w-6 p-0"
-              >
-                <Pencil className="h-3 w-3" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Modifier le score</DialogTitle>
-              </DialogHeader>
-              <DirectScoreEditor
-                groupId={groupId}
-                groupName={groupName}
-                gameId={gameId}
-                gameName={gameName}
-                round={round}
-                onScoreUpdated={() => {
-                  onScoreUpdated?.();
-                  setIsEditing(false);
-                }}
-              />
-            </DialogContent>
-          </Dialog>
-        )}
-      </div>
+      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+        <DialogTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 w-6 p-0"
+          >
+            <Pencil className="h-3 w-3" />
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Modifier le score</DialogTitle>
+          </DialogHeader>
+          <DirectScoreEditor
+            groupId={groupId}
+            groupName={groupName}
+            gameId={gameId}
+            gameName={gameName}
+            round={round}
+            onScoreUpdated={() => {
+              onScoreUpdated?.();
+              setIsEditing(false);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     );
   }
 
+  // If score exists, show score with gold background
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-1">
-        <CheckCircle className="h-3 w-3 text-green-500" />
-        <span className="text-sm font-bold text-green-700 dark:text-green-400">
-          {score.score} pts
-        </span>
+    <div className="flex items-center gap-2">
+      <div className="px-2 py-1 rounded text-sm font-bold" style={{ backgroundColor: '#ECB365', color: '#1a1a1a' }}>
+        {score.score} pts
       </div>
       {showAdmin && (
         <Dialog open={isEditing} onOpenChange={setIsEditing}>
@@ -142,19 +137,29 @@ export function ScheduleCard({ entry, viewType, showAdmin = false }: ScheduleCar
     utils.score.invalidate();
   };
 
-  const timeRange = `${formatTime(entry.startTime)} - ${formatTime(entry.endTime)}`;
-  
+  // Only show start time, and set color/icon to #F5F5DC
+  const startTime = formatTime(entry.startTime);
+
   return (
     <Card className="transition-all hover:shadow-md">
       <CardHeader className="pb-1">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            <span className="font-mono text-sm font-medium">{timeRange}</span>
+            <Clock className="h-4 w-4" style={{ color: '#F5F5DC', opacity: 0.7 }} />
+            <span className="font-mono text-sm font-medium" style={{ color: '#F5F5DC' }}>{startTime}</span>
           </div>
-          <Badge variant="outline" className="text-xs">
-            {entry.round > 1 ? `Tour ${entry.round}` : 'Tour 1'}
-          </Badge>
+          <div className="flex items-center gap-2">
+            {/* Score Display moved to top right */}
+            <ScoreDisplay
+              groupId={entry.group.id}
+              gameId={entry.game.id}
+              round={entry.round}
+              groupName={entry.group.name}
+              gameName={entry.game.name}
+              showAdmin={showAdmin}
+              onScoreUpdated={handleScoreUpdated}
+            />
+          </div>
         </div>
       </CardHeader>
       
@@ -169,15 +174,21 @@ export function ScheduleCard({ entry, viewType, showAdmin = false }: ScheduleCar
                   href={`/games/${createSlug(entry.game.name)}`}
                   className="group"
                 >
-                  <div className="flex items-center gap-2 hover:text-green-600 transition-colors">
-                    <Gamepad2 className="h-4 w-4 text-green-500" />
+                  <div className="flex items-center gap-2 hover:text-gray-700 transition-colors">
+                    <Gamepad2 className="h-4 w-4" style={{ color: '#A88754' }} />
                     <span className="font-semibold group-hover:underline">
                       {entry.game.name}
                     </span>
+                    {/* Only show round badge if round >= 2 */}
+                    {entry.round > 1 && (
+                      <Badge variant="outline" className="text-xs">
+                        {`Tour ${entry.round}`}
+                      </Badge>
+                    )}
                   </div>
                 </Link>
                 {entry.game.description && (
-                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                  <p className="text-sm mt-1 line-clamp-2" style={{ color: '#B0B0A8' }}>
                     {entry.game.description}
                   </p>
                 )}
@@ -189,18 +200,24 @@ export function ScheduleCard({ entry, viewType, showAdmin = false }: ScheduleCar
                   href={`/teams/${createSlug(entry.group.name)}`}
                   className="group"
                 >
-                  <div className="flex items-center gap-2 hover:text-blue-600 transition-colors">
-                    <Users className="h-4 w-4 text-blue-500" />
+                  <div className="flex items-center gap-2 hover:text-gray-700 transition-colors">
+                    <Users className="h-4 w-4" style={{ color: '#A88754' }} />
                     <span className="font-semibold group-hover:underline">
                       {entry.group.name}
                     </span>
+                    {/* Only show round badge if round >= 2 */}
+                    {entry.round > 1 && (
+                      <Badge variant="outline" className="text-xs">
+                        {`Tour ${entry.round}`}
+                      </Badge>
+                    )}
                   </div>
                 </Link>
               </div>
             )}
           </div>
 
-          {/* Opponents (for team view) */}
+          {/* Opponents (for teams view) */}
           {viewType === "team" && entry.opponents && entry.opponents.length > 0 && (
             <div className="space-y-1">
               <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
@@ -214,7 +231,8 @@ export function ScheduleCard({ entry, viewType, showAdmin = false }: ScheduleCar
                   >
                     <Badge 
                       variant="secondary" 
-                      className="text-xs hover:bg-red-100 hover:text-red-700 dark:hover:bg-red-900/30 dark:hover:text-red-300 transition-colors cursor-pointer"
+                      className="text-xs hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-300 transition-colors cursor-pointer"
+                      style={{ backgroundColor: '#ECB365', color: '#1a1a1a' }}
                     >
                       {opponent.name}
                     </Badge>
@@ -223,19 +241,6 @@ export function ScheduleCard({ entry, viewType, showAdmin = false }: ScheduleCar
               </div>
             </div>
           )}
-
-          {/* Score Display */}
-          <div className="pt-2 border-t">
-            <ScoreDisplay
-              groupId={entry.group.id}
-              gameId={entry.game.id}
-              round={entry.round}
-              groupName={entry.group.name}
-              gameName={entry.game.name}
-              showAdmin={showAdmin}
-              onScoreUpdated={handleScoreUpdated}
-            />
-          </div>
         </div>
       </CardContent>
     </Card>

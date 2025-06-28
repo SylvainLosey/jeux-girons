@@ -54,24 +54,44 @@ interface UnifiedScheduleViewProps {
 }
 
 function GameTimeSlotCard({ slot, showAdmin = false }: { slot: GameTimeSlot; showAdmin?: boolean }) {
-  const timeRange = `${formatTime(slot.startTime)} - ${formatTime(slot.endTime)}`;
+  const startTime = formatTime(slot.startTime);
   
   return (
     <Card className="transition-all hover:shadow-md">
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            <span className="font-mono text-sm font-medium">{timeRange}</span>
+            <Clock className="h-4 w-4" style={{ color: '#F5F5DC', opacity: 0.7 }} />
+            <span className="font-mono text-sm font-medium" style={{ color: '#F5F5DC' }}>{startTime}</span>
           </div>
-          <Badge variant="outline" className="text-xs">
-            {slot.round > 1 ? `Tour ${slot.round}` : 'Tour 1'}
-          </Badge>
+          <div className="flex items-center gap-2">
+            {/* Score Display moved to top right - show for first group only as representative */}
+            {slot.groups.length > 0 && (
+              <ScoreDisplayForGroup 
+                groupId={slot.groups[0]!.id}
+                gameId={slot.game.id}
+                round={slot.round}
+                groupName={slot.groups[0]!.name}
+                gameName={slot.game.name}
+                showAdmin={showAdmin}
+              />
+            )}
+          </div>
         </div>
       </CardHeader>
       
       <CardContent className="pt-0">
         <div className="space-y-3">
+          {/* Game name with round badge */}
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-lg">{slot.game.name}</span>
+            {slot.round > 1 && (
+              <Badge variant="outline" className="text-xs">
+                {`Tour ${slot.round}`}
+              </Badge>
+            )}
+          </div>
+          
           {/* Groups participating */}
           <div className="space-y-2">
             <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
@@ -82,15 +102,15 @@ function GameTimeSlotCard({ slot, showAdmin = false }: { slot: GameTimeSlot; sho
                 <div key={group.id} className="flex items-center justify-between p-2 bg-muted/50 rounded">
                   <Link 
                     href={`/teams/${createSlug(group.name)}`}
-                    className="group flex items-center gap-2 hover:text-blue-600 transition-colors"
+                    className="group flex items-center gap-2 hover:text-[#ECB365] transition-colors"
                   >
-                    <Users className="h-4 w-4 text-blue-500" />
+                    <Users className="h-4 w-4" style={{ color: '#A88754' }} />
                     <span className="font-medium group-hover:underline">
                       {group.name}
                     </span>
                   </Link>
                   
-                  {/* Score for this group */}
+                  {/* Individual score for each group */}
                   <ScoreDisplayForGroup 
                     groupId={group.id}
                     gameId={slot.game.id}
@@ -126,52 +146,48 @@ function ScoreDisplayForGroup({ groupId, gameId, round, groupName, gameName, sho
   };
   
   if (!score) {
+    // If no score and not admin, show nothing
+    if (!showAdmin) {
+      return null;
+    }
+    
+    // If no score and admin, show edit icon
     return (
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1 text-muted-foreground">
-          <Clock3 className="h-3 w-3" />
-          <span className="text-xs font-medium">Non joué</span>
-        </div>
-        {showAdmin && (
-          <Dialog open={isEditing} onOpenChange={setIsEditing}>
-            <DialogTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 w-6 p-0"
-              >
-                <Pencil className="h-3 w-3" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Modifier le score</DialogTitle>
-              </DialogHeader>
-              <DirectScoreEditor
-                groupId={groupId}
-                groupName={groupName}
-                gameId={gameId}
-                gameName={gameName}
-                round={round}
-                onScoreUpdated={() => {
-                  handleScoreUpdated();
-                  setIsEditing(false);
-                }}
-              />
-            </DialogContent>
-          </Dialog>
-        )}
-      </div>
+      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+        <DialogTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 w-6 p-0"
+          >
+            <Pencil className="h-3 w-3" />
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Modifier le score</DialogTitle>
+          </DialogHeader>
+          <DirectScoreEditor
+            groupId={groupId}
+            groupName={groupName}
+            gameId={gameId}
+            gameName={gameName}
+            round={round}
+            onScoreUpdated={() => {
+              handleScoreUpdated();
+              setIsEditing(false);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     );
   }
 
+  // If score exists, show score with gold background
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-1">
-        <CheckCircle className="h-3 w-3 text-green-500" />
-        <span className="text-sm font-bold text-green-700 dark:text-green-400">
-          {score.score} pts
-        </span>
+    <div className="flex items-center gap-2">
+      <div className="px-2 py-1 rounded text-sm font-bold" style={{ backgroundColor: '#ECB365', color: '#1a1a1a' }}>
+        {score.score} pts
       </div>
       {showAdmin && (
         <Dialog open={isEditing} onOpenChange={setIsEditing}>
@@ -265,7 +281,7 @@ export function UnifiedScheduleView({ schedule, entity, viewType, showAdmin = fa
       <div className="space-y-8">
         {Object.entries(entriesByDay).map(([day, dayEntries]) => (
           <div key={day} className="space-y-4">
-            <h3 className="text-xl font-semibold capitalize border-b pb-2">
+            <h3 className="text-xl font-semibold capitalize border-b pb-2" style={{ color: '#F5F5DC' }}>
               {day}
             </h3>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-1">
@@ -292,7 +308,7 @@ export function UnifiedScheduleView({ schedule, entity, viewType, showAdmin = fa
         // Group by round within the same time slot
         const slotsByRound = gameEntries.reduce((acc: Record<number, any[]>, entry: any) => {
           acc[entry.round] ??= [];
-          acc[entry.round].push(entry);
+          acc[entry.round]!.push(entry);
           return acc;
         }, {});
 
@@ -302,7 +318,7 @@ export function UnifiedScheduleView({ schedule, entity, viewType, showAdmin = fa
           endTime: slot.endTime,
           game: entity as Game,
           round: parseInt(round),
-          groups: entries.map((entry: any) => entry.group),
+          groups: (entries as any[]).map((entry: any) => entry.group),
         }));
       })
       .sort((a: GameTimeSlot, b: GameTimeSlot) => a.startTime.getTime() - b.startTime.getTime());
@@ -332,7 +348,7 @@ export function UnifiedScheduleView({ schedule, entity, viewType, showAdmin = fa
       <div className="space-y-8">
         {Object.entries(slotsByDay).map(([day, daySlots]) => (
           <div key={day} className="space-y-4">
-            <h3 className="text-xl font-semibold capitalize border-b pb-2">
+            <h3 className="text-xl font-semibold capitalize border-b pb-2" style={{ color: '#F5F5DC' }}>
               {day}
             </h3>
             <div className="grid gap-4">
