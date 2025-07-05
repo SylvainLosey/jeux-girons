@@ -22,7 +22,7 @@ interface ValidationResult {
     participationsNeeded: number;
     minimumSlots: number;
   }[];
-  fillerGames: number;
+  fillerParticipations: number;
 }
 
 function calculateValidation(schedule: Schedule | null, groups: Group[], games: Game[]): ValidationResult {
@@ -38,26 +38,21 @@ function calculateValidation(schedule: Schedule | null, groups: Group[], games: 
     };
   });
 
-  const theoreticalMinimum = breakdown.reduce((sum, item) => sum + item.minimumSlots, 0);
+  const theoreticalMinimum = breakdown.reduce((sum, item) => sum + item.participationsNeeded, 0);
   
   let actualTotal = 0;
-  let fillerGames = 0;
+  let fillerParticipations = 0;
   
   if (schedule) {
-    // Count actual parties (game instances) instead of entries
-    // Group entries by game, round, and timeslot to count unique parties
-    const partiesMap = new Map<string, boolean>();
-    
+    // Count actual participations (each group participation in each game)
     schedule.forEach(slot => {
       slot.entries.forEach(entry => {
-        // Create a unique key for each party
-        const partyKey = `${slot.slotIndex}-${entry.game.id}-${entry.round ?? 1}`;
-        partiesMap.set(partyKey, entry.isSecondChance ?? false);
+        actualTotal++;
+        if (entry.isSecondChance) {
+          fillerParticipations++;
+        }
       });
     });
-    
-    actualTotal = partiesMap.size;
-    fillerGames = Array.from(partiesMap.values()).filter(isSecondChance => isSecondChance).length;
   }
 
   const isValid = actualTotal === theoreticalMinimum;
@@ -67,7 +62,7 @@ function calculateValidation(schedule: Schedule | null, groups: Group[], games: 
     actualTotal,
     isValid,
     breakdown,
-    fillerGames
+    fillerParticipations
   };
 }
 
@@ -101,8 +96,8 @@ export function ScheduleValidation({ schedule, groups, games }: ScheduleValidati
               </p>
               <p className="text-sm text-muted-foreground">
                 {validation.isValid 
-                  ? "Le nombre de parties générées correspond exactement au minimum théorique"
-                  : "Le nombre de parties générées diffère du minimum théorique"
+                  ? "Le nombre de participations générées correspond exactement au minimum théorique"
+                  : "Le nombre de participations générées diffère du minimum théorique"
                 }
               </p>
             </div>
@@ -111,7 +106,7 @@ export function ScheduleValidation({ schedule, groups, games }: ScheduleValidati
             <p className="text-2xl font-bold">
               {schedule ? validation.actualTotal : "—"} / {validation.theoreticalMinimum}
             </p>
-            <p className="text-sm text-muted-foreground">Parties jouées</p>
+            <p className="text-sm text-muted-foreground">Participations</p>
           </div>
         </div>
 
@@ -127,22 +122,22 @@ export function ScheduleValidation({ schedule, groups, games }: ScheduleValidati
           </div>
           <div className="text-center p-3 border rounded-lg">
             <p className="text-2xl font-bold text-green-600">{validation.theoreticalMinimum}</p>
-            <p className="text-sm text-muted-foreground">Min. Théorique</p>
+            <p className="text-sm text-muted-foreground">Participations Théoriques</p>
           </div>
           <div className="text-center p-3 border rounded-lg">
             <p className="text-2xl font-bold text-orange-600">
               {schedule ? validation.actualTotal : "—"}
             </p>
-            <p className="text-sm text-muted-foreground">Parties Générées</p>
+            <p className="text-sm text-muted-foreground">Participations Générées</p>
           </div>
         </div>
 
-        {/* Filler games indicator */}
-        {schedule && validation.fillerGames > 0 && (
+        {/* Filler participations indicator */}
+        {schedule && validation.fillerParticipations > 0 && (
           <Alert>
             <AlertTriangle className="h-4 w-4" />
                          <AlertDescription>
-               <span className="font-medium">{validation.fillerGames} parties &quot;DEUXIEME CHANCE&quot;</span> détectées. 
+               <span className="font-medium">{validation.fillerParticipations} participations &quot;DEUXIEME CHANCE&quot;</span> détectées. 
                Cela peut indiquer un déséquilibre dans la répartition des jeux.
              </AlertDescription>
           </Alert>
@@ -167,7 +162,7 @@ export function ScheduleValidation({ schedule, groups, games }: ScheduleValidati
                   </div>
                   <div className="text-right text-xs text-muted-foreground">
                     <div>{participationsNeeded} participations → {minimumSlots} créneaux min.</div>
-                    <div>{game.numberOfGroups} groupes par partie</div>
+                    <div>{game.numberOfGroups} groupes par jeu</div>
                   </div>
                 </div>
               ))}

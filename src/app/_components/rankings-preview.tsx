@@ -5,7 +5,7 @@ import { api } from "~/trpc/react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
-import { Trophy, Medal, Award, ChevronRight } from "lucide-react";
+import { Trophy, Medal, Award, ChevronRight, BarChart3 } from "lucide-react";
 import { cn } from "~/lib/utils";
 
 // Helper function to create URL-friendly slugs
@@ -21,6 +21,50 @@ function createSlug(name: string): string {
     .replace(/^-|-$/g, ""); // Remove leading/trailing hyphens
 }
 
+// Helper function to calculate progress
+function calculateGameProgress(
+  scores: { id: number; score: number; groupId: number; gameId: number }[] | undefined, 
+  groups: { id: number; name: string }[] | undefined, 
+  games: { id: number; name: string; rounds?: number | null }[] | undefined
+) {
+  if (!scores || !groups || !games) {
+    return { percentage: 0, playedGames: 0, totalGames: 0 };
+  }
+
+  const playedGames = scores.length;
+  const totalGames = groups.length * games.reduce((sum, game) => sum + (game.rounds ?? 1), 0);
+  const percentage = totalGames > 0 ? Math.round((playedGames / totalGames) * 100) : 0;
+
+  return { percentage, playedGames, totalGames };
+}
+
+// Compact Progress Bar Component for preview
+function CompactProgressBar({ percentage, playedGames, totalGames }: { percentage: number; playedGames: number; totalGames: number }) {
+  return (
+    <div className="mb-4 p-3 border rounded-lg bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+      <div className="flex items-center gap-2 mb-2">
+        <BarChart3 className="h-4 w-4 text-oriental-accent" />
+        <span className="text-sm font-medium text-oriental-accent">Progression</span>
+        <span className="text-sm font-bold text-oriental-accent ml-auto">{percentage}%</span>
+      </div>
+      
+      <div className="flex items-center gap-2">
+        <div className="flex-1">
+          <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+            <div 
+              className="bg-gradient-to-r from-oriental-accent to-oriental-accent/80 h-2 rounded-full transition-all duration-500 ease-out"
+              style={{ width: `${percentage}%` }}
+            />
+          </div>
+        </div>
+        <span className="text-xs text-slate-500 whitespace-nowrap">
+          {playedGames}/{totalGames}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 type GroupScore = {
   group: { id: number; name: string };
   totalScore: number;
@@ -34,8 +78,9 @@ export function RankingsPreview() {
   // Fetch all scores and groups
   const { data: scores, isLoading: isLoadingScores } = api.score.getAll.useQuery();
   const { data: groups, isLoading: isLoadingGroups } = api.group.getAll.useQuery();
+  const { data: games, isLoading: isLoadingGames } = api.game.getAll.useQuery();
   
-  if (isLoadingScores || isLoadingGroups) {
+  if (isLoadingScores || isLoadingGroups || isLoadingGames) {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-4">
@@ -49,7 +94,7 @@ export function RankingsPreview() {
     );
   }
 
-  if (!scores || !groups) {
+  if (!scores || !groups || !games) {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-4">
@@ -68,6 +113,9 @@ export function RankingsPreview() {
   if (!hasAnyScores) {
     return null; // Don't render anything if no scores
   }
+
+  // Calculate progress
+  const progress = calculateGameProgress(scores, groups, games);
 
   // Calculate total scores for each group
   const groupScores: GroupScore[] = groups.map((group) => {
@@ -213,6 +261,13 @@ export function RankingsPreview() {
         <Trophy className="h-5 w-5 text-oriental-accent" />
         <h2 className="text-xl font-semibold oriental-subtitle">Classement en direct</h2>
       </div>
+      
+      {/* Compact Progress Bar */}
+      <CompactProgressBar 
+        percentage={progress.percentage} 
+        playedGames={progress.playedGames} 
+        totalGames={progress.totalGames}
+      />
       
       <div className="rounded-md border overflow-hidden">
         <Table>

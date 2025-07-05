@@ -5,7 +5,7 @@ import Link from "next/link";
 import { api } from "~/trpc/react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table";
 import { Alert, AlertDescription } from "~/components/ui/alert";
-import { Trophy, Medal, Award, ArrowUp, ArrowDown, Clock, TrendingUp } from "lucide-react";
+import { Trophy, Medal, Award, ArrowUp, ArrowDown, Clock, TrendingUp, BarChart3 } from "lucide-react";
 import { cn } from "~/lib/utils";
 
 // Helper function to create URL-friendly slugs
@@ -19,6 +19,54 @@ function createSlug(name: string): string {
     .replace(/-+/g, "-") // Replace multiple hyphens with single
     .trim()
     .replace(/^-|-$/g, ""); // Remove leading/trailing hyphens
+}
+
+// Helper function to calculate progress
+function calculateGameProgress(
+  scores: { id: number; score: number; groupId: number; gameId: number }[] | undefined, 
+  groups: { id: number; name: string }[] | undefined, 
+  games: { id: number; name: string; rounds?: number | null }[] | undefined
+) {
+  if (!scores || !groups || !games) {
+    return { percentage: 0, playedGames: 0, totalGames: 0 };
+  }
+
+  const playedGames = scores.length;
+  const totalGames = groups.length * games.reduce((sum, game) => sum + (game.rounds ?? 1), 0);
+  const percentage = totalGames > 0 ? Math.round((playedGames / totalGames) * 100) : 0;
+
+  return { percentage, playedGames, totalGames };
+}
+
+// Progress Bar Component
+function GameProgressBar({ percentage, playedGames, totalGames }: { percentage: number; playedGames: number; totalGames: number }) {
+  return (
+    <div className="mb-6 p-4 border rounded-lg bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+      <div className="flex items-center gap-3 mb-3">
+        <BarChart3 className="h-5 w-5 text-oriental-accent" />
+        <h3 className="text-lg font-semibold text-oriental-accent">Progression des jeux</h3>
+      </div>
+      
+      <div className="flex items-center gap-4">
+        <div className="flex-1">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+              {playedGames} / {totalGames} participations
+            </span>
+            <span className="text-sm font-bold text-oriental-accent">
+              {percentage}%
+            </span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-3 dark:bg-gray-700">
+            <div 
+              className="bg-gradient-to-r from-oriental-accent to-oriental-accent/80 h-3 rounded-full transition-all duration-500 ease-out"
+              style={{ width: `${percentage}%` }}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 type GroupScore = {
@@ -380,9 +428,13 @@ export function RankingsView() {
     refetchOnWindowFocus: false, // Don&apos;t refetch when window regains focus
   });
   const { data: groups, isLoading: isLoadingGroups } = api.group.getAll.useQuery();
+  const { data: games, isLoading: isLoadingGames } = api.game.getAll.useQuery();
   
   // Fetch live schedule to get the first timeslot for empty state
   const { data: liveSchedule } = api.schedule.getLive.useQuery();
+
+  // Calculate progress
+  const progress = calculateGameProgress(scores, groups, games);
 
   // Check if any scores have been entered
   const hasAnyScores = scores && scores.length > 0;
@@ -499,7 +551,7 @@ export function RankingsView() {
     }
   }, [scores, groups, rankedGroups]);
   
-  if (isLoadingScores || isLoadingGroups) {
+  if (isLoadingScores || isLoadingGroups || isLoadingGames) {
     return (
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-3">
@@ -512,7 +564,7 @@ export function RankingsView() {
     );
   }
 
-  if (!scores || !groups) {
+  if (!scores || !groups || !games) {
     return (
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-3">
@@ -596,6 +648,13 @@ export function RankingsView() {
           <h2 className="text-2xl font-semibold oriental-title">Classement en direct</h2>
           <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse ml-2"></div>
         </div>
+        
+        {/* Progress Bar */}
+        <GameProgressBar 
+          percentage={progress.percentage} 
+          playedGames={progress.playedGames} 
+          totalGames={progress.totalGames}
+        />
         
         <div className="rounded-md border overflow-hidden">
           <Table>
