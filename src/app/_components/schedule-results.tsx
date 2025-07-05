@@ -122,8 +122,8 @@ export function ScheduleResults({ schedule }: ScheduleResultsProps) {
                     <span>{formatDate(slot.startTime)}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    <span>{formatTime(slot.startTime)} - {formatTime(slot.endTime)}</span>
+                    <Clock className="h-4 w-4 text-oriental-gold-light" />
+                    <span className="text-base font-semibold text-oriental-accent">{formatTime(slot.startTime)}</span>
                   </div>
                 </div>
               </div>

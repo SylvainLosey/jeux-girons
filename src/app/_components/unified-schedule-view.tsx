@@ -56,8 +56,8 @@ function GameTimeSlotCard({ slot, showAdmin = false }: { slot: GameTimeSlot; sho
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-slate-600" />
-            <span className="font-mono text-sm font-medium text-slate-700">{timeRange}</span>
+            <Clock className="h-4 w-4 text-oriental-gold-light" />
+            <span className="text-base font-semibold text-oriental-accent">{formatTime(slot.startTime)}</span>
           </div>
           {slot.round > 1 && (
             <Badge variant="outline" className="text-xs text-slate-600">

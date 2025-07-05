@@ -77,8 +77,8 @@ export function ScheduleCard({ entry, viewType, showAdmin = false }: ScheduleCar
             {/* First line: Clock + Time (left) and Score badge (right)  */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-slate-600 flex-shrink-0" />
-                <span className="text-sm font-semibold text-slate-700 whitespace-nowrap">
+                <Clock className="h-5 w-5 text-oriental-gold-light flex-shrink-0" />
+                <span className="text-base font-semibold text-oriental-accent whitespace-nowrap">
                   {formatTime(entry.startTime)}
                 </span>
               </div>
