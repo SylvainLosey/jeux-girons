@@ -541,7 +541,7 @@ export function RankingsView() {
           <div className="flex items-center gap-2 mb-6">
             <Trophy className="h-6 w-6 text-oriental-gold" />
             <h2 className="text-2xl font-semibold oriental-title">Classement en direct</h2>
-            <div className="h-2 w-2 bg-slate-600 rounded-full ml-2"></div>
+            <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse ml-2"></div>
           </div>
           
           <div className="text-center py-16">
@@ -590,7 +590,7 @@ export function RankingsView() {
         <div className="flex items-center gap-2 mb-6">
           <Trophy className="h-6 w-6 text-oriental-gold" />
           <h2 className="text-2xl font-semibold oriental-title">Classement en direct</h2>
-          <div className="h-2 w-2 bg-gray-600 rounded-full animate-pulse ml-2"></div>
+          <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse ml-2"></div>
         </div>
         
         <div className="rounded-md border overflow-hidden">
@@ -616,7 +616,7 @@ export function RankingsView() {
         </div>
         
         <div className="text-xs text-slate-500 text-center mt-4 flex items-center justify-center gap-2">
-          <div className="h-1.5 w-1.5 bg-slate-600 rounded-full animate-pulse"></div>
+          <div className="h-1.5 w-1.5 bg-green-500 rounded-full animate-pulse"></div>
           Classement mis à jour en temps réel - basé sur le score total, puis sur le nombre de jeux joués. Équipes avec le même score classées ex æquo.
         </div>
       </div>

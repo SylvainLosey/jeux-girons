@@ -548,7 +548,7 @@ function markGroupAsScheduled(
   groupScheduledInSlot: Set<number>,
   needsToPlay: Map<number, Set<GameRoundKey>>,
   unscheduledGroups: Group[],
-  isSecondChance: boolean = false
+  isSecondChance = false
 ): void {
   // Add the schedule entry
   timeslotEntries.push({ 

@@ -6,6 +6,7 @@ import { Geist } from "next/font/google";
 import { TRPCReactProvider } from "~/trpc/react";
 import { Navbar } from "./_components/navbar";
 import { AdminProvider } from "./_components/navbar";
+import { Footer } from "./_components/footer";
 import { Toaster } from "~/components/ui/sonner";
 
 const geist = Geist({
@@ -29,6 +30,7 @@ export default function RootLayout({
           <AdminProvider>
             <Navbar />
             {children}
+            <Footer />
             <Toaster />
           </AdminProvider>
         </TRPCReactProvider>

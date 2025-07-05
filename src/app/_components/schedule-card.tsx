@@ -75,7 +75,7 @@ export function ScheduleCard({ entry, viewType, showAdmin = false }: ScheduleCar
         
         {/* Game Details */}
         <div className="flex-1 min-w-0 p-4 flex flex-col justify-between">
-          <div className="space-y-2">
+          <div className="space-y-1">
             {/* First line: Clock + Time (left) and Score badge (right) */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
