@@ -346,9 +346,6 @@ function RankingRow({ groupData, rankingsUpdateId, isNew = false }: {
       <TableCell className="font-medium">
         {getTeamNameWithIcon()}
       </TableCell>
-      <TableCell className="text-center">
-        {groupData.gamesPlayed}
-      </TableCell>
       <TableCell className="text-center font-bold">
         <div className="flex items-center justify-center gap-1">
           <span className="transition-colors duration-300">
@@ -362,6 +359,9 @@ function RankingRow({ groupData, rankingsUpdateId, isNew = false }: {
             </span>
           )}
         </div>
+      </TableCell>
+      <TableCell className="text-center">
+        {groupData.gamesPlayed}
       </TableCell>
     </TableRow>
   );
@@ -599,8 +599,8 @@ export function RankingsView() {
               <TableRow>
                 <TableHead className="w-16">Rang</TableHead>
                 <TableHead>Jeunesse</TableHead>
-                <TableHead className="text-center">Jeux joués</TableHead>
                 <TableHead className="text-center">Score total</TableHead>
+                <TableHead className="text-center">Jeux joués</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

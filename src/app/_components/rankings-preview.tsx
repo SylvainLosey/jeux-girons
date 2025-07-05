@@ -227,8 +227,8 @@ export function RankingsPreview() {
             <TableRow>
               <TableHead className="w-16">Rang</TableHead>
               <TableHead>Jeunesse</TableHead>
-              <TableHead className="text-center">Jeux joués</TableHead>
               <TableHead className="text-center">Score total</TableHead>
+              <TableHead className="text-center">Jeux joués</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -246,11 +246,11 @@ export function RankingsPreview() {
                 <TableCell className="font-medium">
                   {getTeamNameWithIcon(groupData)}
                 </TableCell>
-                <TableCell className="text-center">
-                  {groupData.gamesPlayed}
-                </TableCell>
                 <TableCell className="text-center font-bold">
                   {groupData.totalScore} pts
+                </TableCell>
+                <TableCell className="text-center">
+                  {groupData.gamesPlayed}
                 </TableCell>
               </TableRow>
             ))}
