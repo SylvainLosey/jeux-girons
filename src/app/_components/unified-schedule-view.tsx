@@ -9,24 +9,12 @@ import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import { Clock, Users, CheckCircle, Clock3, Pencil } from "lucide-react";
 import { formatTime } from "~/app/_utils/date-utils";
+import { createSlug } from "~/app/_utils/slug-utils";
 import { ScheduleCard } from "./schedule-card";
 import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
 import { DirectScoreEditor } from "./score-editor";
 import { ScoreDisplay } from "~/components/ui/score-display";
-
-// Helper function to create URL-friendly slugs
-function createSlug(name: string): string {
-  return name
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") // Remove accents
-    .replace(/[^a-z0-9\s-]/g, "") // Remove special characters
-    .replace(/\s+/g, "-") // Replace spaces with hyphens
-    .replace(/-+/g, "-") // Replace multiple hyphens with single
-    .trim()
-    .replace(/^-|-$/g, ""); // Remove leading/trailing hyphens
-}
 
 interface ScheduleEntry {
   startTime: Date;

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { scores } from "~/server/db/schema";
-import { eq, and, desc, gte } from "drizzle-orm";
+import { eq, and, desc, gte, or } from "drizzle-orm";
 
 export const scoreRouter = createTRPCRouter({
   // Get scores for a specific group-game-round combination
@@ -151,5 +151,43 @@ export const scoreRouter = createTRPCRouter({
       // Explicitly delete all scores with a where clause to satisfy linter
       await ctx.db.delete(scores).where(gte(scores.id, 0));
       return { success: true };
+    }),
+
+  // Get multiple scores at once for better performance
+  getScores: publicProcedure
+    .input(z.array(z.object({
+      groupId: z.number(),
+      gameId: z.number(),
+      round: z.number().default(1),
+    })))
+    .query(async ({ ctx, input }) => {
+      if (input.length === 0) {
+        return [];
+      }
+
+      // Build OR conditions for each score request
+      const conditions = input.map(req => 
+        and(
+          eq(scores.groupId, req.groupId),
+          eq(scores.gameId, req.gameId),
+          eq(scores.round, req.round)
+        )
+      );
+
+      // Use OR to get all matching scores in a single query
+      const allScores = await ctx.db
+        .select()
+        .from(scores)
+        .where(or(...conditions));
+
+      // Return results in the same order as input, with null for missing scores
+      return input.map(req => {
+        const score = allScores.find(s => 
+          s.groupId === req.groupId && 
+          s.gameId === req.gameId && 
+          s.round === req.round
+        );
+        return score ?? null;
+      });
     }),
 }); 

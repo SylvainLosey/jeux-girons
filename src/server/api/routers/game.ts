@@ -2,6 +2,8 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { games } from "~/server/db/schema";
 import { eq } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
+import { createSlug } from "~/app/_utils/slug-utils";
 
 // Validation schema for creating/updating a game
 const gameInputSchema = z.object({
@@ -56,5 +58,25 @@ export const gameRouter = createTRPCRouter({
     .input(z.object({ id: z.number() })) // Require ID for deleting
     .mutation(async ({ ctx, input }) => {
       await ctx.db.delete(games).where(eq(games.id, input.id));
+    }),
+
+  // Get game by slug
+  getBySlug: publicProcedure
+    .input(z.object({
+      slug: z.string(),
+    }))
+    .query(async ({ ctx, input }) => {
+      // Get all games and find the one matching the slug
+      const games = await ctx.db.query.games.findMany();
+      const game = games.find(g => createSlug(g.name) === input.slug);
+      
+      if (!game) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Game not found",
+        });
+      }
+      
+      return game;
     }),
 }); 
