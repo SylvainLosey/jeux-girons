@@ -3,12 +3,9 @@ import "~/styles/globals.css";
 import { type Metadata } from "next";
 import { Geist } from "next/font/google";
 
-import { TRPCReactProvider } from "~/trpc/react";
+import { ClientProviders } from "./_components/client-providers";
 import { Navbar } from "./_components/navbar";
-import { AdminProvider } from "./_components/navbar";
 import { Footer } from "./_components/footer";
-import { Toaster } from "~/components/ui/sonner";
-import { NavigationProgress } from "~/components/ui/navigation-progress";
 
 const geist = Geist({
   subsets: ["latin"],
@@ -27,15 +24,11 @@ export default function RootLayout({
   return (
     <html lang="fr" className={`${geist.variable}`}>
       <body>
-        <TRPCReactProvider>
-          <AdminProvider>
-            <NavigationProgress />
-            <Navbar />
-            {children}
-            <Footer />
-            <Toaster />
-          </AdminProvider>
-        </TRPCReactProvider>
+        <ClientProviders>
+          <Navbar />
+          {children}
+          <Footer />
+        </ClientProviders>
       </body>
     </html>
   );

@@ -148,26 +148,23 @@ export function Navbar() {
     className?: string;
     children: React.ReactNode;
   }) => (
-    <Link
-      href={href}
-      legacyBehavior
-      passHref
+    <NavigationMenuLink
+      active={active}
+      className={cn(
+        "flex flex-row items-center px-3 py-2 text-sm font-medium transition-colors", 
+        active 
+          ? "bg-oriental-cream/20 text-oriental-cream" 
+          : "text-oriental-cream/70 hover:bg-oriental-cream/10 hover:text-oriental-cream",
+        "p-0 gap-0", 
+        className
+      )}
+      asChild
+      {...props}
     >
-      <NavigationMenuLink
-        active={active}
-        className={cn(
-          "flex flex-row items-center px-3 py-2 text-sm font-medium transition-colors", 
-          active 
-            ? "bg-oriental-cream/20 text-oriental-cream" 
-            : "text-oriental-cream/70 hover:bg-oriental-cream/10 hover:text-oriental-cream",
-          "p-0 gap-0", 
-          className
-        )}
-        {...props}
-      >
+      <Link href={href}>
         {children}
-      </NavigationMenuLink>
-    </Link>
+      </Link>
+    </NavigationMenuLink>
   );
 
   return (
