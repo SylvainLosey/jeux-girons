@@ -20,8 +20,8 @@ export default function HomePage() {
             <GroupsPreview />
           </div>
 
-            {/* Groups Preview */}
-          <div className="pt-4 4md:pt-8">
+            {/* Games Preview */}
+          <div className="pt-4 md:pt-8">
             <GamesPreview />
           </div>
         </div>

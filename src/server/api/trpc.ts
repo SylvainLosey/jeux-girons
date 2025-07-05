@@ -99,21 +99,34 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
 /**
  * Admin authentication middleware
  */
-const adminMiddleware = t.middleware(async ({ ctx, next }) => {
-  // Get admin password from headers
-  const adminPassword = ctx.headers.get("x-admin-password");
+const adminMiddleware = t.middleware(async ({ ctx, next, type }) => {
+  // Get JWT token from headers
+  const authHeader = ctx.headers.get("authorization");
+  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
   
-  if (!adminPassword) {
+  if (!token) {
     throw new Error("Admin authentication required");
   }
   
-  // Validate against environment variable
-  const { env } = await import("~/env");
-  if (adminPassword !== env.ADMIN_PASSWORD) {
+  try {
+    const jwt = await import("jsonwebtoken");
+    const { env } = await import("~/env");
+    const JWT_SECRET = env.ADMIN_PASSWORD + "_jwt_secret";
+    
+    const decoded = jwt.verify(token, JWT_SECRET) as { admin: boolean; exp: number; iat: number };
+    
+    if (!decoded.admin) {
+      throw new Error("Invalid admin credentials");
+    }
+    
+    // For now, skip CSRF validation for simplicity
+    // The JWT authentication and rate limiting provide sufficient security for an event website
+    // TODO: Implement proper CSRF protection if needed for production
+    
+    return next();
+  } catch (error) {
     throw new Error("Invalid admin credentials");
   }
-  
-  return next();
 });
 
 /**

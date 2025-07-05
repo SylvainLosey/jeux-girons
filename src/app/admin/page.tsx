@@ -21,10 +21,10 @@ export default function AdminPage() {
   const authenticateMutation = api.admin.authenticate.useMutation({
     onSuccess: (data) => {
       setIsSubmitting(false);
-      if (data.success) {
-        // Store admin session in localStorage
+      if (data.success && data.token) {
+        // Store JWT token in localStorage
+        localStorage.setItem("adminToken", data.token);
         localStorage.setItem("adminAuthenticated", "true");
-        localStorage.setItem("adminPassword", password);
         setIsAdmin(true);
         router.push("/");
       } else {
@@ -33,7 +33,11 @@ export default function AdminPage() {
     },
     onError: (error) => {
       setIsSubmitting(false);
-      setError("Erreur lors de l'authentification");
+      if (error.message === "Too many failed login attempts. Please try again later.") {
+        setError("Trop de tentatives de connexion. Veuillez réessayer plus tard.");
+      } else {
+        setError("Mot de passe incorrect");
+      }
       console.error("Authentication error:", error);
     },
   });

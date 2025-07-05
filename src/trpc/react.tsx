@@ -56,11 +56,11 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
             const headers = new Headers();
             headers.set("x-trpc-source", "nextjs-react");
             
-            // Add admin password if available
+            // Add JWT token if available
             if (typeof window !== "undefined") {
-              const adminPassword = localStorage.getItem("adminPassword");
-              if (adminPassword) {
-                headers.set("x-admin-password", adminPassword);
+              const adminToken = localStorage.getItem("adminToken");
+              if (adminToken) {
+                headers.set("authorization", `Bearer ${adminToken}`);
               }
             }
             

@@ -14,6 +14,7 @@ import {
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { useState, createContext, useContext, useEffect } from "react";
+import { api } from "~/trpc/react";
 
 // Create admin context
 const AdminContext = createContext<{
@@ -38,10 +39,12 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   // Check for existing admin authentication on mount
   useEffect(() => {
     const checkAdminAuth = () => {
+      const adminToken = localStorage.getItem("adminToken");
       const adminAuth = localStorage.getItem("adminAuthenticated");
-      const adminPassword = localStorage.getItem("adminPassword");
       
-      if (adminAuth === "true" && adminPassword) {
+      if (adminAuth === "true" && adminToken) {
+        // For now, just trust the localStorage values
+        // Token validation will happen when making API calls
         setIsAdmin(true);
       }
     };
@@ -51,7 +54,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     localStorage.removeItem("adminAuthenticated");
-    localStorage.removeItem("adminPassword");
+    localStorage.removeItem("adminToken");
     setIsAdmin(false);
   };
   
