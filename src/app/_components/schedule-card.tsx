@@ -14,7 +14,7 @@ import { createSlug } from "~/app/_utils/slug-utils";
 import { DirectScoreEditor } from "./score-editor";
 import { ScoreDisplay as ReusableScoreDisplay } from "~/components/ui/score-display";
 import { InteractiveLink } from "~/components/ui/interactive-link";
-import { ClickFeedback } from "~/components/ui/click-feedback";
+import { cn } from "~/lib/utils";
 
 interface ScheduleEntry {
   startTime: Date;
@@ -51,9 +51,11 @@ export function ScheduleCard({ entry, viewType, showAdmin = false }: ScheduleCar
 
 
   return (
-    <ClickFeedback showSpinner={isNavigating}>
-      <Card className="group cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.02] overflow-hidden !p-0 h-32">
-        <div className="flex h-full">
+    <Card className={cn(
+      "group cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.02] overflow-hidden !p-0 h-32",
+      isNavigating && "opacity-80 scale-[0.98]"
+    )}>
+      <div className="flex h-full">
         {/* Game Image */}
         <div className="flex-shrink-0 w-32 h-32">
           {entry.game.imageUrl ? (
@@ -152,6 +154,5 @@ export function ScheduleCard({ entry, viewType, showAdmin = false }: ScheduleCar
         </div>
       </div>
     </Card>
-    </ClickFeedback>
   );
 } 
