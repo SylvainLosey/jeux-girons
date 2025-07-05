@@ -169,8 +169,9 @@ function RecentScoresSidebar() {
   const { data: recentScores, isLoading } = api.score.getRecent.useQuery(
     { limit: 15 },
     { 
-      refetchInterval: 30000, // Refresh every 30 seconds instead of 5 seconds
-      refetchOnWindowFocus: false, // Don&apos;t refetch when window regains focus
+      refetchInterval: 5000, // Refresh every 5 seconds for more responsive live updates
+      refetchOnWindowFocus: false, // Don't refetch when window regains focus
+      refetchOnMount: true, // Refetch when component mounts
     }
   );
 
@@ -424,8 +425,8 @@ export function RankingsView() {
   
   // Fetch all scores and groups with more frequent updates for live display
   const { data: scores, isLoading: isLoadingScores } = api.score.getAll.useQuery(undefined, {
-    refetchInterval: 30000, // Refresh every 30 seconds instead of 3 seconds
-    refetchOnWindowFocus: false, // Don&apos;t refetch when window regains focus
+    refetchInterval: 5000, // Refresh every 5 seconds for more responsive live updates
+    refetchOnWindowFocus: false, // Don't refetch when window regains focus
   });
   const { data: groups, isLoading: isLoadingGroups } = api.group.getAll.useQuery();
   const { data: games, isLoading: isLoadingGames } = api.game.getAll.useQuery();

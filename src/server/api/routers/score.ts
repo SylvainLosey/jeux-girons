@@ -103,6 +103,7 @@ export const scoreRouter = createTRPCRouter({
           .update(scores)
           .set({
             score: input.score,
+            updatedAt: new Date(),
           })
           .where(eq(scores.id, existingScore[0].id))
           .returning();
@@ -117,6 +118,8 @@ export const scoreRouter = createTRPCRouter({
             gameId: input.gameId,
             round: input.round,
             score: input.score,
+            createdAt: new Date(),
+            updatedAt: new Date(),
           })
           .returning();
 

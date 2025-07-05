@@ -27,6 +27,7 @@ export function DirectScoreEditor({
   onScoreUpdated 
 }: ScoreEditorProps) {
   const [score, setScore] = useState<number>(0);
+  const utils = api.useUtils();
   
   // Fetch current score
   const { data: currentScore, isLoading } = api.score.getScore.useQuery({
@@ -37,7 +38,10 @@ export function DirectScoreEditor({
 
   // Set score mutation
   const setScoreMutation = api.score.setScore.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
+      // Invalidate all score-related queries to ensure live updates
+      await utils.score.invalidate();
+      
       toast.success("Score mis à jour avec succès");
       onScoreUpdated?.();
     },

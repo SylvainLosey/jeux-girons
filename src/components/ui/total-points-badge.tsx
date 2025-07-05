@@ -13,8 +13,9 @@ export function TotalPointsBadge({ groupId, className }: TotalPointsBadgeProps) 
   const { data: scores, isLoading } = api.score.getByGroup.useQuery(
     { groupId },
     {
-      refetchInterval: 30000, // Refresh every 30 seconds
+      refetchInterval: 5000, // Refresh every 5 seconds for more responsive live updates
       refetchOnWindowFocus: false,
+      refetchOnMount: true, // Refetch when component mounts
     }
   );
 
