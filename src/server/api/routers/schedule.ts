@@ -3,7 +3,7 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure, adminProcedure } from "~/server/api/trpc";
 import { schedules, timeRanges, timeSlots, scheduleEntries } from "~/server/db/schema";
 import { eq, count } from "drizzle-orm";
-import { sql } from "drizzle-orm";
+
 
 // Schema for saving a schedule
 const saveScheduleSchema = z.object({
@@ -92,16 +92,14 @@ export const scheduleRouter = createTRPCRouter({
       
       // Group entries by timeSlotId
       const entriesBySlot = entriesData.reduce((acc, entry) => {
-        if (!acc[entry.timeSlotId]) {
-          acc[entry.timeSlotId] = [];
-        }
-        acc[entry.timeSlotId].push(entry);
+        acc[entry.timeSlotId] ??= [];
+        acc[entry.timeSlotId]!.push(entry);
         return acc;
       }, {} as Record<number, typeof entriesData>);
       
       // Reconstruct the full schedule structure
       const formattedTimeSlots = timeSlotData.map(slot => {
-        const entries = entriesBySlot[slot.id] || [];
+        const entries = entriesBySlot[slot.id] ?? [];
         return {
           slotIndex: slot.slotIndex,
           startTime: slot.startTime,
@@ -131,6 +129,11 @@ export const scheduleRouter = createTRPCRouter({
         isLive: schedule.isLive,
         createdAt: schedule.createdAt,
         updatedAt: schedule.updatedAt,
+        timeRanges: timeRangesData.map(range => ({
+          id: String(range.id),
+          startTime: range.startTime,
+          endTime: range.endTime,
+        })),
         schedule: formattedTimeSlots,
       };
     }),
@@ -143,10 +146,14 @@ export const scheduleRouter = createTRPCRouter({
         // 1. Create the schedule record
         const [savedSchedule] = await tx.insert(schedules).values({
           name: input.name,
-          description: input.description || null,
+          description: input.description ?? null,
           gameDurationMs: input.gameDurationMs,
           transitionTimeMs: input.transitionTimeMs,
         }).returning();
+
+        if (!savedSchedule) {
+          throw new Error("Failed to create schedule");
+        }
 
         // 2. Save the time ranges
         await tx.insert(timeRanges).values(
@@ -165,6 +172,10 @@ export const scheduleRouter = createTRPCRouter({
             startTime: slot.startTime,
             endTime: slot.endTime,
           }).returning();
+
+          if (!savedSlot) {
+            throw new Error("Failed to create time slot");
+          }
 
           // 4. Save all entries for this slot
           if (slot.entries.length > 0) {
@@ -244,10 +255,8 @@ export const scheduleRouter = createTRPCRouter({
       
       // Group entries by timeSlotId
       const entriesBySlot = entriesData.reduce((acc, entry) => {
-        if (!acc[entry.timeSlotId]) {
-          acc[entry.timeSlotId] = [];
-        }
-        acc[entry.timeSlotId].push(entry);
+        acc[entry.timeSlotId] ??= [];
+        acc[entry.timeSlotId]!.push(entry);
         return acc;
       }, {} as Record<number, typeof entriesData>);
       
@@ -268,7 +277,7 @@ export const scheduleRouter = createTRPCRouter({
           slotIndex: slot.slotIndex,
           startTime: slot.startTime,
           endTime: slot.endTime,
-          entries: (entriesBySlot[slot.id] || []).map(entry => ({
+          entries: (entriesBySlot[slot.id] ?? []).map(entry => ({
             group: entry.group,
             game: entry.game,
             round: entry.round,
@@ -288,7 +297,7 @@ export const scheduleRouter = createTRPCRouter({
         .update(schedules)
         .set({
           name: input.name,
-          description: input.description || null,
+          description: input.description ?? null,
           // updatedAt is handled automatically by $onUpdate in the schema
         })
         .where(eq(schedules.id, input.id));

@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
-import { TimeRange } from "~/app/_types/schedule-types";
+import { TimeRange, Schedule } from "~/app/_types/schedule-types";
 import { TimeRangeEditor } from "~/app/_components/time-range-editor";
 import { ScheduleResults } from "~/app/_components/schedule-results";
 import { ScheduleValidation } from "~/app/_components/schedule-validation";
@@ -164,6 +164,21 @@ export function ScheduleDisplay() {
   // Schedule operations
   const addTimeRange = () => {
     const lastRange = timeRanges[timeRanges.length - 1];
+    if (!lastRange) {
+      // If no existing ranges, create a default one
+      const defaultStart = new Date(defaultStartDate);
+      defaultStart.setHours(9, 0, 0, 0);
+      const defaultEnd = new Date(defaultStart);
+      defaultEnd.setHours(13, 0, 0, 0);
+      
+      setTimeRanges([...timeRanges, {
+        id: uuidv4(),
+        startTime: defaultStart,
+        endTime: defaultEnd
+      }]);
+      return;
+    }
+    
     const newStartTime = new Date(lastRange.endTime);
     newStartTime.setHours(newStartTime.getHours() + 1);
     
@@ -230,8 +245,8 @@ export function ScheduleDisplay() {
         entries: slot.entries.map(entry => ({
           groupId: entry.group.id,
           gameId: entry.game.id,
-          round: entry.round || 1,
-          isSecondChance: entry.isSecondChance || false,
+          round: entry.round ?? 1,
+          isSecondChance: entry.isSecondChance ?? false,
         }))
       }))
     });
@@ -243,10 +258,10 @@ export function ScheduleDisplay() {
     }
   };
 
-  const handleEditSchedule = (schedule: typeof savedSchedulesList[0]) => {
+  const handleEditSchedule = (schedule: NonNullable<typeof savedSchedulesList>[0]) => {
     setEditScheduleId(schedule.id);
     setEditScheduleName(schedule.name);
-    setEditScheduleDescription(schedule.description || "");
+    setEditScheduleDescription(schedule.description ?? "");
     setEditDialogOpen(true);
   };
   
@@ -352,7 +367,7 @@ export function ScheduleDisplay() {
                       <div className="flex justify-between items-start">
                         <div>
                           <CardTitle>{schedule.name}</CardTitle>
-                          <CardDescription>{schedule.description || "Aucune description"}</CardDescription>
+                          <CardDescription>{schedule.description ?? "Aucune description"}</CardDescription>
                         </div>
                         <div className="flex gap-1">
                           {schedule.isLive && (
@@ -374,7 +389,7 @@ export function ScheduleDisplay() {
                       </p>
                       <div className="flex justify-between mt-2">
                         <div className="text-sm text-slate-500">
-                          <span className="font-medium">{schedule.slotCount || 0}</span> créneaux
+                          <span className="font-medium">{schedule.slotCount ?? 0}</span> créneaux
                         </div>
                       </div>
                     </CardContent>

@@ -99,7 +99,7 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
 /**
  * Admin authentication middleware
  */
-const adminMiddleware = t.middleware(async ({ ctx, next, type }) => {
+const adminMiddleware = t.middleware(async ({ ctx, next }) => {
   // Get JWT token from headers
   const authHeader = ctx.headers.get("authorization");
   const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
@@ -123,7 +123,7 @@ const adminMiddleware = t.middleware(async ({ ctx, next, type }) => {
     // TODO: Implement proper CSRF protection if needed for production
     
     return next();
-  } catch (error) {
+  } catch {
     throw new Error("Invalid admin credentials");
   }
 });

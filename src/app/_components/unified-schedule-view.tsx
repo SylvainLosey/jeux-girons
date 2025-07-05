@@ -189,8 +189,11 @@ export function UnifiedScheduleView({ schedule, entity, viewType, showAdmin = fa
 
         // Group by round within the same time slot
         const slotsByRound = gameEntries.reduce((acc: Record<number, any[]>, entry: any) => {
-          acc[entry.round] ??= [];
-          acc[entry.round].push(entry);
+          const roundNumber = entry.round;
+          if (!acc[roundNumber]) {
+            acc[roundNumber] = [];
+          }
+          acc[roundNumber]!.push(entry);
           return acc;
         }, {});
 
@@ -200,7 +203,7 @@ export function UnifiedScheduleView({ schedule, entity, viewType, showAdmin = fa
           endTime: slot.endTime,
           game: entity as Game,
           round: parseInt(round),
-          groups: entries.map((entry: any) => entry.group),
+          groups: (entries as any[]).map((entry: any) => entry.group),
         }));
       })
       .sort((a: GameTimeSlot, b: GameTimeSlot) => a.startTime.getTime() - b.startTime.getTime());

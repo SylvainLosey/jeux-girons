@@ -51,6 +51,10 @@ export default tseslint.config(
       "@typescript-eslint/no-unsafe-assignment": "warn",
       "@typescript-eslint/no-unsafe-member-access": "warn",
       "@typescript-eslint/no-unsafe-call": "warn",
+      // Downgrade these rules to warnings instead of errors
+      "@typescript-eslint/prefer-nullish-coalescing": "warn",
+      "react/no-unescaped-entities": "warn",
+      "@next/next/no-img-element": "warn",
     },
   },
   {

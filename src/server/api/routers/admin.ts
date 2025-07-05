@@ -113,7 +113,7 @@ export const adminRouter = createTRPCRouter({
           admin: decoded.admin === true,
           expiresIn: (decoded.exp * 1000) - Date.now() // Convert JWT seconds to milliseconds
         };
-      } catch (error) {
+      } catch {
         return { 
           isValid: false, 
           admin: false,

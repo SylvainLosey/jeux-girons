@@ -40,7 +40,11 @@ export function TimeRangeEditor({ timeRanges, onUpdateTimeRanges }: TimeRangeEdi
         };
       } else {
         // Update the time component
-        const [hours, minutes] = value.split(':').map(Number);
+        const timeParts = value.split(':');
+        if (timeParts.length !== 2) return range;
+        
+        const hours = Number(timeParts[0]);
+        const minutes = Number(timeParts[1]);
         if (isNaN(hours) || isNaN(minutes)) return range;
         
         const updatedDate = new Date(currentDate);

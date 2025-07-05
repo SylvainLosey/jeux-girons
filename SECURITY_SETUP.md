@@ -11,7 +11,6 @@
 - **Fixed**: Added proper validation for security-critical environment variables
 - **Added**: `JWT_SECRET` (minimum 32 characters)
 - **Enhanced**: `ADMIN_PASSWORD` (minimum 8 characters)
-- **Added**: `BLOB_READ_WRITE_TOKEN` validation
 
 ### 3. Server-Side Authentication Validation
 - **Fixed**: Client-side admin state now validates with server
@@ -41,9 +40,6 @@ ADMIN_PASSWORD="your-secure-admin-password-here"
 
 # JWT Configuration (minimum 32 characters - generate with: openssl rand -base64 32)
 JWT_SECRET="your-32-character-or-longer-jwt-secret-here"
-
-# Optional: Vercel Blob Storage for file uploads
-BLOB_READ_WRITE_TOKEN="your-vercel-blob-token-here"
 
 # Development/Build Configuration
 NODE_ENV="development"
@@ -111,7 +107,6 @@ The middleware now adds these security headers:
 - [ ] HTTPS is configured for production
 - [ ] Security headers are working (test with browser dev tools)
 - [ ] Authentication flow is tested
-- [ ] File upload security is tested (if using blob storage)
 
 ## 🔍 Testing Security
 
