@@ -41,7 +41,7 @@ function calculateGameProgress(
 // Compact Progress Bar Component for preview
 function CompactProgressBar({ percentage, playedGames, totalGames }: { percentage: number; playedGames: number; totalGames: number }) {
   return (
-    <div className="mb-4 p-3 border rounded-lg bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+    <div className="mb-4 p-3 border rounded-lg bg-gradient-to-r from-white to-slate-50 dark:from-slate-900 dark:to-slate-800">
       <div className="flex items-center gap-2 mb-2">
         <BarChart3 className="h-4 w-4 text-oriental-accent" />
         <span className="text-sm font-medium text-oriental-accent">Progression</span>

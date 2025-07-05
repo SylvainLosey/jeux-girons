@@ -66,7 +66,7 @@ export function NavigationProgress() {
   if (!isLoading) return null;
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-gray-200 dark:bg-gray-800">
+    <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-white">
       <div
         className={cn(
           "h-full bg-gradient-to-r from-oriental-gold via-oriental-gold-dark to-oriental-gold transition-all duration-300 ease-out",
