@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Users, Gamepad2, CalendarClock, Menu, Settings, Shield, LogOut, Loader2 } from "lucide-react";
+import { Users, Gamepad2, CalendarClock, Menu, Settings, Shield, LogOut, Loader2, ArrowRight } from "lucide-react";
 import { cn } from "~/lib/utils";
 import {
   NavigationMenu,
@@ -191,6 +191,17 @@ export function Navbar() {
                 </NavigationMenuList>
               </NavigationMenu>
             )}
+
+            {/* External Link to Official Giron Site */}
+            <a
+              href="https://murist2025.ch/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-oriental-gold transition-colors border border-gray-300 rounded-md hover:border-oriental-gold"
+            >
+              <span>Site des Girons</span>
+              <ArrowRight className="h-4 w-4" />
+            </a>
             
             {/* Admin Status */}
             {isAdmin && (
@@ -217,25 +228,23 @@ export function Navbar() {
           </div>
           
           {/* Mobile Navigation Button */}
-          {isAdmin && (
-            <div className="md:hidden">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                aria-label="Toggle menu"
-              >
-                <Menu className="h-5 w-5" />
-              </Button>
-            </div>
-          )}
+          <div className="md:hidden flex items-center">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
         
         {/* Mobile Navigation Menu */}
-        {mobileMenuOpen && isAdmin && (
+        {mobileMenuOpen && (
           <div className="md:hidden px-2 pb-3">
             <div className="flex flex-col space-y-1">
-              {navItems.map((item) => (
+              {isAdmin && navItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
@@ -251,8 +260,21 @@ export function Navbar() {
                   {item.name}
                 </Link>
               ))}
+
+              {/* External Link for Mobile */}
+              <a
+                href="https://murist2025.ch/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-oriental-gold transition-colors border border-gray-300 hover:border-oriental-gold mt-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <span>Site des Girons</span>
+                <ArrowRight className="h-4 w-4" />
+              </a>
               
               {/* Mobile Admin Status */}
+              {isAdmin && (
               <div className="flex items-center justify-between px-3 py-2 border-t mt-2 pt-3">
                 <div className="flex items-center space-x-2">
                   <Shield className="h-4 w-4 text-oriental-gold" />
@@ -273,6 +295,7 @@ export function Navbar() {
                   Déconnexion
                 </Button>
               </div>
+              )}
             </div>
           </div>
         )}

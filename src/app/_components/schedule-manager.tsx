@@ -312,7 +312,7 @@ export function ScheduleDisplay() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6 oriental-title">Gestion des Plannings</h1>
+      <h1 className="text-3xl font-bold mb-6 oriental-title text-oriental-accent">Gestion des Plannings</h1>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-8">

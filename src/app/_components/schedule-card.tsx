@@ -101,14 +101,14 @@ export function ScheduleCard({ entry, viewType, showAdmin = false }: ScheduleCar
             <div className="flex items-center gap-2">
               <InteractiveLink 
                 href={`/games/${createSlug(entry.game.name)}`}
-                className="hover:text-oriental-gold transition-colors flex items-center gap-2"
+                className="hover:text-oriental-accent transition-colors flex items-center gap-2"
                 onClick={handleLinkClick}
               >
                 <h3 className="font-semibold text-slate-900 dark:text-slate-100 line-clamp-1">
                   {entry.game.name}
                 </h3>
                 {isNavigating && (
-                  <Loader2 className="h-4 w-4 animate-spin text-oriental-gold" />
+                  <Loader2 className="h-4 w-4 animate-spin text-oriental-accent" />
                 )}
               </InteractiveLink>
               {entry.round > 1 && (

@@ -39,8 +39,8 @@ export function RankingsPreview() {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-4">
-          <Trophy className="h-5 w-5 text-oriental-gold" />
-          <h2 className="text-xl font-semibold oriental-subtitle">Classement en direct</h2>
+          <Trophy className="h-5 w-5 text-oriental-accent" />
+          <h2 className="text-xl font-semibold oriental-subtitle text-oriental-accent">Classement en direct</h2>
         </div>
         <div className="text-center p-8 text-muted-foreground">
           Chargement des classements...
@@ -53,8 +53,8 @@ export function RankingsPreview() {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-4">
-          <Trophy className="h-5 w-5 text-oriental-gold" />
-          <h2 className="text-xl font-semibold oriental-subtitle">Classement en direct</h2>
+          <Trophy className="h-5 w-5 text-oriental-accent" />
+          <h2 className="text-xl font-semibold oriental-subtitle text-oriental-accent">Classement en direct</h2>
         </div>
         <Alert>
           <AlertDescription>Impossible de charger les données de classement.</AlertDescription>
@@ -140,9 +140,9 @@ export function RankingsPreview() {
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1:
-        return <Trophy className="h-5 w-5 text-oriental-gold" />;
+        return <Trophy className="h-5 w-5 text-oriental-accent" />;
       case 2:
-        return <Medal className="h-5 w-5 text-oriental-gold-dark" />;
+        return <Medal className="h-5 w-5 text-oriental-accent" />;
       case 3:
         return <Award className="h-5 w-5 text-oriental-accent" />;
       default:
@@ -204,8 +204,8 @@ export function RankingsPreview() {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-4">
-          <Trophy className="h-5 w-5 text-oriental-gold" />
-          <h2 className="text-xl font-semibold oriental-subtitle">Classement en direct</h2>
+          <Trophy className="h-5 w-5 text-oriental-accent" />
+          <h2 className="text-xl font-semibold oriental-subtitle text-oriental-accent">Classement en direct</h2>
         </div>
         <Alert>
           <AlertDescription>Aucune donnée de score n&apos;est disponible pour le moment.</AlertDescription>
@@ -217,8 +217,8 @@ export function RankingsPreview() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-4">
-        <Trophy className="h-5 w-5 text-oriental-gold" />
-        <h2 className="text-xl font-semibold oriental-subtitle">Classement en direct</h2>
+        <Trophy className="h-5 w-5 text-oriental-accent" />
+        <h2 className="text-xl font-semibold oriental-subtitle text-oriental-accent">Classement en direct</h2>
       </div>
       
       <div className="rounded-md border overflow-hidden">

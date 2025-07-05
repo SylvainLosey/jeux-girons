@@ -173,11 +173,11 @@
   }
   
   .oriental-title {
-    @apply text-oriental-gold font-bold tracking-wide;
+    @apply text-oriental-accent font-bold tracking-wide;
   }
   
   .oriental-subtitle {
-    @apply text-oriental-gold-dark font-semibold;
+    @apply text-oriental-accent font-semibold;
   }
   
   .oriental-accent {

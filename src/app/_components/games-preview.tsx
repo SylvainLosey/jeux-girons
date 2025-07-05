@@ -29,8 +29,8 @@ export function GamesPreview() {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-4">
-          <Gamepad2 className="h-5 w-5 text-oriental-gold" />
-          <h2 className="text-xl font-semibold oriental-subtitle">Les Jeux</h2>
+          <Gamepad2 className="h-5 w-5 text-oriental-accent" />
+          <h2 className="text-xl font-semibold oriental-subtitle text-oriental-accent">Les Jeux</h2>
         </div>
         <div className="text-center p-8 text-muted-foreground">
           Chargement des jeux...
@@ -43,8 +43,8 @@ export function GamesPreview() {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-4">
-          <Gamepad2 className="h-5 w-5 text-oriental-gold" />
-          <h2 className="text-xl font-semibold oriental-subtitle">Les Jeux</h2>
+          <Gamepad2 className="h-5 w-5 text-oriental-accent" />
+          <h2 className="text-xl font-semibold oriental-subtitle text-oriental-accent">Les Jeux</h2>
         </div>
         <Alert>
           <AlertDescription>Impossible de charger les jeux: {error.message}</AlertDescription>
@@ -57,8 +57,8 @@ export function GamesPreview() {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-4">
-          <Gamepad2 className="h-5 w-5 text-oriental-gold" />
-          <h2 className="text-xl font-semibold oriental-subtitle">Les Jeux</h2>
+          <Gamepad2 className="h-5 w-5 text-oriental-accent" />
+          <h2 className="text-xl font-semibold oriental-subtitle text-oriental-accent">Les Jeux</h2>
         </div>
         <Alert>
           <AlertDescription>Aucun jeu disponible pour le moment.</AlertDescription>
@@ -70,8 +70,8 @@ export function GamesPreview() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-4">
-        <Gamepad2 className="h-5 w-5 text-oriental-gold" />
-        <h2 className="text-xl font-semibold oriental-subtitle">Les Jeux</h2>
+        <Gamepad2 className="h-5 w-5 text-oriental-accent" />
+        <h2 className="text-xl font-semibold oriental-subtitle text-oriental-accent">Les Jeux</h2>
       </div>
       
       <div className="grid gap-4 md:grid-cols-2">
@@ -100,7 +100,7 @@ export function GamesPreview() {
                   {/* Game Details */}
                   <div className="flex-1 min-w-0 p-4 flex flex-col justify-center">
                     <div className="space-y-2">
-                      <h3 className="font-semibold text-base text-slate-900 dark:text-slate-100 group-hover:text-oriental-gold transition-colors line-clamp-2">
+                      <h3 className="font-semibold text-base text-slate-900 dark:text-slate-100 group-hover:text-oriental-accent transition-colors line-clamp-2">
                         {game.name}
                       </h3>
                       

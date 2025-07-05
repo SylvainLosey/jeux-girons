@@ -130,8 +130,8 @@ function RecentScoresSidebar() {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-4">
-          <Clock className="h-5 w-5 text-primary" />
-          <h3 className="text-lg font-semibold">Scores récents</h3>
+          <Clock className="h-5 w-5 text-oriental-accent" />
+          <h3 className="text-lg font-semibold text-oriental-accent">Scores récents</h3>
         </div>
         <div className="space-y-3">
           {[...Array(5)].map((_, i) => (
@@ -147,8 +147,8 @@ function RecentScoresSidebar() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-4">
-        <Clock className="h-5 w-5 text-primary" />
-        <h3 className="text-lg font-semibold">Scores récents</h3>
+        <Clock className="h-5 w-5 text-oriental-accent" />
+        <h3 className="text-lg font-semibold text-oriental-accent">Scores récents</h3>
       </div>
       
       {recentScores && recentScores.length > 0 ? (
@@ -245,9 +245,9 @@ function RankingRow({ groupData, rankingsUpdateId, isNew = false }: {
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1:
-        return <Trophy className="h-5 w-5 text-oriental-gold" />;
+        return <Trophy className="h-5 w-5 text-oriental-accent" />;
       case 2:
-        return <Medal className="h-5 w-5 text-oriental-gold-dark" />;
+        return <Medal className="h-5 w-5 text-oriental-accent" />;
       case 3:
         return <Award className="h-5 w-5 text-oriental-accent" />;
       default:
@@ -543,7 +543,7 @@ export function RankingsView() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-3">
           <div className="flex items-center gap-2 mb-6">
-            <Trophy className="h-6 w-6 text-oriental-gold" />
+            <Trophy className="h-6 w-6 text-oriental-accent" />
             <h2 className="text-2xl font-semibold oriental-title">Classement en direct</h2>
             <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse ml-2"></div>
           </div>
@@ -592,7 +592,7 @@ export function RankingsView() {
       {/* Main Rankings Table */}
       <div className="lg:col-span-3 space-y-4">
         <div className="flex items-center gap-2 mb-6">
-          <Trophy className="h-6 w-6 text-oriental-gold" />
+          <Trophy className="h-6 w-6 text-oriental-accent" />
           <h2 className="text-2xl font-semibold oriental-title">Classement en direct</h2>
           <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse ml-2"></div>
         </div>

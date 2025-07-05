@@ -75,12 +75,12 @@ function GameTimeSlotCard({ slot, showAdmin = false }: { slot: GameTimeSlot; sho
               <div key={group.id} className="flex items-center justify-between p-2 rounded-md bg-slate-50 hover:bg-oriental-gold/10 transition-colors">
                 <InteractiveLink 
                   href={`/teams/${createSlug(group.name)}`}
-                  className="text-sm font-medium text-slate-700 hover:text-oriental-gold transition-colors flex items-center gap-2"
+                  className="text-sm font-medium text-slate-700 hover:text-oriental-accent transition-colors flex items-center gap-2"
                   onClick={handleLinkClick}
                 >
                   {group.name}
                   {isNavigating && (
-                    <Loader2 className="h-3 w-3 animate-spin text-oriental-gold" />
+                    <Loader2 className="h-3 w-3 animate-spin text-oriental-accent" />
                   )}
                 </InteractiveLink>
                 <div className="flex-shrink-0">
@@ -166,7 +166,7 @@ export function UnifiedScheduleView({ schedule, entity, viewType, showAdmin = fa
             <h3 className="text-xl font-semibold capitalize border-b pb-2">
               {day}
             </h3>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-1">
+            <div className="grid gap-4 md:grid-cols-2">
               {dayEntries.map((entry, _index) => (
                 <ScheduleCard
                   key={`${entry.slotIndex}-${entry.group.id}-${entry.game.id}-${entry.round}`}
@@ -233,7 +233,7 @@ export function UnifiedScheduleView({ schedule, entity, viewType, showAdmin = fa
             <h3 className="text-xl font-semibold capitalize border-b pb-2">
               {day}
             </h3>
-            <div className="grid gap-4">
+            <div className="grid gap-4 md:grid-cols-2">
               {daySlots.map((slot, _index) => (
                 <GameTimeSlotCard
                   key={`${slot.slotIndex}-${slot.round}`}

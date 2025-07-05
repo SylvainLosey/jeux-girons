@@ -2,6 +2,7 @@
 
 import { Gamepad2 } from "lucide-react";
 import { Alert, AlertDescription } from "~/components/ui/alert";
+import { Badge } from "~/components/ui/badge";
 import { UnifiedScheduleView } from "~/app/_components/unified-schedule-view";
 import { useAdmin } from "~/app/_components/navbar";
 import { Game } from "~/app/_types/schedule-types";
@@ -25,7 +26,7 @@ export function AdminAwareGamePage({ game, liveSchedule }: AdminAwareGamePagePro
         <div className="container mx-auto px-4 pb-4 max-w-4xl">
           <div className="mb-6">
             {/* Game Header - Responsive Layout */}
-            <div className="flex flex-col md:flex-row md:items-start gap-6 mb-6">
+            <div className="flex flex-col md:flex-row md:items-center gap-6 mb-6">
               {/* Game Image */}
               <div className="flex-shrink-0 mx-auto md:mx-0">
                 {game.imageUrl ? (
@@ -42,15 +43,34 @@ export function AdminAwareGamePage({ game, liveSchedule }: AdminAwareGamePagePro
               </div>
               
               {/* Game Details */}
-              <div className="flex-1 text-center md:text-left">
-                <h1 className="text-3xl font-bold mb-3 oriental-title">
-                  {game.name}
+              <div className="flex-1 text-center md:text-left space-y-3">
+                <h1 className="text-3xl font-bold oriental-title text-oriental-accent flex items-center justify-center md:justify-start gap-3">
+                  <Gamepad2 className="h-8 w-8 text-oriental-accent" />
+                  <span className="text-oriental-accent">{game.name}</span>
                 </h1>
                 {game.description && (
                   <p className="text-muted-foreground text-lg leading-relaxed">
                     {game.description}
                   </p>
                 )}
+                
+                {/* Number of Groups Badge */}
+                <div className="flex justify-center md:justify-start">
+                  <Badge 
+                    variant="secondary" 
+                    className={`font-semibold px-3 py-1 ${
+                      game.numberOfGroups === 1 
+                        ? "bg-yellow-600 text-yellow-100" 
+                        : game.numberOfGroups === 2
+                        ? "bg-yellow-400 text-yellow-900"
+                        : "bg-yellow-200 text-yellow-800"
+                    }`}
+                  >
+                    {game.numberOfGroups === 1 
+                      ? "1 jeunesse" 
+                      : `${game.numberOfGroups} jeunesses`}
+                  </Badge>
+                </div>
               </div>
             </div>
           </div>
