@@ -7,7 +7,7 @@ import { Game, Group } from "~/app/_types/schedule-types";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
-import { Clock, Users, CheckCircle, Clock3, Pencil } from "lucide-react";
+import { Clock, Users, CheckCircle, Clock3, Pencil, Loader2 } from "lucide-react";
 import { formatTime } from "~/app/_utils/date-utils";
 import { createSlug } from "~/app/_utils/slug-utils";
 import { ScheduleCard } from "./schedule-card";
@@ -15,6 +15,7 @@ import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
 import { DirectScoreEditor } from "./score-editor";
 import { ScoreDisplay } from "~/components/ui/score-display";
+import { InteractiveLink } from "~/components/ui/interactive-link";
 
 interface ScheduleEntry {
   startTime: Date;
@@ -43,7 +44,12 @@ interface UnifiedScheduleViewProps {
 }
 
 function GameTimeSlotCard({ slot, showAdmin = false }: { slot: GameTimeSlot; showAdmin?: boolean }) {
+  const [isNavigating, setIsNavigating] = useState(false);
   const timeRange = `${formatTime(slot.startTime)} - ${formatTime(slot.endTime)}`;
+  
+  const handleLinkClick = () => {
+    setIsNavigating(true);
+  };
   
   return (
     <Card className="transition-all hover:shadow-md">
@@ -67,12 +73,16 @@ function GameTimeSlotCard({ slot, showAdmin = false }: { slot: GameTimeSlot; sho
           <div className="space-y-1">
             {slot.groups.map((group) => (
               <div key={group.id} className="flex items-center justify-between p-2 rounded-md bg-slate-50 hover:bg-oriental-gold/10 transition-colors">
-                <Link 
+                <InteractiveLink 
                   href={`/teams/${createSlug(group.name)}`}
-                  className="text-sm font-medium text-slate-700 hover:text-oriental-gold transition-colors"
+                  className="text-sm font-medium text-slate-700 hover:text-oriental-gold transition-colors flex items-center gap-2"
+                  onClick={handleLinkClick}
                 >
                   {group.name}
-                </Link>
+                  {isNavigating && (
+                    <Loader2 className="h-3 w-3 animate-spin text-oriental-gold" />
+                  )}
+                </InteractiveLink>
                 <div className="flex-shrink-0">
                   <ScoreDisplay
                     groupId={group.id}

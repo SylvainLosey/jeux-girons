@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Users, Gamepad2, CalendarClock, Menu, Settings, Shield, LogOut } from "lucide-react";
+import { Users, Gamepad2, CalendarClock, Menu, Settings, Shield, LogOut, Loader2 } from "lucide-react";
 import { cn } from "~/lib/utils";
 import {
   NavigationMenu,
@@ -62,10 +62,36 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+function useNavigationState() {
+  const [isNavigating, setIsNavigating] = useState(false);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    // Reset navigation state when pathname changes
+    setIsNavigating(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    const handleStart = () => setIsNavigating(true);
+    const handleComplete = () => setIsNavigating(false);
+
+    window.addEventListener('navigation-start', handleStart);
+    window.addEventListener('navigation-complete', handleComplete);
+
+    return () => {
+      window.removeEventListener('navigation-start', handleStart);
+      window.removeEventListener('navigation-complete', handleComplete);
+    };
+  }, []);
+
+  return isNavigating;
+}
+
 export function Navbar() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isAdmin, logout } = useAdmin();
+  const isNavigating = useNavigationState();
   
   const navItems = [
     {
@@ -118,20 +144,36 @@ export function Navbar() {
   );
 
   return (
-    <nav className="bg-background border-b mb-6">
-      <div className="container mx-auto">
-        <div className="flex items-center h-16 justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center px-2 text-xl font-bold oriental-title">
-            <Image
-              src="/logo_giron.png"
-              alt="Logo du Giron de Murist"
-              width={40}
-              height={40}
-              className="mr-3"
-            />
-            <span className="text-[#A38D6F]">Jeux du Giron de Murist</span>
-          </Link>
+    <nav className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          <div className="flex items-center">
+            <Link href="/" className="flex items-center space-x-3">
+              <img 
+                src="/logo_giron.png" 
+                alt="Logo Giron" 
+                className="h-10 w-10 object-contain"
+              />
+              <div className="flex flex-col">
+                <span className="text-lg font-bold text-gray-900 dark:text-white">
+                  Jeux Murist
+                </span>
+                <span className="text-xs text-gray-500 dark:text-gray-400 -mt-1">
+                  2025
+                </span>
+              </div>
+            </Link>
+            
+            {/* Navigation Loading Indicator */}
+            {isNavigating && (
+              <div className="ml-4 flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin text-oriental-gold" />
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  Chargement...
+                </span>
+              </div>
+            )}
+          </div>
           
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">

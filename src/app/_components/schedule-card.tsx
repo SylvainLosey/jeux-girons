@@ -8,11 +8,13 @@ import { Badge } from "~/components/ui/badge";
 import { Card, CardContent } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
-import { Clock, Users, Gamepad2, CheckCircle, Clock3, Pencil } from "lucide-react";
+import { Clock, Users, Gamepad2, CheckCircle, Clock3, Pencil, Loader2 } from "lucide-react";
 import { formatTime } from "~/app/_utils/date-utils";
 import { createSlug } from "~/app/_utils/slug-utils";
 import { DirectScoreEditor } from "./score-editor";
 import { ScoreDisplay as ReusableScoreDisplay } from "~/components/ui/score-display";
+import { InteractiveLink } from "~/components/ui/interactive-link";
+import { ClickFeedback } from "~/components/ui/click-feedback";
 
 interface ScheduleEntry {
   startTime: Date;
@@ -35,17 +37,23 @@ interface ScheduleCardProps {
 
 export function ScheduleCard({ entry, viewType, showAdmin = false }: ScheduleCardProps) {
   const [scoreUpdated, setScoreUpdated] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
   
   const handleScoreUpdated = () => {
     setScoreUpdated(true);
     setTimeout(() => setScoreUpdated(false), 2000);
   };
 
+  const handleLinkClick = () => {
+    setIsNavigating(true);
+  };
+
 
 
   return (
-    <Card className="group cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.02] overflow-hidden !p-0 h-32">
-      <div className="flex h-full">
+    <ClickFeedback showSpinner={isNavigating}>
+      <Card className="group cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.02] overflow-hidden !p-0 h-32">
+        <div className="flex h-full">
         {/* Game Image */}
         <div className="flex-shrink-0 w-32 h-32">
           {entry.game.imageUrl ? (
@@ -89,14 +97,18 @@ export function ScheduleCard({ entry, viewType, showAdmin = false }: ScheduleCar
             
             {/* Second line: Game name + Tour badge + Second chance badge */}
             <div className="flex items-center gap-2">
-              <Link 
+              <InteractiveLink 
                 href={`/games/${createSlug(entry.game.name)}`}
-                className="hover:text-oriental-gold transition-colors"
+                className="hover:text-oriental-gold transition-colors flex items-center gap-2"
+                onClick={handleLinkClick}
               >
                 <h3 className="font-semibold text-slate-900 dark:text-slate-100 line-clamp-1">
                   {entry.game.name}
                 </h3>
-              </Link>
+                {isNavigating && (
+                  <Loader2 className="h-4 w-4 animate-spin text-oriental-gold" />
+                )}
+              </InteractiveLink>
               {entry.round > 1 && (
                 <Badge variant="outline" className="text-xs flex-shrink-0">
                   Tour {entry.round}
@@ -120,21 +132,26 @@ export function ScheduleCard({ entry, viewType, showAdmin = false }: ScheduleCar
           {/* Team info for game view (bottom) */}
           {viewType === "game" && (
             <div className="mt-auto">
-              <Link 
+              <InteractiveLink 
                 href={`/teams/${createSlug(entry.group.name)}`}
                 className="group"
+                onClick={handleLinkClick}
               >
                 <div className="flex items-center gap-2 hover:text-slate-600 transition-colors">
                   <Users className="h-3 w-3 text-slate-600" />
                   <span className="text-xs font-medium group-hover:underline text-slate-700">
                     {entry.group.name}
                   </span>
+                  {isNavigating && (
+                    <Loader2 className="h-3 w-3 animate-spin text-slate-600" />
+                  )}
                 </div>
-              </Link>
+              </InteractiveLink>
             </div>
           )}
         </div>
       </div>
     </Card>
+    </ClickFeedback>
   );
 } 

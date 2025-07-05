@@ -40,7 +40,7 @@ export function RankingsPreview() {
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-4">
           <Trophy className="h-5 w-5 text-oriental-gold" />
-          <h2 className="text-xl font-semibold oriental-subtitle">Classement</h2>
+          <h2 className="text-xl font-semibold oriental-subtitle">Classement en direct</h2>
         </div>
         <div className="text-center p-8 text-muted-foreground">
           Chargement des classements...
@@ -54,7 +54,7 @@ export function RankingsPreview() {
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-4">
           <Trophy className="h-5 w-5 text-oriental-gold" />
-          <h2 className="text-xl font-semibold oriental-subtitle">Classement</h2>
+          <h2 className="text-xl font-semibold oriental-subtitle">Classement en direct</h2>
         </div>
         <Alert>
           <AlertDescription>Impossible de charger les données de classement.</AlertDescription>
@@ -205,7 +205,7 @@ export function RankingsPreview() {
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-4">
           <Trophy className="h-5 w-5 text-oriental-gold" />
-          <h2 className="text-xl font-semibold oriental-subtitle">Classement</h2>
+          <h2 className="text-xl font-semibold oriental-subtitle">Classement en direct</h2>
         </div>
         <Alert>
           <AlertDescription>Aucune donnée de score n&apos;est disponible pour le moment.</AlertDescription>
@@ -218,7 +218,7 @@ export function RankingsPreview() {
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-4">
         <Trophy className="h-5 w-5 text-oriental-gold" />
-        <h2 className="text-xl font-semibold oriental-subtitle">Classement</h2>
+        <h2 className="text-xl font-semibold oriental-subtitle">Classement en direct</h2>
       </div>
       
       <div className="rounded-md border overflow-hidden">

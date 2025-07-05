@@ -8,6 +8,7 @@ import { Navbar } from "./_components/navbar";
 import { AdminProvider } from "./_components/navbar";
 import { Footer } from "./_components/footer";
 import { Toaster } from "~/components/ui/sonner";
+import { NavigationProgress } from "~/components/ui/navigation-progress";
 
 const geist = Geist({
   subsets: ["latin"],
@@ -28,6 +29,7 @@ export default function RootLayout({
       <body>
         <TRPCReactProvider>
           <AdminProvider>
+            <NavigationProgress />
             <Navbar />
             {children}
             <Footer />
