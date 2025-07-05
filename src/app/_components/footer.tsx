@@ -6,7 +6,7 @@ export function Footer() {
       <div className="container mx-auto px-4">
         <div className="flex justify-center items-center text-xs text-muted-foreground">
 
-          <span>Giron Murist 2025</span>
+          <span>Giron de la Broye fribourgeoise 2025</span>
           <span className="mx-2">|</span>
           <Link 
             href="/mentions-legales"
