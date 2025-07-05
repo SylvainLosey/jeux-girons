@@ -44,7 +44,7 @@ export function AdminAwareGamePage({ game, liveSchedule }: AdminAwareGamePagePro
               
               {/* Game Details */}
               <div className="flex-1 text-center md:text-left space-y-3">
-                <h1 className="text-3xl font-bold oriental-title text-oriental-accent flex items-center justify-center md:justify-start gap-3">
+                <h1 className="text-3xl font-bold oriental-title flex items-center justify-center md:justify-start gap-3">
                   <Gamepad2 className="h-8 w-8 text-oriental-accent" />
                   <span className="text-oriental-accent">{game.name}</span>
                 </h1>

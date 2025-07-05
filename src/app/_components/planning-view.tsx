@@ -161,7 +161,7 @@ export function PlanningView() {
       {/* Selected Group Schedule */}
       {selectedGroup && (
         <div>
-          <h2 className="text-2xl font-semibold mb-4 border-b pb-2 flex items-center oriental-title text-oriental-accent">
+          <h2 className="text-2xl font-semibold mb-4 border-b pb-2 flex items-center oriental-title">
             <Users className="mr-2 h-5 w-5 text-oriental-accent" />
             {selectedGroup.name}
           </h2>
@@ -188,7 +188,7 @@ export function PlanningView() {
       {/* Selected Game Schedule */}
       {selectedGame && (
         <div>
-          <h2 className="text-2xl font-semibold mb-4 border-b pb-2 flex items-center oriental-title text-oriental-accent">
+          <h2 className="text-2xl font-semibold mb-4 border-b pb-2 flex items-center oriental-title">
             <Gamepad2 className="mr-2 h-5 w-5 text-oriental-accent" />
             {selectedGame.name}
           </h2>

@@ -113,7 +113,7 @@ export function ScheduleResults({ schedule }: ScheduleResultsProps) {
           return (
             <div key={slot.slotIndex} className="p-4 border rounded-lg shadow-md bg-card">
               <div className="mb-4">
-                <h3 className="text-xl font-semibold text-left oriental-subtitle text-oriental-accent">
+                <h3 className="text-xl font-semibold text-left oriental-subtitle">
                   Créneau {slot.slotIndex}
                 </h3>
                 <div className="mt-2 space-y-1 text-sm text-slate-500">

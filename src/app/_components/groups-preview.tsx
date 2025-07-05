@@ -27,7 +27,7 @@ export function GroupsPreview() {
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-4">
           <Users className="h-5 w-5 text-oriental-accent" />
-          <h2 className="text-xl font-semibold oriental-subtitle text-oriental-accent">Les Horaires par Jeunesse</h2>
+          <h2 className="text-xl font-semibold oriental-subtitle">Les Horaires par Jeunesse</h2>
         </div>
         <div className="text-center p-8 text-muted-foreground">
           Chargement des jeunesses...
@@ -41,7 +41,7 @@ export function GroupsPreview() {
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-4">
           <Users className="h-5 w-5 text-oriental-accent" />
-          <h2 className="text-xl font-semibold oriental-subtitle text-oriental-accent">Les Horaires par Jeunesse</h2>
+          <h2 className="text-xl font-semibold oriental-subtitle">Les Horaires par Jeunesse</h2>
         </div>
         <Alert>
           <AlertDescription>Impossible de charger les jeunesses: {error.message}</AlertDescription>
@@ -55,7 +55,7 @@ export function GroupsPreview() {
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-4">
           <Users className="h-5 w-5 text-oriental-accent" />
-          <h2 className="text-xl font-semibold oriental-subtitle text-oriental-accent">Les Horaires par Jeunesse</h2>
+          <h2 className="text-xl font-semibold oriental-subtitle">Les Horaires par Jeunesse</h2>
         </div>
         <Alert>
           <AlertDescription>Aucune jeunesse disponible pour le moment.</AlertDescription>
@@ -71,7 +71,7 @@ export function GroupsPreview() {
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-4">
         <Users className="h-5 w-5 text-oriental-accent" />
-        <h2 className="text-xl font-semibold oriental-subtitle text-oriental-accent">Les Horaires par Jeunesse</h2>
+        <h2 className="text-xl font-semibold oriental-subtitle">Les Horaires par Jeunesse</h2>
       </div>
       
       <div className="grid gap-1 md:grid-cols-2 lg:grid-cols-3">

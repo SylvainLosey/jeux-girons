@@ -65,7 +65,7 @@ export default function AdminPage() {
                 <Shield className="h-8 w-8 text-oriental-gold" />
               </div>
             </div>
-            <CardTitle className="text-2xl font-bold oriental-title text-oriental-accent">
+            <CardTitle className="text-2xl font-bold oriental-title">
               Accès Administrateur
             </CardTitle>
             <CardDescription className="text-base">

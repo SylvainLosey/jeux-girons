@@ -165,7 +165,7 @@ export function GroupManager() {
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-3">
-          <h1 className="text-3xl font-bold oriental-title text-oriental-accent">Jeunesses</h1>
+          <h1 className="text-3xl font-bold oriental-title">Jeunesses</h1>
           <span className="text-lg font-medium text-slate-600 bg-slate-100 px-3 py-1 rounded-full">
             {groups?.length ?? 0} total
           </span>

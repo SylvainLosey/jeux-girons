@@ -40,7 +40,7 @@ export function RankingsPreview() {
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-4">
           <Trophy className="h-5 w-5 text-oriental-accent" />
-          <h2 className="text-xl font-semibold oriental-subtitle text-oriental-accent">Classement en direct</h2>
+          <h2 className="text-xl font-semibold oriental-subtitle">Classement en direct</h2>
         </div>
         <div className="text-center p-8 text-muted-foreground">
           Chargement des classements...
@@ -54,7 +54,7 @@ export function RankingsPreview() {
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-4">
           <Trophy className="h-5 w-5 text-oriental-accent" />
-          <h2 className="text-xl font-semibold oriental-subtitle text-oriental-accent">Classement en direct</h2>
+          <h2 className="text-xl font-semibold oriental-subtitle">Classement en direct</h2>
         </div>
         <Alert>
           <AlertDescription>Impossible de charger les données de classement.</AlertDescription>
@@ -140,11 +140,11 @@ export function RankingsPreview() {
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1:
-        return <Trophy className="h-5 w-5 text-oriental-accent" />;
+        return <Trophy className="h-5 w-5 text-yellow-600" />;
       case 2:
-        return <Medal className="h-5 w-5 text-oriental-accent" />;
+        return <Medal className="h-5 w-5 text-gray-600" />;
       case 3:
-        return <Award className="h-5 w-5 text-oriental-accent" />;
+        return <Award className="h-5 w-5 text-orange-600" />;
       default:
         return null;
     }
@@ -164,23 +164,16 @@ export function RankingsPreview() {
   };
 
   const getRankDisplay = (groupData: GroupScore) => {
-    if (groupData.isTied && groupData.tiedWith && groupData.tiedWith > 1) {
-      return (
-        <div className="flex flex-col items-center">
-          <div className="flex items-center">
-            <span className="h-5 w-5 flex items-center justify-center text-sm font-bold">
-              {groupData.actualRank}
-            </span>
-          </div>
-          <span className="text-xs text-muted-foreground mt-1">ex æquo</span>
-        </div>
-      );
-    }
     return (
-      <div className="flex items-center justify-center">
-        <span className="h-5 w-5 flex items-center justify-center text-sm font-bold">
-          {groupData.actualRank}
-        </span>
+      <div className="flex flex-col items-center min-h-[2.5rem] justify-center">
+        <div className="flex items-center">
+          <span className="h-5 w-5 flex items-center justify-center text-sm font-bold">
+            {groupData.actualRank}
+          </span>
+        </div>
+        {groupData.isTied && groupData.tiedWith && groupData.tiedWith > 1 && (
+          <span className="text-xs text-muted-foreground mt-1">ex æquo</span>
+        )}
       </div>
     );
   };
@@ -205,7 +198,7 @@ export function RankingsPreview() {
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-4">
           <Trophy className="h-5 w-5 text-oriental-accent" />
-          <h2 className="text-xl font-semibold oriental-subtitle text-oriental-accent">Classement en direct</h2>
+          <h2 className="text-xl font-semibold oriental-subtitle">Classement en direct</h2>
         </div>
         <Alert>
           <AlertDescription>Aucune donnée de score n&apos;est disponible pour le moment.</AlertDescription>
@@ -218,7 +211,7 @@ export function RankingsPreview() {
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-4">
         <Trophy className="h-5 w-5 text-oriental-accent" />
-        <h2 className="text-xl font-semibold oriental-subtitle text-oriental-accent">Classement en direct</h2>
+        <h2 className="text-xl font-semibold oriental-subtitle">Classement en direct</h2>
       </div>
       
       <div className="rounded-md border overflow-hidden">
