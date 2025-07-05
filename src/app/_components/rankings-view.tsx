@@ -41,7 +41,7 @@ function calculateGameProgress(
 // Progress Bar Component
 function GameProgressBar({ percentage, playedGames, totalGames }: { percentage: number; playedGames: number; totalGames: number }) {
   return (
-    <div className="mb-6 p-4 border rounded-lg bg-gradient-to-r from-white to-slate-50 dark:from-slate-900 dark:to-slate-800">
+    <div className="mb-6">
       <div className="flex items-center gap-3 mb-3">
         <BarChart3 className="h-5 w-5 text-oriental-accent" />
         <h3 className="text-lg font-semibold text-oriental-accent">Progression des jeux</h3>
@@ -656,7 +656,7 @@ export function RankingsView() {
           totalGames={progress.totalGames}
         />
         
-        <div className="rounded-md border overflow-hidden bg-white">
+        <div className="rounded-md border border-oriental-gold-light overflow-hidden bg-white">
           <Table>
             <TableHeader>
               <TableRow>

@@ -159,6 +159,10 @@
   .text-oriental-gold-light {
     color: var(--oriental-gold-light);
   }
+
+  .border-oriental-gold-light {
+    border-color: var(--oriental-gold-light);
+  }
   
   .text-oriental-accent {
     color: var(--oriental-accent);

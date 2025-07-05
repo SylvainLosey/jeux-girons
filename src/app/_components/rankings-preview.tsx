@@ -38,29 +38,17 @@ function calculateGameProgress(
   return { percentage, playedGames, totalGames };
 }
 
-// Compact Progress Bar Component for preview
-function CompactProgressBar({ percentage, playedGames, totalGames }: { percentage: number; playedGames: number; totalGames: number }) {
+// Compact Progress Bar Component for preview - inline version
+function CompactProgressBar({ percentage }: { percentage: number }) {
   return (
-    <div className="mb-4 p-3 border rounded-lg bg-gradient-to-r from-white to-slate-50 dark:from-slate-900 dark:to-slate-800">
-      <div className="flex items-center gap-2 mb-2">
-        <BarChart3 className="h-4 w-4 text-oriental-accent" />
-        <span className="text-sm font-medium text-oriental-accent">Progression</span>
-        <span className="text-sm font-bold text-oriental-accent ml-auto">{percentage}%</span>
+    <div className="flex items-center gap-3">
+      <div className="w-32 bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+        <div 
+          className="bg-gradient-to-r from-oriental-accent to-oriental-accent/80 h-2.5 rounded-full transition-all duration-500 ease-out"
+          style={{ width: `${percentage}%` }}
+        />
       </div>
-      
-      <div className="flex items-center gap-2">
-        <div className="flex-1">
-          <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
-            <div 
-              className="bg-gradient-to-r from-oriental-accent to-oriental-accent/80 h-2 rounded-full transition-all duration-500 ease-out"
-              style={{ width: `${percentage}%` }}
-            />
-          </div>
-        </div>
-        <span className="text-xs text-slate-500 whitespace-nowrap">
-          {playedGames}/{totalGames}
-        </span>
-      </div>
+      <span className="text-sm font-medium text-oriental-accent">{percentage}%</span>
     </div>
   );
 }
@@ -257,19 +245,15 @@ export function RankingsPreview() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-4">
-        <Trophy className="h-5 w-5 text-oriental-accent" />
-        <h2 className="text-xl font-semibold oriental-subtitle">Classement en direct</h2>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Trophy className="h-5 w-5 text-oriental-accent" />
+          <h2 className="text-xl font-semibold oriental-subtitle">Classement en direct</h2>
+        </div>
+        <CompactProgressBar percentage={progress.percentage} />
       </div>
       
-      {/* Compact Progress Bar */}
-      <CompactProgressBar 
-        percentage={progress.percentage} 
-        playedGames={progress.playedGames} 
-        totalGames={progress.totalGames}
-      />
-      
-      <div className="rounded-md border overflow-hidden bg-white">
+      <div className="rounded-md border border-oriental-gold-light overflow-hidden bg-white">
         <Table>
           <TableHeader>
             <TableRow>
@@ -309,7 +293,10 @@ export function RankingsPreview() {
       {rankedGroups.length > 5 && (
         <div className="text-center">
           <Link href="/rankings">
-            <Button variant="outline" size="sm">
+            <Button 
+              size="sm" 
+              className="bg-oriental-accent hover:bg-oriental-accent/90 border border-oriental-accent hover:border-oriental-accent/90 text-white transition-all duration-200"
+            >
               Voir le classement complet
               <ChevronRight className="h-3 w-3 ml-1" />
             </Button>
