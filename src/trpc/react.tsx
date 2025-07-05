@@ -55,6 +55,15 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
           headers: () => {
             const headers = new Headers();
             headers.set("x-trpc-source", "nextjs-react");
+            
+            // Add admin password if available
+            if (typeof window !== "undefined") {
+              const adminPassword = localStorage.getItem("adminPassword");
+              if (adminPassword) {
+                headers.set("x-admin-password", adminPassword);
+              }
+            }
+            
             return headers;
           },
         }),

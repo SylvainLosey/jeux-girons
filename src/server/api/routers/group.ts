@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, publicProcedure, adminProcedure } from "~/server/api/trpc";
 import { groups } from "~/server/db/schema";
 import { eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
@@ -13,7 +13,7 @@ const groupInputSchema = z.object({
 });
 
 export const groupRouter = createTRPCRouter({
-  create: publicProcedure
+  create: adminProcedure
     .input(groupInputSchema)
     .mutation(async ({ ctx, input }) => {
       await ctx.db.insert(groups).values({
@@ -31,7 +31,7 @@ export const groupRouter = createTRPCRouter({
     });
   }),
 
-  update: publicProcedure
+  update: adminProcedure
     .input(
       groupInputSchema.extend({
         id: z.number(), // Require ID for updating
@@ -50,7 +50,7 @@ export const groupRouter = createTRPCRouter({
        // Consider returning the updated group or success status
     }),
 
-  delete: publicProcedure
+  delete: adminProcedure
     .input(z.object({ id: z.number() })) // Require ID for deleting
     .mutation(async ({ ctx, input }) => {
       await ctx.db.delete(groups).where(eq(groups.id, input.id));

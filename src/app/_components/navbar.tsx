@@ -192,16 +192,18 @@ export function Navbar() {
               </NavigationMenu>
             )}
 
-            {/* External Link to Official Giron Site */}
-            <a
-              href="https://murist2025.ch/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-oriental-gold transition-colors border border-gray-300 rounded-md hover:border-oriental-gold"
-            >
-              <span>Site des Girons</span>
-              <ArrowRight className="h-4 w-4" />
-            </a>
+            {/* External Link to Official Giron Site - Hidden in admin mode */}
+            {!isAdmin && (
+              <a
+                href="https://murist2025.ch/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-oriental-gold transition-colors border border-gray-300 rounded-md hover:border-oriental-gold"
+              >
+                <span>Site des Girons</span>
+                <ArrowRight className="h-4 w-4" />
+              </a>
+            )}
             
             {/* Admin Status */}
             {isAdmin && (
@@ -261,17 +263,19 @@ export function Navbar() {
                 </Link>
               ))}
 
-              {/* External Link for Mobile */}
-              <a
-                href="https://murist2025.ch/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-oriental-gold transition-colors border border-gray-300 hover:border-oriental-gold mt-2"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <span>Site des Girons</span>
-                <ArrowRight className="h-4 w-4" />
-              </a>
+              {/* External Link for Mobile - Hidden in admin mode */}
+              {!isAdmin && (
+                <a
+                  href="https://murist2025.ch/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-oriental-gold transition-colors border border-gray-300 hover:border-oriental-gold mt-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <span>Site des Girons</span>
+                  <ArrowRight className="h-4 w-4" />
+                </a>
+              )}
               
               {/* Mobile Admin Status */}
               {isAdmin && (

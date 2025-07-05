@@ -97,6 +97,26 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
 });
 
 /**
+ * Admin authentication middleware
+ */
+const adminMiddleware = t.middleware(async ({ ctx, next }) => {
+  // Get admin password from headers
+  const adminPassword = ctx.headers.get("x-admin-password");
+  
+  if (!adminPassword) {
+    throw new Error("Admin authentication required");
+  }
+  
+  // Validate against environment variable
+  const { env } = await import("~/env");
+  if (adminPassword !== env.ADMIN_PASSWORD) {
+    throw new Error("Invalid admin credentials");
+  }
+  
+  return next();
+});
+
+/**
  * Public (unauthenticated) procedure
  *
  * This is the base piece you use to build new queries and mutations on your tRPC API. It does not
@@ -104,3 +124,10 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
  * are logged in.
  */
 export const publicProcedure = t.procedure.use(timingMiddleware);
+
+/**
+ * Admin procedure
+ *
+ * This procedure requires admin authentication via the x-admin-password header.
+ */
+export const adminProcedure = t.procedure.use(timingMiddleware).use(adminMiddleware);

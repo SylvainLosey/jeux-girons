@@ -1,6 +1,6 @@
 // src/server/api/routers/schedule.ts
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, publicProcedure, adminProcedure } from "~/server/api/trpc";
 import { schedules, timeRanges, timeSlots, scheduleEntries } from "~/server/db/schema";
 import { eq, count } from "drizzle-orm";
 import { sql } from "drizzle-orm";
@@ -135,7 +135,7 @@ export const scheduleRouter = createTRPCRouter({
       };
     }),
 
-  save: publicProcedure
+  save: adminProcedure
     .input(saveScheduleSchema)
     .mutation(async ({ ctx, input }) => {
       // Use a transaction to ensure all operations succeed or fail together
@@ -184,14 +184,14 @@ export const scheduleRouter = createTRPCRouter({
       });
     }),
 
-  delete: publicProcedure
+  delete: adminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ ctx, input }) => {
       await ctx.db.delete(schedules).where(eq(schedules.id, input.id));
       return { success: true };
     }),
 
-  setLive: publicProcedure
+  setLive: adminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ ctx, input }) => {
       return await ctx.db.transaction(async (tx) => {
@@ -277,7 +277,7 @@ export const scheduleRouter = createTRPCRouter({
       };
     }),
 
-  update: publicProcedure
+  update: adminProcedure
     .input(z.object({
       id: z.number(),
       name: z.string().min(1, "Schedule name cannot be empty"),

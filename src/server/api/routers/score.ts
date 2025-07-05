@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, publicProcedure, adminProcedure } from "~/server/api/trpc";
 import { scores } from "~/server/db/schema";
 import { eq, and, desc, gte, or } from "drizzle-orm";
 
@@ -76,7 +76,7 @@ export const scoreRouter = createTRPCRouter({
     }),
 
   // Set or update a score
-  setScore: publicProcedure
+  setScore: adminProcedure
     .input(z.object({
       groupId: z.number(),
       gameId: z.number(),
@@ -125,7 +125,7 @@ export const scoreRouter = createTRPCRouter({
     }),
 
   // Delete a score
-  deleteScore: publicProcedure
+  deleteScore: adminProcedure
     .input(z.object({
       groupId: z.number(),
       gameId: z.number(),
@@ -146,7 +146,7 @@ export const scoreRouter = createTRPCRouter({
     }),
 
   // Delete all scores
-  deleteAllScores: publicProcedure
+  deleteAllScores: adminProcedure
     .mutation(async ({ ctx }) => {
       // Explicitly delete all scores with a where clause to satisfy linter
       await ctx.db.delete(scores).where(gte(scores.id, 0));

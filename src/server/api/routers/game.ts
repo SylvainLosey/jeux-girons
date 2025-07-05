@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, publicProcedure, adminProcedure } from "~/server/api/trpc";
 import { games } from "~/server/db/schema";
 import { eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
@@ -15,7 +15,7 @@ const gameInputSchema = z.object({
 });
 
 export const gameRouter = createTRPCRouter({
-  create: publicProcedure
+  create: adminProcedure
     .input(gameInputSchema)
     .mutation(async ({ ctx, input }) => {
       await ctx.db.insert(games).values({
@@ -34,7 +34,7 @@ export const gameRouter = createTRPCRouter({
     });
   }),
 
-  update: publicProcedure
+  update: adminProcedure
     .input(
       gameInputSchema.extend({
         id: z.number(), // Require ID for updating
@@ -54,7 +54,7 @@ export const gameRouter = createTRPCRouter({
         .where(eq(games.id, input.id));
     }),
 
-  delete: publicProcedure
+  delete: adminProcedure
     .input(z.object({ id: z.number() })) // Require ID for deleting
     .mutation(async ({ ctx, input }) => {
       await ctx.db.delete(games).where(eq(games.id, input.id));
