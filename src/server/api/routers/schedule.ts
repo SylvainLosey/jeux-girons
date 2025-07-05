@@ -23,6 +23,7 @@ const saveScheduleSchema = z.object({
       groupId: z.number().int(),
       gameId: z.number().int(),
       round: z.number().int().default(1),
+      isSecondChance: z.boolean().default(false),
     }))
   }))
 });
@@ -173,6 +174,7 @@ export const scheduleRouter = createTRPCRouter({
                 groupId: entry.groupId,
                 gameId: entry.gameId,
                 round: entry.round,
+                isSecondChance: entry.isSecondChance,
               }))
             );
           }

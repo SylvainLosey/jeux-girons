@@ -1,0 +1,1 @@
+ALTER TABLE "jeux-girons_schedule_entry" ADD COLUMN "is_second_chance" boolean DEFAULT false NOT NULL;

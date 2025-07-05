@@ -91,6 +91,7 @@ export const scheduleEntries = createTable(
     groupId: d.integer("group_id").notNull().references(() => groups.id),
     gameId: d.integer("game_id").notNull().references(() => games.id),
     round: d.integer("round").notNull().default(1),
+    isSecondChance: d.boolean("is_second_chance").notNull().default(false),
   })
 );
 

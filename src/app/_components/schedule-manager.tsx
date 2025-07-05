@@ -12,6 +12,7 @@ import { Textarea } from "~/components/ui/textarea";
 import { TimeRange } from "~/app/_types/schedule-types";
 import { TimeRangeEditor } from "~/app/_components/time-range-editor";
 import { ScheduleResults } from "~/app/_components/schedule-results";
+import { ScheduleValidation } from "~/app/_components/schedule-validation";
 import { generateSchedule } from "~/app/_utils/schedule-generator";
 import { formatTime } from "~/app/_utils/date-utils";
 import { v4 as uuidv4 } from "uuid";
@@ -230,6 +231,7 @@ export function ScheduleDisplay() {
           groupId: entry.group.id,
           gameId: entry.game.id,
           round: entry.round || 1,
+          isSecondChance: entry.isSecondChance || false,
         }))
       }))
     });
@@ -434,6 +436,13 @@ export function ScheduleDisplay() {
               </h2>
               <p className="mb-4 text-slate-500">{selectedSchedule.description}</p>
               
+              {/* Schedule Validation */}
+              <ScheduleValidation 
+                schedule={selectedSchedule.schedule}
+                groups={groups || []}
+                games={games || []}
+              />
+              
               <ScheduleResults 
                 schedule={selectedSchedule.schedule} 
                 groups={groups || []}
@@ -495,6 +504,14 @@ export function ScheduleDisplay() {
           {schedule && schedule.length > 0 && (
             <div className="space-y-6">
               <h2 className="text-2xl font-semibold">Planning Généré</h2>
+              
+              {/* Schedule Validation */}
+              <ScheduleValidation 
+                schedule={schedule}
+                groups={groups || []}
+                games={games || []}
+              />
+              
               <ScheduleResults 
                 schedule={schedule} 
                 groups={groups || []}

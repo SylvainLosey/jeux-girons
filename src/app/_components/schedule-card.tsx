@@ -34,6 +34,7 @@ interface ScheduleEntry {
   round: number;
   opponents?: Group[];
   slotIndex: number;
+  isSecondChance?: boolean;
 }
 
 interface ScheduleCardProps {
@@ -98,7 +99,7 @@ export function ScheduleCard({ entry, viewType, showAdmin = false }: ScheduleCar
               </div>
             </div>
             
-            {/* Second line: Game name + Tour badge */}
+            {/* Second line: Game name + Tour badge + Second chance badge */}
             <div className="flex items-center gap-2">
               <Link 
                 href={`/games/${createSlug(entry.game.name)}`}
@@ -111,6 +112,11 @@ export function ScheduleCard({ entry, viewType, showAdmin = false }: ScheduleCar
               {entry.round > 1 && (
                 <Badge variant="outline" className="text-xs flex-shrink-0">
                   Tour {entry.round}
+                </Badge>
+              )}
+              {entry.isSecondChance && (
+                <Badge variant="secondary" className="text-xs flex-shrink-0 bg-yellow-100 text-yellow-800">
+                  DEUXIEME CHANCE
                 </Badge>
               )}
             </div>

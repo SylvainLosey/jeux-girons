@@ -9,6 +9,7 @@ export interface ScheduleEntry {
   group: Group;
   game: Game;
   round?: number; // Optional round number (defaults to 1)
+  isSecondChance?: boolean; // Flag to indicate this is a second chance/filler game
 }
 
 // Define the structure for a timeslot
@@ -62,6 +63,7 @@ export interface SavedScheduleMetadata {
         groupId: number;
         gameId: number;
         round: number;
+        isSecondChance: boolean;
       }[];
     }[];
   }

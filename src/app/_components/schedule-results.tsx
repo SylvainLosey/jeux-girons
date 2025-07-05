@@ -4,6 +4,7 @@ import { formatTime, formatDate } from "../_utils/date-utils";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table";
 import { Calendar, Clock, ChevronDown, ChevronUp, RotateCcw } from "lucide-react";
 import { Button } from "~/components/ui/button";
+import { Badge } from "~/components/ui/badge";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
 
@@ -71,16 +72,29 @@ export function ScheduleResults({ schedule }: ScheduleResultsProps) {
       
       <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {schedule.map((slot) => {
-          // Group entries by game for this timeslot, storing the round number
-          const gamesInSlot = new Map<number, { game: Game; groups: Group[]; round: number | undefined }>();
+          // Group entries by game for this timeslot, storing the round number and second chance info
+          const gamesInSlot = new Map<number, { 
+            game: Game; 
+            groups: { group: Group; isSecondChance: boolean }[]; 
+            round: number | undefined; 
+            hasSecondChance: boolean;
+          }>();
           slot.entries.forEach(entry => {
             if (!gamesInSlot.has(entry.game.id)) {
               // Store the round from the *first* entry encountered for this game in this slot
-              gamesInSlot.set(entry.game.id, { game: entry.game, groups: [], round: entry.round });
+              gamesInSlot.set(entry.game.id, { 
+                game: entry.game, 
+                groups: [], 
+                round: entry.round, 
+                hasSecondChance: false 
+              });
             }
             const gameData = gamesInSlot.get(entry.game.id);
             if (gameData) {
-              gameData.groups.push(entry.group);
+              gameData.groups.push({ group: entry.group, isSecondChance: entry.isSecondChance ?? false });
+              if (entry.isSecondChance) {
+                gameData.hasSecondChance = true;
+              }
               // Note: This assumes all entries for the same game in a slot have the same round number.
               // The generator logic should ensure this.
             }
@@ -88,7 +102,7 @@ export function ScheduleResults({ schedule }: ScheduleResultsProps) {
 
           // Sort groups alphabetically within each game for consistent display
           gamesInSlot.forEach(gameData => {
-            gameData.groups.sort((a, b) => a.name.localeCompare(b.name));
+            gameData.groups.sort((a, b) => a.group.name.localeCompare(b.group.name));
           });
 
           // Convert map to array and sort games alphabetically for consistent display
@@ -137,14 +151,28 @@ export function ScheduleResults({ schedule }: ScheduleResultsProps) {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {sortedGamesData.map(({ game, groups, round }) => (
+                        {sortedGamesData.map(({ game, groups, round, hasSecondChance }) => (
                           <TableRow key={game.id}>
                             <TableCell className="font-medium text-slate-700">
-                              {game.name}
-                              {round && round > 1 ? ` (Tour ${round})` : ''}
+                              <div className="flex items-center gap-2">
+                                {game.name}
+                                {round && round > 1 ? ` (Tour ${round})` : ''}
+                                {hasSecondChance && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    DEUXIEME CHANCE
+                                  </Badge>
+                                )}
+                              </div>
                             </TableCell>
                             <TableCell className="text-slate-600">
-                              {groups.map(g => g.name).join(', ')}
+                              <div className="flex flex-wrap gap-1">
+                                {groups.map(({ group, isSecondChance }) => (
+                                  <span key={group.id} className={isSecondChance ? "font-medium" : ""}>
+                                    {group.name}
+                                    {isSecondChance && " ⭐"}
+                                  </span>
+                                ))}
+                              </div>
                             </TableCell>
                           </TableRow>
                         ))}
