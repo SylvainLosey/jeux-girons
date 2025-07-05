@@ -8,6 +8,13 @@
       "when": 1749482517924,
       "tag": "0000_little_shooting_star",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1751711031451,
+      "tag": "0001_add_image_url_to_games",
+      "breakpoints": true
     }
   ]
 }

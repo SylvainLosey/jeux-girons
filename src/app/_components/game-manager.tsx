@@ -45,13 +45,15 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Textarea } from "~/components/ui/textarea";
+import { ImageUpload } from "~/components/ui/image-upload";
 
 const gameFormSchema = z.object({
   id: z.number().optional(),
   name: z.string().min(1, "Nom du jeu est requis"),
   numberOfGroups: z.coerce.number().int().min(1).max(3),
   description: z.string().optional(),
-  rounds: z.coerce.number().int().min(1).max(2).default(1),
+  rounds: z.coerce.number().int().min(1).max(2),
+  imageUrl: z.string().optional(),
 });
 
 type GameFormValues = z.infer<typeof gameFormSchema>;
@@ -62,6 +64,7 @@ export function GameManager() {
   const [editingGame, setEditingGame] = useState<Game | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [gameToDelete, setGameToDelete] = useState<number | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const utils = api.useUtils();
 
@@ -74,6 +77,7 @@ export function GameManager() {
       numberOfGroups: 1,
       description: "",
       rounds: 1,
+      imageUrl: "",
     },
   });
 
@@ -122,13 +126,15 @@ export function GameManager() {
         numberOfGroups: game.numberOfGroups,
         description: game.description ?? "",
         rounds: game.rounds ?? 1,
+        imageUrl: game.imageUrl ?? "",
       });
     } else {
       form.reset({ 
         name: "", 
         numberOfGroups: 1, 
         description: "", 
-        rounds: 1 
+        rounds: 1,
+        imageUrl: "",
       });
     }
     setIsDialogOpen(true);
@@ -282,6 +288,30 @@ export function GameManager() {
                         />
                       </FormControl>
                       <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="imageUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <ImageUpload
+                          value={field.value ?? ''}
+                          onChange={field.onChange}
+                          onError={(error) => {
+                            setUploadError(error);
+                            setTimeout(() => setUploadError(null), 5000);
+                          }}
+                          label="Image du jeu (Optionnel)"
+                          disabled={isSubmitting}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                      {uploadError && (
+                        <p className="text-sm text-red-600 mt-1">{uploadError}</p>
+                      )}
                     </FormItem>
                   )}
                 />

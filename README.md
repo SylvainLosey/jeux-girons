@@ -15,6 +15,41 @@ If you are not familiar with the different technologies used in this project, pl
 - [Tailwind CSS](https://tailwindcss.com)
 - [tRPC](https://trpc.io)
 
+## Configuration
+
+### Vercel Blob Storage
+
+This project uses Vercel Blob Storage for image uploads. To configure it:
+
+1. **Create a Vercel Blob Store:**
+   ```bash
+   # Install Vercel CLI if you haven't already
+   npm install -g vercel
+   
+   # Login to Vercel
+   vercel login
+   
+   # Create a blob store
+   vercel blob create
+   ```
+
+2. **Add Environment Variables:**
+   Add the following to your `.env.local` file:
+   ```env
+   BLOB_READ_WRITE_TOKEN="vercel_blob_xxxxx"
+   ```
+
+3. **For Production:**
+   - Deploy your app to Vercel
+   - The `BLOB_READ_WRITE_TOKEN` will be automatically set by Vercel
+   - Image uploads will work seamlessly in production
+
+### Local Development
+
+For local development, you can either:
+- Set up a Vercel Blob Store and use the token locally
+- Or temporarily use URL-only mode (images via external URLs)
+
 ## Learn More
 
 To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
