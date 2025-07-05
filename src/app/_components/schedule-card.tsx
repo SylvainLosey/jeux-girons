@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Clock, Users, Gamepad2, CheckCircle, Clock3, Pencil, Swords } from "lucide-react";
 import { formatTime } from "~/app/_utils/date-utils";
 import { DirectScoreEditor } from "./score-editor";
+import { ScoreDisplay as ReusableScoreDisplay } from "~/components/ui/score-display";
 
 // Helper function to create URL-friendly slugs
 function createSlug(name: string): string {
@@ -41,88 +42,7 @@ interface ScheduleCardProps {
   showAdmin?: boolean;
 }
 
-function ScoreDisplay({ groupId, gameId, round, groupName, gameName, showAdmin = false, onScoreUpdated }: {
-  groupId: number;
-  gameId: number;
-  round: number;
-  groupName: string;
-  gameName: string;
-  showAdmin?: boolean;
-  onScoreUpdated?: () => void;
-}) {
-  const { data: score } = api.score.getScore.useQuery({ groupId, gameId, round });
-  const [isEditing, setIsEditing] = useState(false);
-  
-  if (!score) {
-    // Unplayed state - show nothing unless admin
-    return showAdmin ? (
-      <Dialog open={isEditing} onOpenChange={setIsEditing}>
-        <DialogTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0"
-          >
-            <Pencil className="h-4 w-4" />
-          </Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Modifier le score</DialogTitle>
-          </DialogHeader>
-          <DirectScoreEditor
-            groupId={groupId}
-            groupName={groupName}
-            gameId={gameId}
-            gameName={gameName}
-            round={round}
-            onScoreUpdated={() => {
-              onScoreUpdated?.();
-              setIsEditing(false);
-            }}
-          />
-        </DialogContent>
-      </Dialog>
-    ) : null;
-  }
 
-  return (
-    <div className="flex items-center gap-2">
-      <Badge variant="default" className="bg-oriental-gold hover:bg-oriental-gold-dark text-white font-semibold">
-        {score.score} pts
-      </Badge>
-      {showAdmin && (
-        <Dialog open={isEditing} onOpenChange={setIsEditing}>
-          <DialogTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0"
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Modifier le score</DialogTitle>
-            </DialogHeader>
-            <DirectScoreEditor
-              groupId={groupId}
-              groupName={groupName}
-              gameId={gameId}
-              gameName={gameName}
-              round={round}
-              onScoreUpdated={() => {
-                onScoreUpdated?.();
-                setIsEditing(false);
-              }}
-            />
-          </DialogContent>
-        </Dialog>
-      )}
-    </div>
-  );
-}
 
 export function ScheduleCard({ entry, viewType, showAdmin = false }: ScheduleCardProps) {
   const [scoreUpdated, setScoreUpdated] = useState(false);
@@ -166,7 +86,7 @@ export function ScheduleCard({ entry, viewType, showAdmin = false }: ScheduleCar
               
               {/* Score right-aligned */}
               <div className="flex-shrink-0">
-                <ScoreDisplay
+                <ReusableScoreDisplay
                   groupId={entry.group.id}
                   gameId={entry.game.id}
                   round={entry.round}

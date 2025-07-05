@@ -13,6 +13,7 @@ import { ScheduleCard } from "./schedule-card";
 import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
 import { DirectScoreEditor } from "./score-editor";
+import { ScoreDisplay } from "~/components/ui/score-display";
 
 // Helper function to create URL-friendly slugs
 function createSlug(name: string): string {
@@ -64,149 +65,46 @@ function GameTimeSlotCard({ slot, showAdmin = false }: { slot: GameTimeSlot; sho
             <Clock className="h-4 w-4 text-slate-600" />
             <span className="font-mono text-sm font-medium text-slate-700">{timeRange}</span>
           </div>
-          <Badge variant="outline" className="text-xs text-slate-600">
-            {slot.round > 1 ? `Tour ${slot.round}` : 'Tour 1'}
-          </Badge>
+          {slot.round > 1 && (
+            <Badge variant="outline" className="text-xs text-slate-600">
+              Tour {slot.round}
+            </Badge>
+          )}
         </div>
       </CardHeader>
       
       <CardContent className="pt-0">
         <div className="space-y-3">
-          {/* Groups participating */}
-          <div className="space-y-2">
-            <div className="text-xs font-medium text-slate-500 uppercase tracking-wide">
-              Participants
-            </div>
-            <div className="flex flex-wrap gap-1">
-              {slot.groups.map((group) => (
+          {/* Groups participating - one per line with score display */}
+          <div className="space-y-1">
+            {slot.groups.map((group) => (
+              <div key={group.id} className="flex items-center justify-between p-2 rounded-md bg-slate-50 hover:bg-oriental-gold/10 transition-colors">
                 <Link 
-                  key={group.id}
                   href={`/teams/${createSlug(group.name)}`}
+                  className="text-sm font-medium text-slate-700 hover:text-oriental-gold transition-colors"
                 >
-                  <Badge 
-                    variant="secondary" 
-                    className="text-xs hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer text-slate-700"
-                  >
-                    {group.name}
-                  </Badge>
+                  {group.name}
                 </Link>
-              ))}
-            </div>
+                <div className="flex-shrink-0">
+                  <ScoreDisplay
+                    groupId={group.id}
+                    gameId={slot.game.id}
+                    round={slot.round}
+                    groupName={group.name}
+                    gameName={slot.game.name}
+                    showAdmin={showAdmin}
+                  />
+                </div>
+              </div>
+            ))}
           </div>
-          
-          {/* Admin actions */}
-          {showAdmin && (
-            <div className="pt-2 border-t">
-              <DirectScoreEditor 
-                gameId={slot.game.id}
-                round={slot.round}
-                groups={slot.groups}
-                gameName={slot.game.name}
-              />
-            </div>
-          )}
         </div>
       </CardContent>
     </Card>
   );
 }
 
-function ScoreDisplayForGroup({ groupId, gameId, round, groupName, gameName, showAdmin = false }: {
-  groupId: number;
-  gameId: number;
-  round: number;
-  groupName: string;
-  gameName: string;
-  showAdmin?: boolean;
-}) {
-  const { data: score } = api.score.getScore.useQuery({ groupId, gameId, round });
-  const [isEditing, setIsEditing] = useState(false);
-  const utils = api.useUtils();
-  
-  const handleScoreUpdated = () => {
-    utils.score.invalidate();
-  };
-  
-  if (!score) {
-    return (
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1 text-slate-500">
-          <Clock3 className="h-3 w-3" />
-          <span className="text-xs font-medium">Non joué</span>
-        </div>
-        {showAdmin && (
-          <Dialog open={isEditing} onOpenChange={setIsEditing}>
-            <DialogTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 w-6 p-0"
-              >
-                <Pencil className="h-3 w-3" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Modifier le score</DialogTitle>
-              </DialogHeader>
-              <DirectScoreEditor
-                groupId={groupId}
-                groupName={groupName}
-                gameId={gameId}
-                gameName={gameName}
-                round={round}
-                onScoreUpdated={() => {
-                  handleScoreUpdated();
-                  setIsEditing(false);
-                }}
-              />
-            </DialogContent>
-          </Dialog>
-        )}
-      </div>
-    );
-  }
 
-  return (
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-1">
-        <CheckCircle className="h-3 w-3 text-oriental-gold" />
-        <span className="text-sm font-bold text-oriental-gold">
-          {score.score} pts
-        </span>
-      </div>
-      {showAdmin && (
-        <Dialog open={isEditing} onOpenChange={setIsEditing}>
-          <DialogTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0"
-            >
-              <Pencil className="h-3 w-3" />
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Modifier le score</DialogTitle>
-            </DialogHeader>
-            <DirectScoreEditor
-              groupId={groupId}
-              groupName={groupName}
-              gameId={gameId}
-              gameName={gameName}
-              round={round}
-              onScoreUpdated={() => {
-                handleScoreUpdated();
-                setIsEditing(false);
-              }}
-            />
-          </DialogContent>
-        </Dialog>
-      )}
-    </div>
-  );
-}
 
 export function UnifiedScheduleView({ schedule, entity, viewType, showAdmin = false }: UnifiedScheduleViewProps) {
   if (viewType === "team") {

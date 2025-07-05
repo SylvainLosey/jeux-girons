@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Users, Gamepad2, CalendarClock, Menu, Settings } from "lucide-react";
 import { cn } from "~/lib/utils";
@@ -99,7 +100,14 @@ export function Navbar() {
         <div className="flex items-center h-16 justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center px-2 text-xl font-bold oriental-title">
-            Jeux Murist 25
+            <Image
+              src="/logo_giron.png"
+              alt="Logo du Giron de Murist"
+              width={40}
+              height={40}
+              className="mr-3"
+            />
+            <span className="text-[#A38D6F]">Jeux du Giron de Murist</span>
           </Link>
           
           {/* Desktop Navigation */}
