@@ -175,23 +175,25 @@ export function Navbar() {
           </div>
           
           {/* Mobile Navigation Button */}
-          <div className="md:hidden">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Toggle menu"
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-          </div>
+          {isAdmin && (
+            <div className="md:hidden">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label="Toggle menu"
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+            </div>
+          )}
         </div>
         
         {/* Mobile Navigation Menu */}
-        {mobileMenuOpen && (
+        {mobileMenuOpen && isAdmin && (
           <div className="md:hidden px-2 pb-3">
             <div className="flex flex-col space-y-1">
-              {isAdmin && navItems.map((item) => (
+              {navItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
@@ -209,28 +211,26 @@ export function Navbar() {
               ))}
               
               {/* Mobile Admin Status */}
-              {isAdmin && (
-                <div className="flex items-center justify-between px-3 py-2 border-t mt-2 pt-3">
-                  <div className="flex items-center space-x-2">
-                    <Shield className="h-4 w-4 text-oriental-gold" />
-                    <Label className="text-sm font-medium text-oriental-gold">
-                      Admin connecté
-                    </Label>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      logout();
-                      setMobileMenuOpen(false);
-                    }}
-                    className="text-sm text-muted-foreground hover:text-destructive"
-                  >
-                    <LogOut className="h-4 w-4 mr-1" />
-                    Déconnexion
-                  </Button>
+              <div className="flex items-center justify-between px-3 py-2 border-t mt-2 pt-3">
+                <div className="flex items-center space-x-2">
+                  <Shield className="h-4 w-4 text-oriental-gold" />
+                  <Label className="text-sm font-medium text-oriental-gold">
+                    Admin connecté
+                  </Label>
                 </div>
-              )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    logout();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="text-sm text-muted-foreground hover:text-destructive"
+                >
+                  <LogOut className="h-4 w-4 mr-1" />
+                  Déconnexion
+                </Button>
+              </div>
             </div>
           </div>
         )}
