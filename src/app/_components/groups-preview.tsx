@@ -62,7 +62,7 @@ export function GroupsPreview() {
         <h2 className="text-xl font-semibold oriental-subtitle">Les Horaires par Jeunesse</h2>
       </div>
       
-      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {sortedGroups.map((group) => {
           const groupSlug = createSlug(group.name);
           
@@ -70,7 +70,7 @@ export function GroupsPreview() {
             <Link 
               key={group.id} 
               href={`/teams/${groupSlug}`}
-              className="block px-3 py-2.5 text-left font-medium text-slate-900 dark:text-slate-100 hover:text-oriental-accent hover:bg-oriental-accent/5 transition-colors rounded-lg border border-border/30 hover:border-oriental-accent/30 bg-white shadow-sm"
+              className="block px-3 py-2.5 text-left text-sm font-medium text-slate-900 dark:text-slate-100 hover:text-oriental-accent hover:bg-oriental-accent/5 transition-colors rounded-lg border border-border/30 hover:border-oriental-accent/30 bg-white shadow-sm truncate"
             >
               {group.name}
             </Link>
