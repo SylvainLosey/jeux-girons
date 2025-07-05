@@ -8,6 +8,7 @@ import { Search, Users, Gamepad2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { UnifiedScheduleView } from "./unified-schedule-view";
 import { useAdmin } from "./navbar";
+import { TotalPointsBadge } from "~/components/ui/total-points-badge";
 
 export function PlanningView() {
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
@@ -117,7 +118,7 @@ export function PlanningView() {
                   value={gameSearchValue}
                   onChange={(e) => setGameSearchValue(e.target.value)}
                   onFocus={() => setGameSearchFocused(true)}
-                  onBlur={() => setTimeout(() => setGameSearchFocused(false), 100)} 
+                  onBlur={() => setTimeout(() => setGameSearchFocused(false), 100)}
                   className="flex h-11 w-full py-3 bg-transparent text-sm outline-none placeholder:text-slate-500"
                 />
               </div>
@@ -161,9 +162,10 @@ export function PlanningView() {
       {/* Selected Group Schedule */}
       {selectedGroup && (
         <div>
-          <h2 className="text-2xl font-semibold mb-4 border-b pb-2 flex items-center oriental-title">
-            <Users className="mr-2 h-5 w-5 text-oriental-accent" />
+          <h2 className="text-2xl font-semibold mb-4 border-b pb-2 flex items-center gap-3 oriental-title">
+            <Users className="h-5 w-5 text-oriental-accent" />
             {selectedGroup.name}
+            <TotalPointsBadge groupId={selectedGroup.id} />
           </h2>
           
           {isLoadingLive ? (

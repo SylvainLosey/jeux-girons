@@ -51,7 +51,7 @@ function GameProgressBar({ percentage, playedGames, totalGames }: { percentage: 
         <div className="flex-1">
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
-              {playedGames} / {totalGames}
+              {playedGames} / {totalGames} scores
             </span>
             <span className="text-sm font-bold text-oriental-accent">
               {percentage}%
@@ -613,7 +613,7 @@ export function RankingsView() {
               </p>
             )}
             <p className="text-sm text-slate-500">
-              Le classement apparaîtra dès qu'un premier score sera enregistré.
+              Le classement apparaîtra dès qu&apos;un premier score sera enregistré.
             </p>
           </div>
         </div>
