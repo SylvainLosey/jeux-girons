@@ -93,6 +93,7 @@
   --oriental-accent: #C8941F;
   --oriental-cream: #F5F5DD;
   --oriental-warm-bg: #FEFAF1; /* Add the warm background color as a variable */
+  --oriental-dark-brown: #5D4037; /* Dark brown for text */
 }
 
 .dark {
@@ -170,6 +171,10 @@
   
   .text-oriental-cream {
     color: var(--oriental-cream);
+  }
+  
+  .text-oriental-dark-brown {
+    color: var(--oriental-dark-brown);
   }
   
   .bg-oriental-gold {

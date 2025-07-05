@@ -165,7 +165,7 @@ export function PlanningView() {
           <h2 className="text-2xl font-semibold mb-4 border-b pb-2 flex items-center gap-3 oriental-title">
             <Users className="h-5 w-5 text-oriental-accent" />
             {selectedGroup.name}
-            <TotalPointsBadge groupId={selectedGroup.id} />
+            <TotalPointsBadge groupId={selectedGroup.id} showRankingAward={true} />
           </h2>
           
           {isLoadingLive ? (

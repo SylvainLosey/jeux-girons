@@ -28,7 +28,7 @@ export function AdminAwareTeamPage({ group, liveSchedule }: AdminAwareTeamPagePr
             <h1 className="text-3xl font-bold mb-2 flex items-center gap-4 oriental-title">
               <Users className="h-8 w-8 text-oriental-accent" />
               {group.name}
-              <TotalPointsBadge groupId={group.id} />
+              <TotalPointsBadge groupId={group.id} showRankingAward={true} />
             </h1>
           </div>
 

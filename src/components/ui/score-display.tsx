@@ -173,7 +173,7 @@ export function ScoreDisplay({
 
   return (
     <div className="flex items-center gap-1">
-      <Badge variant="default" className="bg-oriental-gold hover:bg-oriental-gold-dark text-white font-semibold">
+      <Badge variant="default" className="bg-oriental-gold hover:bg-oriental-gold-dark text-oriental-dark-brown font-semibold">
         {score.score} pts
       </Badge>
       {showAdmin && (
