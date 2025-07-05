@@ -49,9 +49,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate JWT token
-    const JWT_SECRET = env.ADMIN_PASSWORD + "_jwt_secret";
     try {
-      const decoded = jwt.verify(token, JWT_SECRET) as { admin: boolean };
+      const decoded = jwt.verify(token, env.JWT_SECRET) as { admin: boolean };
       if (!decoded.admin) {
         return NextResponse.json({
           error: "Admin access required for file uploads"
@@ -77,7 +76,7 @@ export async function POST(request: NextRequest) {
     recordUploadAttempt(clientIP);
 
     // Check if Vercel Blob Storage is configured
-    const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
+    const blobToken = env.BLOB_READ_WRITE_TOKEN;
     
     if (!blobToken) {
       return NextResponse.json({

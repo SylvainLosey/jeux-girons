@@ -35,27 +35,51 @@ export const useAdmin = () => useContext(AdminContext);
 
 export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
   
   // Check for existing admin authentication on mount
   useEffect(() => {
-    const checkAdminAuth = () => {
-      const adminToken = localStorage.getItem("adminToken");
-      const adminAuth = localStorage.getItem("adminAuthenticated");
-      
-      if (adminAuth === "true" && adminToken) {
-        // For now, just trust the localStorage values
-        // Token validation will happen when making API calls
-        setIsAdmin(true);
-      }
-    };
-    
-    checkAdminAuth();
+    const adminToken = localStorage.getItem("adminToken");
+    setToken(adminToken);
   }, []);
+  
+  // Validate token using tRPC query
+  const { data: validation, error } = api.admin.validateToken.useQuery(
+    { token: token! },
+    { 
+      enabled: !!token,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      retry: false,
+    }
+  );
+  
+  // Update admin state based on validation result
+  useEffect(() => {
+    if (validation) {
+      if (validation.isValid && validation.admin) {
+        setIsAdmin(true);
+      } else {
+        // Clear invalid tokens
+        localStorage.removeItem("adminAuthenticated");
+        localStorage.removeItem("adminToken");
+        setIsAdmin(false);
+        setToken(null);
+      }
+    } else if (error) {
+      // Clear invalid tokens on error
+      localStorage.removeItem("adminAuthenticated");
+      localStorage.removeItem("adminToken");
+      setIsAdmin(false);
+      setToken(null);
+    }
+  }, [validation, error]);
 
   const logout = () => {
     localStorage.removeItem("adminAuthenticated");
     localStorage.removeItem("adminToken");
     setIsAdmin(false);
+    setToken(null);
   };
   
   return (

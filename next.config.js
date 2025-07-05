@@ -6,18 +6,16 @@ import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
 const config = {
-     // Disable TypeScript type checking during build
+  // Re-enable TypeScript type checking for better security
   typescript: {
-    // !! WARN !!
-    // Dangerously allows production builds to successfully complete even if
-    // your project has type errors.
-    ignoreBuildErrors: true,
+    // Only ignore build errors in development or when explicitly needed
+    ignoreBuildErrors: process.env.NODE_ENV === "development" && process.env.IGNORE_BUILD_ERRORS === "true",
   },
 
-  // If you also have ESLint errors, you can disable those too
+  // Re-enable ESLint checking for better code quality
   eslint: {
-    // Similarly, this allows production builds with ESLint errors
-    ignoreDuringBuilds: true,
+    // Only ignore lint errors in development or when explicitly needed
+    ignoreDuringBuilds: process.env.NODE_ENV === "development" && process.env.IGNORE_BUILD_ERRORS === "true",
   },
 };
 

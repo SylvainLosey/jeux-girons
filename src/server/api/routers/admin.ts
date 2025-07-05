@@ -16,7 +16,6 @@ const loginAttempts = new Map<string, { count: number; lastAttempt: number }>();
 
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
-const JWT_SECRET = env.ADMIN_PASSWORD + "_jwt_secret"; // Use admin password as part of JWT secret
 
 function getClientIP(headers: Headers): string {
   return headers.get("x-forwarded-for")?.split(",")[0] ?? 
@@ -88,7 +87,7 @@ export const adminRouter = createTRPCRouter({
           admin: true, 
           iat: Math.floor(Date.now() / 1000) // JWT standard uses seconds, not milliseconds
         },
-        JWT_SECRET,
+        env.JWT_SECRET,
         { expiresIn: "24h" }
       );
 
@@ -108,7 +107,7 @@ export const adminRouter = createTRPCRouter({
     }))
     .query(async ({ input }) => {
       try {
-        const decoded = jwt.verify(input.token, JWT_SECRET) as JWTPayload;
+        const decoded = jwt.verify(input.token, env.JWT_SECRET) as JWTPayload;
         return { 
           isValid: true, 
           admin: decoded.admin === true,

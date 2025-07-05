@@ -111,9 +111,8 @@ const adminMiddleware = t.middleware(async ({ ctx, next, type }) => {
   try {
     const jwt = await import("jsonwebtoken");
     const { env } = await import("~/env");
-    const JWT_SECRET = env.ADMIN_PASSWORD + "_jwt_secret";
     
-    const decoded = jwt.verify(token, JWT_SECRET) as { admin: boolean; exp: number; iat: number };
+    const decoded = jwt.verify(token, env.JWT_SECRET) as { admin: boolean; exp: number; iat: number };
     
     if (!decoded.admin) {
       throw new Error("Invalid admin credentials");

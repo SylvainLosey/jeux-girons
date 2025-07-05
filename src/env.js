@@ -12,7 +12,9 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
-    ADMIN_PASSWORD: z.string().min(1),
+    ADMIN_PASSWORD: z.string().min(8, "Admin password must be at least 8 characters"),
+    JWT_SECRET: z.string().min(32, "JWT secret must be at least 32 characters"),
+    BLOB_READ_WRITE_TOKEN: z.string().optional(),
   },
 
   /**
@@ -33,6 +35,7 @@ export const env = createEnv({
     DATABASE_URL_UNPOOLED: process.env.DATABASE_URL_UNPOOLED,
     NODE_ENV: process.env.NODE_ENV,
     ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,
+    JWT_SECRET: process.env.JWT_SECRET,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**
