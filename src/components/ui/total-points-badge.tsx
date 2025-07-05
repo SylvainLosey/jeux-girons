@@ -117,7 +117,32 @@ export function TotalPointsBadge({ groupId, className, showRankingAward = false 
   }
 
   const getRankText = (rank: number) => {
-    return rank;
+    switch (rank) {
+      case 1:
+        return (
+          <>
+            1<sup>er</sup>
+          </>
+        );
+      case 2:
+        return (
+          <>
+            2<sup>ème</sup>
+          </>
+        );
+      case 3:
+        return (
+          <>
+            3<sup>ème</sup>
+          </>
+        );
+      default:
+        return (
+          <>
+            {rank}<sup>ème</sup>
+          </>
+        );
+    }
   };
 
   const getRankIcon = (rank: number) => {
