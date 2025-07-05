@@ -8,7 +8,7 @@ import { Badge } from "~/components/ui/badge";
 import { Card, CardContent } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
-import { Clock, Users, Gamepad2, CheckCircle, Clock3, Pencil, Swords } from "lucide-react";
+import { Clock, Users, Gamepad2, CheckCircle, Clock3, Pencil } from "lucide-react";
 import { formatTime } from "~/app/_utils/date-utils";
 import { DirectScoreEditor } from "./score-editor";
 import { ScoreDisplay as ReusableScoreDisplay } from "~/components/ui/score-display";
@@ -53,7 +53,7 @@ export function ScheduleCard({ entry, viewType, showAdmin = false }: ScheduleCar
     setTimeout(() => setScoreUpdated(false), 2000);
   };
 
-  const hasOpponents = viewType === "team" && entry.opponents && entry.opponents.length > 0;
+
 
   return (
     <Card className="group cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.02] overflow-hidden !p-0 h-32">
@@ -121,27 +121,8 @@ export function ScheduleCard({ entry, viewType, showAdmin = false }: ScheduleCar
               )}
             </div>
             
-            {/* Third line: Opponents + Description or just Description */}
+            {/* Third line: Description only */}
             <div className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-              {hasOpponents && (
-                <div className="inline-flex items-center gap-1 mr-2">
-                  {entry.opponents!.map((opponent, index) => (
-                    <Link 
-                      key={opponent.id}
-                      href={`/teams/${createSlug(opponent.name)}`}
-                    >
-                      <Badge 
-                        variant="secondary" 
-                        className="bg-oriental-gold-light hover:bg-oriental-gold text-slate-800 text-xs font-medium inline-flex items-center gap-1"
-                      >
-                        <Swords className="h-2 w-2 flex-shrink-0" />
-                        <span className="truncate">{opponent.name}</span>
-                      </Badge>
-                    </Link>
-                  ))}
-                  {entry.game.description && <span className="text-slate-400 mx-1">|</span>}
-                </div>
-              )}
               {entry.game.description && (
                 <span>{entry.game.description}</span>
               )}
