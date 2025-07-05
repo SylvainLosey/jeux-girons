@@ -9,6 +9,13 @@ export function Footer() {
           <span>Giron Murist 2025</span>
           <span className="mx-2">|</span>
           <Link 
+            href="/mentions-legales"
+            className="hover:text-oriental-gold transition-colors"
+          >
+            Mentions légales
+          </Link>
+          <span className="mx-2">|</span>
+          <Link 
             href="/admin"
             className="hover:text-oriental-gold transition-colors"
           >
