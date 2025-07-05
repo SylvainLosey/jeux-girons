@@ -5,7 +5,7 @@ import { api } from "~/trpc/react";
 import { Card, CardContent } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { Alert, AlertDescription } from "~/components/ui/alert";
-import { Gamepad2, Users } from "lucide-react";
+import { Gamepad2, Users, Sparkles } from "lucide-react";
 import { cn } from "~/lib/utils";
 
 // Helper function to create URL-friendly slugs
@@ -67,14 +67,21 @@ export function GamesPreview() {
     );
   }
 
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-4">
-        <Gamepad2 className="h-5 w-5 text-oriental-accent" />
-        <h2 className="text-xl font-semibold oriental-subtitle">Les Jeux</h2>
-      </div>
-      
-      <div className="grid gap-4 md:grid-cols-2">
+      return (
+      <div className="space-y-4">
+        <div className="space-y-1 mb-6">
+          <div className="flex items-center gap-2">
+            <Gamepad2 className="h-5 w-5 text-oriental-accent" />
+            <h2 className="text-2xl font-semibold oriental-subtitle">Les Jeux</h2>
+          </div>
+          <div className="text-base text-oriental-dark-brown">
+            <span>
+              <span className="font-semibold text-oriental-dark-brown">{games.length}</span> joutes variées et surprenantes
+            </span>
+          </div>
+        </div>
+        
+        <div className="grid gap-4 md:grid-cols-2">
         {games.map((game) => {
           const gameSlug = createSlug(game.name);
           

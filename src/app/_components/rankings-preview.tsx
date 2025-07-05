@@ -5,7 +5,7 @@ import { api } from "~/trpc/react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
-import { Trophy, Medal, Award, ChevronRight, BarChart3 } from "lucide-react";
+import { Trophy, Medal, Award, ChevronRight, BarChart3, TrendingUp } from "lucide-react";
 import { cn } from "~/lib/utils";
 
 // Helper function to create URL-friendly slugs
@@ -243,15 +243,23 @@ export function RankingsPreview() {
     );
   }
 
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <Trophy className="h-5 w-5 text-oriental-accent" />
-          <h2 className="text-xl font-semibold oriental-subtitle">Classement</h2>
+      return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between mb-6">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <Trophy className="h-5 w-5 text-oriental-accent" />
+              <h2 className="text-2xl font-semibold oriental-subtitle">Classement</h2>
+            </div>
+            <div className="text-base text-oriental-dark-brown">
+              <span>
+                <span className="font-semibold text-oriental-dark-brown">{progress.playedGames}</span> scores entrés sur{' '}
+                <span className="font-semibold text-oriental-dark-brown">{progress.totalGames}</span>
+              </span>
+            </div>
+          </div>
+          <CompactProgressBar percentage={progress.percentage} />
         </div>
-        <CompactProgressBar percentage={progress.percentage} />
-      </div>
       
       <div className="rounded-md border border-oriental-gold-light overflow-hidden bg-white">
         <Table>

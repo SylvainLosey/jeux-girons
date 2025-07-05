@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Users } from "lucide-react";
+import { Users, Users2 } from "lucide-react";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { api } from "~/trpc/react";
 import { createSlug } from "~/app/_utils/slug-utils";
@@ -57,9 +57,16 @@ export function GroupsPreview() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-4">
-        <Users className="h-5 w-5 text-oriental-accent" />
-        <h2 className="text-xl font-semibold oriental-subtitle">Les Horaires par Jeunesse</h2>
+      <div className="space-y-1 mb-6">
+        <div className="flex items-center gap-2">
+          <Users className="h-5 w-5 text-oriental-accent" />
+          <h2 className="text-2xl font-semibold oriental-subtitle">Les Horaires par Jeunesse</h2>
+        </div>
+        <div className="text-base text-oriental-dark-brown">
+          <span>
+            <span className="font-semibold text-oriental-dark-brown">{groups.length}</span> jeunesses s'affronteront
+          </span>
+        </div>
       </div>
       
       <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
