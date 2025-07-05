@@ -181,7 +181,7 @@ export function GameManager() {
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Jeux</h1>
+        <h1 className="text-3xl font-bold oriental-title">Jeux</h1>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => handleOpenDialog()}>
@@ -312,7 +312,7 @@ export function GameManager() {
           <TableBody>
             {games?.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={4} className="h-24 text-center text-slate-500">
                   Aucun jeu trouvé. Cliquez sur &quot;Ajouter un Jeu&quot; pour en créer un.
                 </TableCell>
               </TableRow>
@@ -323,7 +323,7 @@ export function GameManager() {
                 switch (game.numberOfGroups) {
                   case 1:
                     badgeText = "1 jeunesse";
-                    badgeClasses += " bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
+                    badgeClasses += " bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300";
                     break;
                   case 2:
                     badgeText = "2 jeunesses";
@@ -335,16 +335,18 @@ export function GameManager() {
                     break;
                   default:
                     badgeText = `${game.numberOfGroups} jeunesses`; 
-                    badgeClasses += " bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
+                    badgeClasses += " bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300";
                 }
 
                 return (
                   <TableRow key={game.id}>
-                    <TableCell className="font-medium">{game.name}</TableCell>
+                    <TableCell className="font-medium text-slate-700">{game.name}</TableCell>
                     <TableCell>
-                      <span className={badgeClasses}>{badgeText}</span>
+                      <span className={badgeClasses}>
+                        {badgeText}
+                      </span>
                     </TableCell>
-                    <TableCell>{game.rounds > 1 ? `${game.rounds} tours` : "1 tour"}</TableCell>
+                    <TableCell className="text-slate-600">{game.rounds > 1 ? `${game.rounds} tours` : "1 tour"}</TableCell>
                     <TableCell className="text-right">
                       <Button variant="ghost" size="icon" className="mr-1" onClick={() => handleOpenDialog(game)} aria-label="Editer">
                         <Pencil className="h-4 w-4" />

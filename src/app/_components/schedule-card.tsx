@@ -57,7 +57,7 @@ function ScoreDisplay({ groupId, gameId, round, groupName, gameName, showAdmin =
     // Unplayed state
     return (
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1 text-muted-foreground">
+        <div className="flex items-center gap-1 text-slate-500">
           <Clock3 className="h-3 w-3" />
           <span className="text-xs font-medium">Non joué</span>
         </div>
@@ -97,8 +97,8 @@ function ScoreDisplay({ groupId, gameId, round, groupName, gameName, showAdmin =
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-1">
-        <CheckCircle className="h-3 w-3 text-gray-600" />
-        <span className="text-sm font-bold text-gray-700 dark:text-gray-300">
+        <CheckCircle className="h-3 w-3 text-slate-600" />
+        <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
           {score.score} pts
         </span>
       </div>
@@ -136,23 +136,25 @@ function ScoreDisplay({ groupId, gameId, round, groupName, gameName, showAdmin =
 }
 
 export function ScheduleCard({ entry, viewType, showAdmin = false }: ScheduleCardProps) {
-  const utils = api.useUtils();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [scoreUpdated, setScoreUpdated] = useState(false);
   
-  const handleScoreUpdated = () => {
-    utils.score.invalidate();
-  };
-
   const timeRange = `${formatTime(entry.startTime)} - ${formatTime(entry.endTime)}`;
   
+  const handleScoreUpdated = () => {
+    setScoreUpdated(true);
+    setTimeout(() => setScoreUpdated(false), 2000);
+  };
+
   return (
     <Card className="transition-all hover:shadow-md">
-      <CardHeader className="pb-1">
+      <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            <span className="font-mono text-sm font-medium">{timeRange}</span>
+            <Clock className="h-4 w-4 text-slate-600" />
+            <span className="font-mono text-sm font-medium text-slate-700">{timeRange}</span>
           </div>
-          <Badge variant="outline" className="text-xs">
+          <Badge variant="outline" className="text-xs text-slate-600">
             {entry.round > 1 ? `Tour ${entry.round}` : 'Tour 1'}
           </Badge>
         </div>
@@ -169,15 +171,15 @@ export function ScheduleCard({ entry, viewType, showAdmin = false }: ScheduleCar
                   href={`/games/${createSlug(entry.game.name)}`}
                   className="group"
                 >
-                  <div className="flex items-center gap-2 hover:text-gray-700 transition-colors">
-                    <Gamepad2 className="h-4 w-4 text-gray-600" />
-                    <span className="font-semibold group-hover:underline">
+                  <div className="flex items-center gap-2 hover:text-slate-600 transition-colors">
+                    <Gamepad2 className="h-4 w-4 text-slate-600" />
+                    <span className="font-semibold group-hover:underline text-slate-700">
                       {entry.game.name}
                     </span>
                   </div>
                 </Link>
                 {entry.game.description && (
-                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                  <p className="text-sm text-slate-500 mt-1 line-clamp-2">
                     {entry.game.description}
                   </p>
                 )}
@@ -189,9 +191,9 @@ export function ScheduleCard({ entry, viewType, showAdmin = false }: ScheduleCar
                   href={`/teams/${createSlug(entry.group.name)}`}
                   className="group"
                 >
-                  <div className="flex items-center gap-2 hover:text-gray-700 transition-colors">
-                    <Users className="h-4 w-4 text-gray-600" />
-                    <span className="font-semibold group-hover:underline">
+                  <div className="flex items-center gap-2 hover:text-slate-600 transition-colors">
+                    <Users className="h-4 w-4 text-slate-600" />
+                    <span className="font-semibold group-hover:underline text-slate-700">
                       {entry.group.name}
                     </span>
                   </div>
@@ -203,7 +205,7 @@ export function ScheduleCard({ entry, viewType, showAdmin = false }: ScheduleCar
           {/* Opponents (for team view) */}
           {viewType === "team" && entry.opponents && entry.opponents.length > 0 && (
             <div className="space-y-1">
-              <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              <div className="text-xs font-medium text-slate-500 uppercase tracking-wide">
                 Contre
               </div>
               <div className="flex flex-wrap gap-1">
@@ -214,7 +216,7 @@ export function ScheduleCard({ entry, viewType, showAdmin = false }: ScheduleCar
                   >
                     <Badge 
                       variant="secondary" 
-                      className="text-xs hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-300 transition-colors cursor-pointer"
+                      className="text-xs hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer text-slate-700"
                     >
                       {opponent.name}
                     </Badge>

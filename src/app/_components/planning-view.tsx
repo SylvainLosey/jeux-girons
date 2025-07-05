@@ -68,7 +68,7 @@ export function PlanningView() {
                   onChange={(e) => setGroupSearchValue(e.target.value)}
                   onFocus={() => setGroupSearchFocused(true)}
                   onBlur={() => setTimeout(() => setGroupSearchFocused(false), 100)}
-                  className="flex h-11 w-full py-3 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                  className="flex h-11 w-full py-3 bg-transparent text-sm outline-none placeholder:text-slate-500"
                 />
               </div>
               
@@ -76,11 +76,11 @@ export function PlanningView() {
                 <div className="absolute w-full z-10 border border-t-0 rounded-b-lg shadow-md bg-popover">
                   <ul className="max-h-[300px] overflow-y-auto py-1">
                     {isLoadingGroups ? (
-                      <li className="px-2 py-3 text-sm text-center text-muted-foreground">
+                      <li className="px-2 py-3 text-sm text-center text-slate-500">
                         Chargement des jeunesses...
                       </li>
                     ) : !groups?.length ? (
-                      <li className="px-2 py-3 text-sm text-center text-muted-foreground">
+                      <li className="px-2 py-3 text-sm text-center text-slate-500">
                         Aucune jeunesse trouvée
                       </li>
                     ) : (
@@ -118,7 +118,7 @@ export function PlanningView() {
                   onChange={(e) => setGameSearchValue(e.target.value)}
                   onFocus={() => setGameSearchFocused(true)}
                   onBlur={() => setTimeout(() => setGameSearchFocused(false), 100)} 
-                  className="flex h-11 w-full py-3 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                  className="flex h-11 w-full py-3 bg-transparent text-sm outline-none placeholder:text-slate-500"
                 />
               </div>
               
@@ -126,11 +126,11 @@ export function PlanningView() {
                 <div className="absolute w-full z-10 border border-t-0 rounded-b-lg shadow-md bg-popover">
                   <ul className="max-h-[300px] overflow-y-auto py-1">
                     {isLoadingGames ? (
-                      <li className="px-2 py-3 text-sm text-center text-muted-foreground">
+                      <li className="px-2 py-3 text-sm text-center text-slate-500">
                         Chargement des jeux...
                       </li>
                     ) : !games?.length ? (
-                      <li className="px-2 py-3 text-sm text-center text-muted-foreground">
+                      <li className="px-2 py-3 text-sm text-center text-slate-500">
                         Aucun jeu trouvé
                       </li>
                     ) : (
@@ -161,7 +161,7 @@ export function PlanningView() {
       {/* Selected Group Schedule */}
       {selectedGroup && (
         <div>
-          <h2 className="text-2xl font-semibold mb-4 border-b pb-2 flex items-center">
+          <h2 className="text-2xl font-semibold mb-4 border-b pb-2 flex items-center oriental-title">
             <Users className="mr-2 h-5 w-5" />
             {selectedGroup.name}
           </h2>
@@ -188,14 +188,14 @@ export function PlanningView() {
       {/* Selected Game Schedule */}
       {selectedGame && (
         <div>
-          <h2 className="text-2xl font-semibold mb-4 border-b pb-2 flex items-center">
+          <h2 className="text-2xl font-semibold mb-4 border-b pb-2 flex items-center oriental-title">
             <Gamepad2 className="mr-2 h-5 w-5" />
             {selectedGame.name}
           </h2>
           
           {/* Add game description if available */}
           {selectedGame.description && (
-            <p className="mb-4 text-muted-foreground">{selectedGame.description}</p>
+            <p className="mb-4 text-slate-500">{selectedGame.description}</p>
           )}
           
           {isLoadingLive ? (
@@ -221,11 +221,11 @@ export function PlanningView() {
       {!selectedGroup && !selectedGame && isAdmin && (
         <div className="text-center p-5 bg-muted rounded-lg border">
           <div className="flex justify-center space-x-3 mb-3">
-            <Users className="h-8 w-8 text-muted-foreground" />
-            <Gamepad2 className="h-8 w-8 text-muted-foreground" />
+            <Users className="h-8 w-8 text-slate-500" />
+            <Gamepad2 className="h-8 w-8 text-slate-500" />
           </div>
           <h3 className="text-lg font-medium mb-2">Sélectionnez une Jeunesse ou un Jeu</h3>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-slate-500 text-sm">
             Utilisez la recherche ci-dessus pour consulter l&apos;horaire par jeunesse ou par jeu
           </p>
         </div>

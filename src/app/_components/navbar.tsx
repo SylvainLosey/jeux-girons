@@ -98,7 +98,7 @@ export function Navbar() {
       <div className="container mx-auto">
         <div className="flex items-center h-16 justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center px-2 text-xl font-bold">
+          <Link href="/" className="flex items-center px-2 text-xl font-bold oriental-title">
             Jeux Murist 25
           </Link>
           

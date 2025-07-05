@@ -99,10 +99,10 @@ export function ScheduleResults({ schedule }: ScheduleResultsProps) {
           return (
             <div key={slot.slotIndex} className="p-4 border rounded-lg shadow-md bg-card">
               <div className="mb-4">
-                <h3 className="text-xl font-semibold text-left">
+                <h3 className="text-xl font-semibold text-left oriental-subtitle">
                   Créneau {slot.slotIndex}
                 </h3>
-                <div className="mt-2 space-y-1 text-sm text-muted-foreground">
+                <div className="mt-2 space-y-1 text-sm text-slate-500">
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
                     <span>{formatDate(slot.startTime)}</span>
@@ -115,13 +115,13 @@ export function ScheduleResults({ schedule }: ScheduleResultsProps) {
               </div>
               
               {sortedGamesData.length === 0 ? (
-                <p className="text-center text-muted-foreground py-4">
+                <p className="text-center text-slate-500 py-4">
                   Aucune affectation pour ce créneau.
                 </p>
               ) : (
                 <>
                   {/* Counter showing number of games/groups */}
-                  <div className="mb-2 text-sm font-medium">
+                  <div className="mb-2 text-sm font-medium text-slate-700">
                     {sortedGamesData.length} jeu{sortedGamesData.length > 1 ? 'x' : ''}, 
                     {' '}
                     {sortedGamesData.reduce((sum, curr) => sum + curr.groups.length, 0)} groupe{sortedGamesData.reduce((sum, curr) => sum + curr.groups.length, 0) > 1 ? 's' : ''}
@@ -132,18 +132,18 @@ export function ScheduleResults({ schedule }: ScheduleResultsProps) {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="w-1/3">Jeu</TableHead>
-                          <TableHead className="w-2/3">Participants</TableHead>
+                          <TableHead className="w-1/3 text-slate-600">Jeu</TableHead>
+                          <TableHead className="w-2/3 text-slate-600">Participants</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {sortedGamesData.map(({ game, groups, round }) => (
                           <TableRow key={game.id}>
-                            <TableCell className="font-medium">
+                            <TableCell className="font-medium text-slate-700">
                               {game.name}
                               {round && round > 1 ? ` (Tour ${round})` : ''}
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="text-slate-600">
                               {groups.map(g => g.name).join(', ')}
                             </TableCell>
                           </TableRow>

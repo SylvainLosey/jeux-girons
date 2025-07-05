@@ -310,7 +310,7 @@ export function ScheduleDisplay() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Gestion des Plannings</h1>
+      <h1 className="text-3xl font-bold mb-6 oriental-title">Gestion des Plannings</h1>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-8">
@@ -367,11 +367,11 @@ export function ScheduleDisplay() {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-slate-500">
                         Créé le : {new Date(schedule.createdAt).toLocaleString()}
                       </p>
                       <div className="flex justify-between mt-2">
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-sm text-slate-500">
                           <span className="font-medium">{schedule.slotCount || 0}</span> créneaux
                         </div>
                       </div>
@@ -432,7 +432,7 @@ export function ScheduleDisplay() {
                 ) : null}
                 Planning {selectedSchedule.isLive ? "Actif" : "Sélectionné"} : {selectedSchedule.name}
               </h2>
-              <p className="mb-4 text-muted-foreground">{selectedSchedule.description}</p>
+              <p className="mb-4 text-slate-500">{selectedSchedule.description}</p>
               
               <ScheduleResults 
                 schedule={selectedSchedule.schedule} 

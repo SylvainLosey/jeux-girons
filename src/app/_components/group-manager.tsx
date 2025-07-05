@@ -158,13 +158,13 @@ export function GroupManager() {
   const isSubmitting = createGroupMutation.isPending || updateGroupMutation.isPending;
   const isDeleting = deleteGroupMutation.isPending;
 
-  if (isLoading) return <div className="text-center p-4">Chargement des jeunesses...</div>;
+  if (isLoading) return <div className="text-center p-4 text-slate-500">Chargement des jeunesses...</div>;
   if (error) return <div className="text-center p-4 text-red-600">Erreur lors du chargement des jeunesses: {error.message}</div>;
 
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Jeunesses</h1>
+        <h1 className="text-3xl font-bold oriental-title">Jeunesses</h1>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => handleOpenDialog()}>
@@ -246,16 +246,16 @@ export function GroupManager() {
           <TableBody>
             {groups?.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={4} className="h-24 text-center text-slate-500">
                   Aucune jeunesse trouvée. Cliquez sur &quot;Ajouter une Jeunesse&quot; pour en créer une.
                 </TableCell>
               </TableRow>
             ) : (
               groups?.map((group) => (
                 <TableRow key={group.id}>
-                  <TableCell className="font-medium">{group.name}</TableCell>
-                  <TableCell>{group.contactName ?? <span className="text-muted-foreground">-</span>}</TableCell>
-                  <TableCell>{group.contactPhone ?? <span className="text-muted-foreground">-</span>}</TableCell>
+                  <TableCell className="font-medium text-slate-700">{group.name}</TableCell>
+                  <TableCell className="text-slate-600">{group.contactName ?? <span className="text-slate-500">-</span>}</TableCell>
+                  <TableCell className="text-slate-600">{group.contactPhone ?? <span className="text-slate-500">-</span>}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" className="mr-1" onClick={() => handleOpenDialog(group)} aria-label="Editer">
                       <Pencil className="h-4 w-4" />

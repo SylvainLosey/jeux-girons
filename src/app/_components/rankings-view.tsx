@@ -92,25 +92,25 @@ function RecentScoreItem({ score, index }: { score: RecentScore; index: number }
       visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
     )}>
       <div className="flex-1 min-w-0">
-        <div className="font-medium text-sm truncate">
+        <div className="font-medium text-sm truncate text-slate-700">
           {score.group.name}
         </div>
-        <div className="text-xs text-muted-foreground">
+        <div className="text-xs text-slate-500">
           {score.game.name}
           {score.round > 1 && ` (Tour ${score.round})`}
         </div>
-        <div className="text-xs text-muted-foreground">
+        <div className="text-xs text-slate-500">
           {formatTimeAgo(score.updatedAt)}
         </div>
       </div>
       <div className="flex items-center gap-2">
         <div className="text-right">
-          <div className="font-bold text-lg text-gray-700 dark:text-gray-300">
+          <div className="font-bold text-lg text-slate-700 dark:text-slate-300">
             {score.score}
           </div>
-          <div className="text-xs text-muted-foreground">pts</div>
+          <div className="text-xs text-slate-500">pts</div>
         </div>
-        <TrendingUp className="h-4 w-4 text-gray-600" />
+        <TrendingUp className="h-4 w-4 text-slate-600" />
       </div>
     </div>
   );
@@ -242,11 +242,11 @@ function RankingRow({ groupData, rankingsUpdateId, isNew = false }: {
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1:
-        return <Trophy className="h-5 w-5 text-yellow-500" />;
+        return <Trophy className="h-5 w-5 text-oriental-gold" />;
       case 2:
-        return <Medal className="h-5 w-5 text-gray-400" />;
+        return <Medal className="h-5 w-5 text-oriental-gold-dark" />;
       case 3:
-        return <Award className="h-5 w-5 text-orange-600" />;
+        return <Award className="h-5 w-5 text-oriental-accent" />;
       default:
         return null;
     }
@@ -539,24 +539,24 @@ export function RankingsView() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-3">
           <div className="flex items-center gap-2 mb-6">
-            <Trophy className="h-6 w-6 text-yellow-500" />
-            <h2 className="text-2xl font-semibold">Classement en direct</h2>
-            <div className="h-2 w-2 bg-gray-600 rounded-full ml-2"></div>
+            <Trophy className="h-6 w-6 text-oriental-gold" />
+            <h2 className="text-2xl font-semibold oriental-title">Classement en direct</h2>
+            <div className="h-2 w-2 bg-slate-600 rounded-full ml-2"></div>
           </div>
           
           <div className="text-center py-16">
-            <Trophy className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" />
-            <h3 className="text-xl font-semibold mb-2">Les jeux n'ont pas encore commencé</h3>
+            <Trophy className="h-16 w-16 mx-auto mb-4 text-slate-400" />
+            <h3 className="text-xl font-semibold mb-2">Les jeux n&apos;ont pas encore commencé</h3>
             {firstTimeslot ? (
-              <p className="text-muted-foreground mb-4">
+              <p className="text-slate-500 mb-4">
                 Les jeux commencent le {formatDateTime(new Date(firstTimeslot.startTime))}
               </p>
             ) : (
-              <p className="text-muted-foreground mb-4">
+              <p className="text-slate-500 mb-4">
                 En attente du planning des jeux
               </p>
             )}
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-slate-500">
               Le classement apparaîtra dès qu'un premier score sera enregistré.
             </p>
           </div>
@@ -588,8 +588,8 @@ export function RankingsView() {
       {/* Main Rankings Table */}
       <div className="lg:col-span-3 space-y-4">
         <div className="flex items-center gap-2 mb-6">
-          <Trophy className="h-6 w-6 text-yellow-500" />
-          <h2 className="text-2xl font-semibold">Classement en direct</h2>
+          <Trophy className="h-6 w-6 text-oriental-gold" />
+          <h2 className="text-2xl font-semibold oriental-title">Classement en direct</h2>
           <div className="h-2 w-2 bg-gray-600 rounded-full animate-pulse ml-2"></div>
         </div>
         
@@ -615,8 +615,8 @@ export function RankingsView() {
           </Table>
         </div>
         
-        <div className="text-xs text-muted-foreground text-center mt-4 flex items-center justify-center gap-2">
-          <div className="h-1.5 w-1.5 bg-gray-600 rounded-full animate-pulse"></div>
+        <div className="text-xs text-slate-500 text-center mt-4 flex items-center justify-center gap-2">
+          <div className="h-1.5 w-1.5 bg-slate-600 rounded-full animate-pulse"></div>
           Classement mis à jour en temps réel - basé sur le score total, puis sur le nombre de jeux joués. Équipes avec le même score classées ex æquo.
         </div>
       </div>

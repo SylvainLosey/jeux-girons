@@ -43,6 +43,11 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-oriental-gold: var(--oriental-gold);
+  --color-oriental-gold-dark: var(--oriental-gold-dark);
+  --color-oriental-gold-light: var(--oriental-gold-light);
+  --color-oriental-gold-soft: var(--oriental-gold-soft);
+  --color-oriental-accent: var(--oriental-accent);
 }
 
 :root {
@@ -78,6 +83,13 @@
   --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
   --sidebar-border: oklch(0.929 0.013 255.508);
   --sidebar-ring: oklch(0.704 0.04 256.788);
+  
+  /* Couleurs orientales basées sur #ECB365 */
+  --oriental-gold: #ECB365;
+  --oriental-gold-dark: #D4A142;
+  --oriental-gold-light: #F4C985;
+  --oriental-gold-soft: #FAE4B3;
+  --oriental-accent: #C8941F;
 }
 
 .dark {
@@ -112,6 +124,13 @@
   --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.551 0.027 264.364);
+  
+  /* Couleurs orientales pour le mode sombre */
+  --oriental-gold: #ECB365;
+  --oriental-gold-dark: #D4A142;
+  --oriental-gold-light: #F4C985;
+  --oriental-gold-soft: #FAE4B3;
+  --oriental-accent: #C8941F;
 }
 
 @layer base {
@@ -120,5 +139,48 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Classes utilitaires pour le thème oriental */
+@layer utilities {
+  .text-oriental-gold {
+    color: var(--oriental-gold);
+  }
+  
+  .text-oriental-gold-dark {
+    color: var(--oriental-gold-dark);
+  }
+  
+  .text-oriental-gold-light {
+    color: var(--oriental-gold-light);
+  }
+  
+  .text-oriental-accent {
+    color: var(--oriental-accent);
+  }
+  
+  .bg-oriental-gold {
+    background-color: var(--oriental-gold);
+  }
+  
+  .bg-oriental-gold-soft {
+    background-color: var(--oriental-gold-soft);
+  }
+  
+  .border-oriental-gold {
+    border-color: var(--oriental-gold);
+  }
+  
+  .oriental-title {
+    @apply text-oriental-gold font-bold tracking-wide;
+  }
+  
+  .oriental-subtitle {
+    @apply text-oriental-gold-dark font-semibold;
+  }
+  
+  .oriental-accent {
+    @apply text-oriental-accent;
   }
 }

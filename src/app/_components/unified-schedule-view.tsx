@@ -61,10 +61,10 @@ function GameTimeSlotCard({ slot, showAdmin = false }: { slot: GameTimeSlot; sho
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            <span className="font-mono text-sm font-medium">{timeRange}</span>
+            <Clock className="h-4 w-4 text-slate-600" />
+            <span className="font-mono text-sm font-medium text-slate-700">{timeRange}</span>
           </div>
-          <Badge variant="outline" className="text-xs">
+          <Badge variant="outline" className="text-xs text-slate-600">
             {slot.round > 1 ? `Tour ${slot.round}` : 'Tour 1'}
           </Badge>
         </div>
@@ -74,35 +74,37 @@ function GameTimeSlotCard({ slot, showAdmin = false }: { slot: GameTimeSlot; sho
         <div className="space-y-3">
           {/* Groups participating */}
           <div className="space-y-2">
-            <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Jeunesses participantes
+            <div className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+              Participants
             </div>
-            <div className="grid gap-2">
+            <div className="flex flex-wrap gap-1">
               {slot.groups.map((group) => (
-                <div key={group.id} className="flex items-center justify-between p-2 bg-muted/50 rounded">
-                  <Link 
-                    href={`/teams/${createSlug(group.name)}`}
-                    className="group flex items-center gap-2 hover:text-gray-700 transition-colors"
+                <Link 
+                  key={group.id}
+                  href={`/teams/${createSlug(group.name)}`}
+                >
+                  <Badge 
+                    variant="secondary" 
+                    className="text-xs hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer text-slate-700"
                   >
-                    <Users className="h-4 w-4 text-gray-600" />
-                    <span className="font-medium group-hover:underline">
-                      {group.name}
-                    </span>
-                  </Link>
-                  
-                  {/* Score for this group */}
-                  <ScoreDisplayForGroup 
-                    groupId={group.id}
-                    gameId={slot.game.id}
-                    round={slot.round}
-                    groupName={group.name}
-                    gameName={slot.game.name}
-                    showAdmin={showAdmin}
-                  />
-                </div>
+                    {group.name}
+                  </Badge>
+                </Link>
               ))}
             </div>
           </div>
+          
+          {/* Admin actions */}
+          {showAdmin && (
+            <div className="pt-2 border-t">
+              <DirectScoreEditor 
+                gameId={slot.game.id}
+                round={slot.round}
+                groups={slot.groups}
+                gameName={slot.game.name}
+              />
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -128,7 +130,7 @@ function ScoreDisplayForGroup({ groupId, gameId, round, groupName, gameName, sho
   if (!score) {
     return (
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1 text-muted-foreground">
+        <div className="flex items-center gap-1 text-slate-500">
           <Clock3 className="h-3 w-3" />
           <span className="text-xs font-medium">Non joué</span>
         </div>
