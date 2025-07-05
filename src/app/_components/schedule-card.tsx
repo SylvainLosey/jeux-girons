@@ -5,10 +5,10 @@ import { useState } from "react";
 import { api } from "~/trpc/react";
 import { Game, Group } from "~/app/_types/schedule-types";
 import { Badge } from "~/components/ui/badge";
-import { Card, CardContent, CardHeader } from "~/components/ui/card";
+import { Card, CardContent } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
-import { Clock, Users, Gamepad2, CheckCircle, Clock3, Pencil } from "lucide-react";
+import { Clock, Users, Gamepad2, CheckCircle, Clock3, Pencil, Swords } from "lucide-react";
 import { formatTime } from "~/app/_utils/date-utils";
 import { DirectScoreEditor } from "./score-editor";
 
@@ -54,63 +54,52 @@ function ScoreDisplay({ groupId, gameId, round, groupName, gameName, showAdmin =
   const [isEditing, setIsEditing] = useState(false);
   
   if (!score) {
-    // Unplayed state
-    return (
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1 text-slate-500">
-          <Clock3 className="h-3 w-3" />
-          <span className="text-xs font-medium">Non joué</span>
-        </div>
-        {showAdmin && (
-          <Dialog open={isEditing} onOpenChange={setIsEditing}>
-            <DialogTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 w-6 p-0"
-              >
-                <Pencil className="h-3 w-3" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Modifier le score</DialogTitle>
-              </DialogHeader>
-              <DirectScoreEditor
-                groupId={groupId}
-                groupName={groupName}
-                gameId={gameId}
-                gameName={gameName}
-                round={round}
-                onScoreUpdated={() => {
-                  onScoreUpdated?.();
-                  setIsEditing(false);
-                }}
-              />
-            </DialogContent>
-          </Dialog>
-        )}
-      </div>
-    );
+    // Unplayed state - show nothing unless admin
+    return showAdmin ? (
+      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+        <DialogTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0"
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Modifier le score</DialogTitle>
+          </DialogHeader>
+          <DirectScoreEditor
+            groupId={groupId}
+            groupName={groupName}
+            gameId={gameId}
+            gameName={gameName}
+            round={round}
+            onScoreUpdated={() => {
+              onScoreUpdated?.();
+              setIsEditing(false);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+    ) : null;
   }
 
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-1">
-        <CheckCircle className="h-3 w-3 text-slate-600" />
-        <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
-          {score.score} pts
-        </span>
-      </div>
+    <div className="flex items-center gap-2">
+      <Badge variant="default" className="bg-oriental-gold hover:bg-oriental-gold-dark text-white font-semibold">
+        {score.score} pts
+      </Badge>
       {showAdmin && (
         <Dialog open={isEditing} onOpenChange={setIsEditing}>
           <DialogTrigger asChild>
             <Button
               variant="ghost"
               size="sm"
-              className="h-6 w-6 p-0"
+              className="h-8 w-8 p-0"
             >
-              <Pencil className="h-3 w-3" />
+              <Pencil className="h-4 w-4" />
             </Button>
           </DialogTrigger>
           <DialogContent>
@@ -136,110 +125,121 @@ function ScoreDisplay({ groupId, gameId, round, groupName, gameName, showAdmin =
 }
 
 export function ScheduleCard({ entry, viewType, showAdmin = false }: ScheduleCardProps) {
-  const [dialogOpen, setDialogOpen] = useState(false);
   const [scoreUpdated, setScoreUpdated] = useState(false);
-  
-  const timeRange = `${formatTime(entry.startTime)} - ${formatTime(entry.endTime)}`;
   
   const handleScoreUpdated = () => {
     setScoreUpdated(true);
     setTimeout(() => setScoreUpdated(false), 2000);
   };
 
-  return (
-    <Card className="transition-all hover:shadow-md">
-      <CardHeader className="pb-2">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-slate-600" />
-            <span className="font-mono text-sm font-medium text-slate-700">{timeRange}</span>
-          </div>
-          <Badge variant="outline" className="text-xs text-slate-600">
-            {entry.round > 1 ? `Tour ${entry.round}` : 'Tour 1'}
-          </Badge>
-        </div>
-      </CardHeader>
-      
-      <CardContent className="pt-0">
-        <div className="space-y-2">
-          {/* Game/Team Info */}
-          <div className="space-y-1">
-            {viewType === "team" ? (
-              // Team view - show game info
-              <div>
-                <Link 
-                  href={`/games/${createSlug(entry.game.name)}`}
-                  className="group"
-                >
-                  <div className="flex items-center gap-2 hover:text-slate-600 transition-colors">
-                    <Gamepad2 className="h-4 w-4 text-slate-600" />
-                    <span className="font-semibold group-hover:underline text-slate-700">
-                      {entry.game.name}
-                    </span>
-                  </div>
-                </Link>
-                {entry.game.description && (
-                  <p className="text-sm text-slate-500 mt-1 line-clamp-2">
-                    {entry.game.description}
-                  </p>
-                )}
-              </div>
-            ) : (
-              // Game view - show team info
-              <div>
-                <Link 
-                  href={`/teams/${createSlug(entry.group.name)}`}
-                  className="group"
-                >
-                  <div className="flex items-center gap-2 hover:text-slate-600 transition-colors">
-                    <Users className="h-4 w-4 text-slate-600" />
-                    <span className="font-semibold group-hover:underline text-slate-700">
-                      {entry.group.name}
-                    </span>
-                  </div>
-                </Link>
-              </div>
-            )}
-          </div>
+  const hasOpponents = viewType === "team" && entry.opponents && entry.opponents.length > 0;
 
-          {/* Opponents (for team view) */}
-          {viewType === "team" && entry.opponents && entry.opponents.length > 0 && (
-            <div className="space-y-1">
-              <div className="text-xs font-medium text-slate-500 uppercase tracking-wide">
-                Contre
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {entry.opponents.map((opponent) => (
-                  <Link 
-                    key={opponent.id}
-                    href={`/teams/${createSlug(opponent.name)}`}
-                  >
-                    <Badge 
-                      variant="secondary" 
-                      className="text-xs hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer text-slate-700"
-                    >
-                      {opponent.name}
-                    </Badge>
-                  </Link>
-                ))}
-              </div>
+  return (
+    <Card className="group cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.02] overflow-hidden !p-0 h-32">
+      <div className="flex h-full">
+        {/* Game Image */}
+        <div className="flex-shrink-0 w-32 h-32">
+          {entry.game.imageUrl ? (
+            <img
+              src={entry.game.imageUrl}
+              alt={entry.game.name}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+              <Gamepad2 className="h-12 w-12 text-gray-400" />
             </div>
           )}
-
-          {/* Score Display */}
-          <div className="pt-2 border-t">
-            <ScoreDisplay
-              groupId={entry.group.id}
-              gameId={entry.game.id}
-              round={entry.round}
-              groupName={entry.group.name}
-              gameName={entry.game.name}
-              showAdmin={showAdmin}
-              onScoreUpdated={handleScoreUpdated}
-            />
-          </div>
         </div>
-      </CardContent>
+        
+        {/* Game Details */}
+        <div className="flex-1 min-w-0 p-4 flex flex-col justify-between">
+          <div className="space-y-2">
+            {/* First line: Clock + Time (left) and Score badge (right) */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-slate-600 flex-shrink-0" />
+                <span className="text-sm font-semibold text-slate-700 whitespace-nowrap">
+                  {formatTime(entry.startTime)}
+                </span>
+              </div>
+              
+              {/* Score right-aligned */}
+              <div className="flex-shrink-0">
+                <ScoreDisplay
+                  groupId={entry.group.id}
+                  gameId={entry.game.id}
+                  round={entry.round}
+                  groupName={entry.group.name}
+                  gameName={entry.game.name}
+                  showAdmin={showAdmin}
+                  onScoreUpdated={handleScoreUpdated}
+                />
+              </div>
+            </div>
+            
+            {/* Second line: Game name + Tour badge */}
+            <div className="flex items-center gap-2">
+              <Link 
+                href={`/games/${createSlug(entry.game.name)}`}
+                className="hover:text-oriental-gold transition-colors"
+              >
+                <h3 className="font-semibold text-slate-900 dark:text-slate-100 line-clamp-1">
+                  {entry.game.name}
+                </h3>
+              </Link>
+              {entry.round > 1 && (
+                <Badge variant="outline" className="text-xs flex-shrink-0">
+                  Tour {entry.round}
+                </Badge>
+              )}
+            </div>
+            
+            {/* Third line: Opponents + Description or just Description */}
+            <div className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+              {hasOpponents && (
+                <div className="inline-flex items-center gap-1 mr-2">
+                  {entry.opponents!.map((opponent, index) => (
+                    <Link 
+                      key={opponent.id}
+                      href={`/teams/${createSlug(opponent.name)}`}
+                    >
+                      <Badge 
+                        variant="secondary" 
+                        className="bg-oriental-gold-light hover:bg-oriental-gold text-slate-800 text-xs font-medium inline-flex items-center gap-1"
+                      >
+                        <Swords className="h-2 w-2 flex-shrink-0" />
+                        <span className="truncate">{opponent.name}</span>
+                      </Badge>
+                    </Link>
+                  ))}
+                  {entry.game.description && <span className="text-slate-400 mx-1">|</span>}
+                </div>
+              )}
+              {entry.game.description && (
+                <span>{entry.game.description}</span>
+              )}
+            </div>
+          </div>
+          
+          {/* Team info for game view (bottom) */}
+          {viewType === "game" && (
+            <div className="mt-auto">
+              <Link 
+                href={`/teams/${createSlug(entry.group.name)}`}
+                className="group"
+              >
+                <div className="flex items-center gap-2 hover:text-slate-600 transition-colors">
+                  <Users className="h-3 w-3 text-slate-600" />
+                  <span className="text-xs font-medium group-hover:underline text-slate-700">
+                    {entry.group.name}
+                  </span>
+                </div>
+              </Link>
+            </div>
+          )}
+        </div>
+      </div>
     </Card>
   );
 } 

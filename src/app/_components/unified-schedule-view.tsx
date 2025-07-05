@@ -170,8 +170,8 @@ function ScoreDisplayForGroup({ groupId, gameId, round, groupName, gameName, sho
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-1">
-        <CheckCircle className="h-3 w-3 text-gray-600" />
-        <span className="text-sm font-bold text-gray-700 dark:text-gray-300">
+        <CheckCircle className="h-3 w-3 text-oriental-gold" />
+        <span className="text-sm font-bold text-oriental-gold">
           {score.score} pts
         </span>
       </div>
