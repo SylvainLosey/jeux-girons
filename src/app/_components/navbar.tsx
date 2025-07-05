@@ -154,14 +154,14 @@ export function Navbar() {
                 alt="Logo Giron" 
                 className="h-10 w-10 object-contain"
               />
-              <div className="flex flex-col">
-                <span className="text-lg font-bold text-gray-900 dark:text-white">
-                  Jeux Murist
-                </span>
-                <span className="text-xs text-gray-500 dark:text-gray-400 -mt-1">
-                  2025
-                </span>
-              </div>
+                             <div className="flex flex-col">
+                 <span className="text-lg font-bold" style={{ color: '#A08E6D' }}>
+                   Jeux de Murist
+                 </span>
+                 <span className="text-xs text-gray-500 dark:text-gray-300 -mt-1">
+                   2025
+                 </span>
+               </div>
             </Link>
             
             {/* Navigation Loading Indicator */}
