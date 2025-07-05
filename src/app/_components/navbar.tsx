@@ -158,8 +158,8 @@ export function Navbar() {
         className={cn(
           "flex flex-row items-center px-3 py-2 text-sm font-medium transition-colors", 
           active 
-            ? "bg-primary/10 text-primary" 
-            : "text-foreground/70 hover:bg-accent hover:text-accent-foreground",
+            ? "bg-oriental-cream/20 text-oriental-cream" 
+            : "text-oriental-cream/70 hover:bg-oriental-cream/10 hover:text-oriental-cream",
           "p-0 gap-0", 
           className
         )}
@@ -171,7 +171,7 @@ export function Navbar() {
   );
 
   return (
-    <nav className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
+    <nav className="shadow-sm border-b border-[#0A222C]/20 sticky top-0 z-40" style={{ backgroundColor: '#0A222C' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
@@ -185,7 +185,7 @@ export function Navbar() {
                  <span className="text-lg font-bold" style={{ color: '#A08E6D' }}>
                    Jeux de Murist
                  </span>
-                 <span className="text-xs text-gray-500 dark:text-gray-300 -mt-1">
+                 <span className="text-xs text-oriental-cream/70 -mt-1">
                    2025
                  </span>
                </div>
@@ -195,7 +195,7 @@ export function Navbar() {
             {isNavigating && (
               <div className="ml-4 flex items-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin text-oriental-gold" />
-                <span className="text-sm text-gray-600 dark:text-gray-400">
+                <span className="text-sm text-oriental-cream/70">
                   Chargement...
                 </span>
               </div>
@@ -225,7 +225,7 @@ export function Navbar() {
                 href="https://murist2025.ch/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-oriental-gold transition-colors border border-gray-300 rounded-md hover:border-oriental-gold"
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-oriental-cream/70 hover:text-oriental-cream transition-colors border border-oriental-cream/30 rounded-md hover:border-oriental-cream"
               >
                 <span>Site des Girons</span>
                 <ArrowRight className="h-4 w-4" />
@@ -237,8 +237,8 @@ export function Navbar() {
               <div className="flex items-center space-x-2 ml-4 pl-4 border-l">
                 <div className="flex items-center space-x-3">
                   <div className="flex items-center space-x-2">
-                    <Shield className="h-4 w-4 text-oriental-gold" />
-                    <Label className="text-sm font-medium text-oriental-gold">
+                    <Shield className="h-4 w-4 text-oriental-cream" />
+                    <Label className="text-sm font-medium text-oriental-cream">
                       Admin connecté
                     </Label>
                   </div>
@@ -246,7 +246,7 @@ export function Navbar() {
                     variant="ghost"
                     size="sm"
                     onClick={logout}
-                    className="text-sm text-muted-foreground hover:text-destructive"
+                    className="text-sm text-oriental-cream/70 hover:text-oriental-cream"
                   >
                     <LogOut className="h-4 w-4 mr-1" />
                     Déconnexion
@@ -263,6 +263,7 @@ export function Navbar() {
               size="icon" 
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle menu"
+              className="text-oriental-cream hover:bg-oriental-cream/10"
             >
               <Menu className="h-5 w-5" />
             </Button>
@@ -281,8 +282,8 @@ export function Navbar() {
                   className={cn(
                     "flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors",
                     item.active 
-                      ? "bg-primary/10 text-primary" 
-                      : "text-foreground/70 hover:bg-accent hover:text-accent-foreground"
+                      ? "bg-oriental-cream/20 text-oriental-cream" 
+                      : "text-oriental-cream/70 hover:bg-oriental-cream/10 hover:text-oriental-cream"
                   )}
                 >
                   <item.icon className="mr-2 h-4 w-4 flex-shrink-0" />
@@ -296,7 +297,7 @@ export function Navbar() {
                   href="https://murist2025.ch/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-oriental-gold transition-colors border border-gray-300 hover:border-oriental-gold mt-2"
+                  className="flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium text-oriental-cream/70 hover:text-oriental-cream transition-colors border border-oriental-cream/30 hover:border-oriental-cream mt-2"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <span>Site des Girons</span>
@@ -308,8 +309,8 @@ export function Navbar() {
               {isAdmin && (
               <div className="flex items-center justify-between px-3 py-2 border-t mt-2 pt-3">
                 <div className="flex items-center space-x-2">
-                  <Shield className="h-4 w-4 text-oriental-gold" />
-                  <Label className="text-sm font-medium text-oriental-gold">
+                  <Shield className="h-4 w-4 text-oriental-cream" />
+                  <Label className="text-sm font-medium text-oriental-cream">
                     Admin connecté
                   </Label>
                 </div>
@@ -320,7 +321,7 @@ export function Navbar() {
                     logout();
                     setMobileMenuOpen(false);
                   }}
-                  className="text-sm text-muted-foreground hover:text-destructive"
+                  className="text-sm text-oriental-cream/70 hover:text-oriental-cream"
                 >
                   <LogOut className="h-4 w-4 mr-1" />
                   Déconnexion

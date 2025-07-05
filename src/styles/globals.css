@@ -48,6 +48,7 @@
   --color-oriental-gold-light: var(--oriental-gold-light);
   --color-oriental-gold-soft: var(--oriental-gold-soft);
   --color-oriental-accent: var(--oriental-accent);
+  --color-oriental-cream: var(--oriental-cream);
 }
 
 :root {
@@ -90,6 +91,7 @@
   --oriental-gold-light: #F4C985;
   --oriental-gold-soft: #FAE4B3;
   --oriental-accent: #C8941F;
+  --oriental-cream: #F5F5DD;
 }
 
 .dark {
@@ -131,6 +133,7 @@
   --oriental-gold-light: #F4C985;
   --oriental-gold-soft: #FAE4B3;
   --oriental-accent: #C8941F;
+  --oriental-cream: #F5F5DD;
 }
 
 @layer base {
@@ -160,8 +163,16 @@
     color: var(--oriental-accent);
   }
   
+  .text-oriental-cream {
+    color: var(--oriental-cream);
+  }
+  
   .bg-oriental-gold {
     background-color: var(--oriental-gold);
+  }
+  
+  .bg-oriental-accent {
+    background-color: var(--oriental-accent);
   }
   
   .bg-oriental-gold-soft {
