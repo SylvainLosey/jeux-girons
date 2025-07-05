@@ -70,7 +70,7 @@ export function GroupsPreview() {
             <Link 
               key={group.id} 
               href={`/teams/${groupSlug}`}
-              className="block p-1 text-left font-medium text-slate-900 dark:text-slate-100 hover:text-oriental-accent hover:bg-oriental-accent/5 transition-colors rounded border border-border/30 hover:border-oriental-accent/30"
+              className="block p-3 text-left font-medium text-slate-900 dark:text-slate-100 hover:text-oriental-accent hover:bg-oriental-accent/5 transition-colors rounded border border-border/30 hover:border-oriental-accent/30 bg-white shadow-sm"
             >
               {group.name}
             </Link>

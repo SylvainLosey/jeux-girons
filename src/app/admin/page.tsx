@@ -60,7 +60,7 @@ export default function AdminPage() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-oriental-gold-soft/20 to-oriental-gold-light/10 p-4">
+    <main className="flex min-h-screen flex-col items-center justify-center bg-oriental-warm p-4">
       <div className="w-full max-w-md">
         <Card className="shadow-lg border-oriental-gold/20">
           <CardHeader className="text-center">

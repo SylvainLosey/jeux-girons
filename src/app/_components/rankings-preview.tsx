@@ -269,7 +269,7 @@ export function RankingsPreview() {
         totalGames={progress.totalGames}
       />
       
-      <div className="rounded-md border overflow-hidden">
+      <div className="rounded-md border overflow-hidden bg-white">
         <Table>
           <TableHeader>
             <TableRow>

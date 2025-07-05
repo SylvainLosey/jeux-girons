@@ -53,11 +53,11 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
+  --background: #FEFAF1; /* Warm cream background for body */
   --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
+  --card: #FFFFFF; /* White background for cards */
   --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
+  --popover: #FFFFFF; /* White background for popovers */
   --popover-foreground: oklch(0.129 0.042 264.695);
   --primary: oklch(0.208 0.042 265.755);
   --primary-foreground: oklch(0.984 0.003 247.858);
@@ -92,6 +92,7 @@
   --oriental-gold-soft: #FAE4B3;
   --oriental-accent: #C8941F;
   --oriental-cream: #F5F5DD;
+  --oriental-warm-bg: #FEFAF1; /* Add the warm background color as a variable */
 }
 
 .dark {
@@ -177,6 +178,14 @@
   
   .bg-oriental-gold-soft {
     background-color: var(--oriental-gold-soft);
+  }
+  
+  .bg-oriental-warm {
+    background-color: var(--oriental-warm-bg);
+  }
+  
+  .bg-content-white {
+    background-color: #FFFFFF;
   }
   
   .border-oriental-gold {

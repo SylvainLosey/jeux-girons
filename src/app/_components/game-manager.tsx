@@ -329,7 +329,7 @@ export function GameManager() {
         </Dialog>
       </div>
 
-      <div className="rounded-md border">
+      <div className="rounded-md border bg-white">
         <Table>
           <TableHeader>
             <TableRow>

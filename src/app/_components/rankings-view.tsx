@@ -136,7 +136,7 @@ function RecentScoreItem({ score, index }: { score: RecentScore; index: number }
   return (
     <div className={cn(
       "flex items-center justify-between p-3 rounded-lg border transition-all duration-300",
-      "hover:bg-muted/50 hover:border-primary/20",
+      "hover:bg-muted/50 hover:border-primary/20 bg-white shadow-sm",
       visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
     )}>
       <div className="flex-1 min-w-0">
@@ -656,7 +656,7 @@ export function RankingsView() {
           totalGames={progress.totalGames}
         />
         
-        <div className="rounded-md border overflow-hidden">
+        <div className="rounded-md border overflow-hidden bg-white">
           <Table>
             <TableHeader>
               <TableRow>
