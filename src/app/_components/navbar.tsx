@@ -172,28 +172,28 @@ export function Navbar() {
 
   return (
     <nav className="shadow-sm border-b border-[#0A222C]/20 sticky top-0 z-40" style={{ backgroundColor: '#0A222C' }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-20 py-4">
           <div className="flex items-center">
-            <Link href="/" className="flex items-center space-x-3">
+            <Link href="/" className="flex items-center space-x-4">
               <img 
                 src="/logo_giron.png" 
                 alt="Logo Giron" 
-                className="h-10 w-10 object-contain"
+                className="h-16 w-16 object-contain"
               />
-                             <div className="flex flex-col">
-                 <span className="text-lg font-bold" style={{ color: '#A08E6D' }}>
-                   Jeux de Murist
-                 </span>
-                 <span className="text-xs text-oriental-cream/70 -mt-1">
-                   2025
-                 </span>
-               </div>
+              <div className="flex flex-col">
+                <span className="text-xl font-bold" style={{ color: '#A08E6D' }}>
+                  Jeux de Murist
+                </span>
+                <span className="text-xs text-oriental-cream/70 -mt-1">
+                  2025
+                </span>
+              </div>
             </Link>
             
             {/* Navigation Loading Indicator */}
             {isNavigating && (
-              <div className="ml-4 flex items-center gap-2">
+              <div className="ml-6 flex items-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin text-oriental-gold" />
                 <span className="text-sm text-oriental-cream/70">
                   Chargement...
