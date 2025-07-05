@@ -2,6 +2,7 @@
 
 import { RankingsPreview } from "./_components/rankings-preview";
 import { UnifiedSearch } from "./_components/unified-search";
+import { GamesPreview } from "./_components/games-preview";
 import { api } from "~/trpc/react";
 
 export default function HomePage() {
@@ -23,6 +24,12 @@ export default function HomePage() {
           
           {/* Unified Search */}
           <UnifiedSearch />
+          
+          {/* Divider */}
+          <div className="border-t border-border/50"></div>
+          
+          {/* Games Preview */}
+          <GamesPreview />
         </div>
       </div>
     </main>
