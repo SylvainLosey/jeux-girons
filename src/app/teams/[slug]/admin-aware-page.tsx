@@ -26,9 +26,6 @@ export function AdminAwareTeamPage({ group, liveSchedule }: AdminAwareTeamPagePr
             <Users className="mr-3 h-8 w-8 text-oriental-accent" />
             {group.name}
           </h1>
-          <p className="text-muted-foreground">
-            Horaire détaillé pour cette jeunesse
-          </p>
         </div>
 
         {!liveSchedule ? (
