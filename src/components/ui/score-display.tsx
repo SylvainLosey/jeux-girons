@@ -83,6 +83,8 @@ export function ScoreProvider({ children }: { children: React.ReactNode }) {
 
   const invalidateScores = () => {
     utils.score.invalidate();
+    // Also invalidate schedule queries to update completion status
+    utils.schedule.getCreneauxForAdmin.invalidate();
     setScores(new Map());
     setScoreRequests([]);
   };

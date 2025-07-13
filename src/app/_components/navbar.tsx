@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Users, Gamepad2, CalendarClock, Menu, Settings, Shield, LogOut, Loader2, ArrowRight } from "lucide-react";
+import { Users, Gamepad2, CalendarClock, Menu, Settings, Shield, LogOut, Loader2, ArrowRight, ClipboardList } from "lucide-react";
 import { cn } from "~/lib/utils";
 import {
   NavigationMenu,
@@ -139,6 +139,13 @@ export function Navbar() {
       icon: CalendarClock,
       active: pathname === "/schedule"
     },
+    // Add admin items
+    ...(isAdmin ? [{
+      name: "Scores",
+      href: "/admin/creneaux",
+      icon: ClipboardList,
+      active: pathname === "/admin/creneaux"
+    }] : []),
   ];
 
   // Custom component for navlink compatibility with Next.js Link

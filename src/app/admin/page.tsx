@@ -26,7 +26,7 @@ export default function AdminPage() {
         localStorage.setItem("adminToken", data.token);
         localStorage.setItem("adminAuthenticated", "true");
         setIsAdmin(true);
-        router.push("/");
+        router.push("/admin/creneaux");
       } else {
         setError("Mot de passe incorrect");
       }

@@ -137,6 +137,7 @@ export function DirectScoreEditor({
           value={scoreInput}
           onChange={handleScoreChange}
           placeholder="Entrez le score..."
+          autoFocus
         />
         {scoreError && (
           <div className="text-sm text-red-600 mt-1">

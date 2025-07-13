@@ -304,4 +304,88 @@ export const scheduleRouter = createTRPCRouter({
       
       return { success: true };
     }),
+
+  // Get schedule data organized by time slots for admin score management
+  getCreneauxForAdmin: adminProcedure
+    .query(async ({ ctx }) => {
+      // Find the live schedule
+      const liveSchedule = await ctx.db.query.schedules.findFirst({
+        where: eq(schedules.isLive, true),
+      });
+      
+      if (!liveSchedule) {
+        return null;
+      }
+      
+      // Get all time slots for this schedule
+      const scheduledTimeSlots = await ctx.db.query.timeSlots.findMany({
+        where: eq(timeSlots.scheduleId, liveSchedule.id),
+        orderBy: (timeSlotsTable, { asc }) => [asc(timeSlotsTable.startTime)],
+      });
+      
+      // Get all entries for these time slots
+      const slotIds = scheduledTimeSlots.map(slot => slot.id);
+      const entries = slotIds.length > 0 
+        ? await ctx.db.query.scheduleEntries.findMany({
+            where: (entries, { inArray }) => inArray(entries.timeSlotId, slotIds),
+            with: {
+              group: true,
+              game: true,
+            },
+          })
+        : [];
+      
+      // Get all scores for completion status
+      const allScores = await ctx.db.query.scores.findMany({
+        with: {
+          group: true,
+          game: true,
+        },
+      });
+      
+      // Group entries by time slot
+      const entriesBySlot = entries.reduce((acc, entry) => {
+        acc[entry.timeSlotId] ??= [];
+        acc[entry.timeSlotId]!.push(entry);
+        return acc;
+      }, {} as Record<number, typeof entries>);
+      
+              // Build the créneau data structure
+        const creneaux = scheduledTimeSlots.map(slot => {
+        const slotEntries = entriesBySlot[slot.id] ?? [];
+        
+        // Calculate completion status for this slot
+        const gamesWithScores = slotEntries.map(entry => {
+          const hasScore = allScores.some(score => 
+            score.groupId === entry.groupId && 
+            score.gameId === entry.gameId && 
+            score.round === entry.round
+          );
+          
+          return {
+            ...entry,
+            hasScore,
+          };
+        });
+        
+        const completedCount = gamesWithScores.filter(g => g.hasScore).length;
+        const totalCount = gamesWithScores.length;
+        const isComplete = totalCount > 0 && completedCount === totalCount;
+        
+        return {
+          slotIndex: slot.slotIndex,
+          startTime: slot.startTime,
+          endTime: slot.endTime,
+          games: gamesWithScores,
+          completedCount,
+          totalCount,
+          isComplete,
+        };
+      });
+      
+      return {
+        schedule: liveSchedule,
+        creneaux,
+      };
+    }),
 });
