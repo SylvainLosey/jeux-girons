@@ -21,6 +21,31 @@ If you are not familiar with the different technologies used in this project, pl
 
 This project uses URL-based image management. Simply provide image URLs from external sources when adding images to games.
 
+### Analytics
+
+This project uses [Vercel Analytics](https://vercel.com/analytics) for tracking user interactions and page views. The analytics setup includes:
+
+#### Page View Tracking
+- **Home page**: `page_view` event with `page_name: "home"`
+- **Team pages**: `team_view` event with `team_slug` and `page_type: "team"`
+- **Game pages**: `game_view` event with `game_slug` and `page_type: "game"`
+- **Rankings page**: `rankings_view` event with `page_type: "rankings"`
+- **Planning page**: `page_view` event with `page_name: "planning"`
+- **Groups page**: `page_view` event with `page_name: "groups"`
+
+#### User Interaction Tracking
+- **Score updates**: `score_updated` event with group name, game name, round, and score
+- **Group management**: `group_created`, `group_updated`, `group_deleted` events
+- **General interactions**: `user_interaction` event with action and properties
+
+#### Analytics Utility
+The analytics functionality is centralized in `src/lib/analytics.ts` and provides:
+- `trackTeamView(teamSlug)`: Track team page views
+- `trackGameView(gameSlug)`: Track game page views  
+- `trackRankingsView()`: Track rankings page views
+- `trackPageView(pageName, properties)`: Track general page views
+- `trackInteraction(action, properties)`: Track user interactions
+
 ## Learn More
 
 To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:

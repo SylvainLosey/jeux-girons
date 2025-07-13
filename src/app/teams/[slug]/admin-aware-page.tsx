@@ -1,12 +1,15 @@
 "use client";
 
 import { Users } from "lucide-react";
+import { useEffect } from "react";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { UnifiedScheduleView } from "~/app/_components/unified-schedule-view";
 import { useAdmin } from "~/app/_components/navbar";
 import { Group } from "~/app/_types/schedule-types";
 import { ScoreProvider } from "~/components/ui/score-display";
 import { TotalPointsBadge } from "~/components/ui/total-points-badge";
+import { analytics } from "~/lib/analytics";
+import { createSlug } from "~/app/_utils/slug-utils";
 
 interface LiveSchedule {
   schedule: unknown;
@@ -19,6 +22,12 @@ interface AdminAwareTeamPageProps {
 
 export function AdminAwareTeamPage({ group, liveSchedule }: AdminAwareTeamPageProps) {
   const { isAdmin } = useAdmin();
+
+  // Track team page view
+  useEffect(() => {
+    const teamSlug = createSlug(group.name);
+    analytics.trackTeamView(teamSlug);
+  }, [group.name]);
 
   return (
     <ScoreProvider>

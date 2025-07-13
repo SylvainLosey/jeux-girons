@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { api } from "~/trpc/react";
 import { Game, Group } from "~/app/_types/schedule-types";
 import { Alert, AlertDescription } from "~/components/ui/alert";
@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { UnifiedScheduleView } from "./unified-schedule-view";
 import { useAdmin } from "./navbar";
 import { TotalPointsBadge } from "~/components/ui/total-points-badge";
+import { analytics } from "~/lib/analytics";
 
 export function PlanningView() {
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
@@ -17,6 +18,11 @@ export function PlanningView() {
   const [gameSearchValue, setGameSearchValue] = useState("");
   const [groupSearchFocused, setGroupSearchFocused] = useState(false);
   const [gameSearchFocused, setGameSearchFocused] = useState(false);
+  
+  // Track planning page view
+  useEffect(() => {
+    analytics.trackPageView("planning");
+  }, []);
   
   // Fetch all groups and games
   const { data: groups, isLoading: isLoadingGroups } = api.group.getAll.useQuery();

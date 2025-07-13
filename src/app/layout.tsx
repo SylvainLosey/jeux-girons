@@ -2,6 +2,7 @@ import "~/styles/globals.css";
 
 import { type Metadata } from "next";
 import { Geist } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 
 import { ClientProviders } from "./_components/client-providers";
 import { Navbar } from "./_components/navbar";
@@ -29,6 +30,7 @@ export default function RootLayout({
           {children}
           <Footer />
         </ClientProviders>
+        <Analytics />
       </body>
     </html>
   );

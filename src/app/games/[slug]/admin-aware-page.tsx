@@ -1,12 +1,15 @@
 "use client";
 
 import { Gamepad2 } from "lucide-react";
+import { useEffect } from "react";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
 import { UnifiedScheduleView } from "~/app/_components/unified-schedule-view";
 import { useAdmin } from "~/app/_components/navbar";
 import { Game } from "~/app/_types/schedule-types";
 import { ScoreProvider } from "~/components/ui/score-display";
+import { analytics } from "~/lib/analytics";
+import { createSlug } from "~/app/_utils/slug-utils";
 
 interface LiveSchedule {
   schedule: unknown;
@@ -19,6 +22,12 @@ interface AdminAwareGamePageProps {
 
 export function AdminAwareGamePage({ game, liveSchedule }: AdminAwareGamePageProps) {
   const { isAdmin } = useAdmin();
+
+  // Track game page view
+  useEffect(() => {
+    const gameSlug = createSlug(game.name);
+    analytics.trackGameView(gameSlug);
+  }, [game.name]);
 
   return (
     <ScoreProvider>

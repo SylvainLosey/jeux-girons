@@ -7,6 +7,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { toast } from "sonner";
 import React from "react";
+import { analytics } from "~/lib/analytics";
 
 interface ScoreEditorProps {
   groupId: number;
@@ -41,6 +42,14 @@ export function DirectScoreEditor({
   // Set score mutation
   const setScoreMutation = api.score.setScore.useMutation({
     onSuccess: async () => {
+      // Track score update
+      analytics.trackInteraction("score_updated", {
+        group_name: groupName,
+        game_name: gameName,
+        round: round,
+        score: score,
+      });
+      
       // Invalidate all score-related queries to ensure live updates
       await utils.score.invalidate();
       
