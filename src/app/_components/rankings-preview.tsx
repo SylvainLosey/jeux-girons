@@ -69,17 +69,7 @@ export function RankingsPreview() {
   const { data: games, isLoading: isLoadingGames } = api.game.getAll.useQuery();
   
   if (isLoadingScores || isLoadingGroups || isLoadingGames) {
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center gap-2 mb-4">
-          <Trophy className="h-5 w-5 text-oriental-accent" />
-          <h2 className="text-xl font-semibold oriental-subtitle">Classement</h2>
-        </div>
-        <div className="text-center p-8 text-muted-foreground">
-          Chargement des classements...
-        </div>
-      </div>
-    );
+    return null;
   }
 
   if (!scores || !groups || !games) {

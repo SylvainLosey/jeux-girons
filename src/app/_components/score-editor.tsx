@@ -27,6 +27,8 @@ export function DirectScoreEditor({
   onScoreUpdated 
 }: ScoreEditorProps) {
   const [score, setScore] = useState<number>(0);
+  const [scoreInput, setScoreInput] = useState<string>("");
+  const [scoreError, setScoreError] = useState<string>("");
   const utils = api.useUtils();
   
   // Fetch current score
@@ -54,11 +56,44 @@ export function DirectScoreEditor({
   React.useEffect(() => {
     if (currentScore) {
       setScore(currentScore.score);
+      setScoreInput(currentScore.score.toString());
     }
   }, [currentScore]);
 
+  const validateScore = (value: string): boolean => {
+    // Check if it's a valid integer (zero or positive)
+    const num = parseInt(value);
+    if (isNaN(num) || num < 0 || !Number.isInteger(num)) {
+      setScoreError("Le score doit être un nombre entier positif ou zéro");
+      return false;
+    }
+    setScoreError("");
+    return true;
+  };
+
+  const handleScoreChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setScoreInput(value);
+    
+    // Clear error when user starts typing
+    if (scoreError) {
+      setScoreError("");
+    }
+    
+    // Only update score if it's a valid number
+    const num = parseInt(value);
+    if (!isNaN(num) && num >= 0 && Number.isInteger(num)) {
+      setScore(num);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateScore(scoreInput)) {
+      return;
+    }
+    
     setScoreMutation.mutate({
       groupId,
       gameId,
@@ -89,12 +124,16 @@ export function DirectScoreEditor({
         <Label htmlFor="score">Score</Label>
         <Input
           id="score"
-          type="number"
-          value={score}
-          onChange={(e) => setScore(parseInt(e.target.value) || 0)}
+          type="text"
+          value={scoreInput}
+          onChange={handleScoreChange}
           placeholder="Entrez le score..."
-          min="0"
         />
+        {scoreError && (
+          <div className="text-sm text-red-600 mt-1">
+            {scoreError}
+          </div>
+        )}
       </div>
       <div className="flex justify-end space-x-2">
         <Button 
