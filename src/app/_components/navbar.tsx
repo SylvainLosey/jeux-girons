@@ -224,7 +224,7 @@ export function Navbar() {
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-oriental-cream/70 hover:text-oriental-cream transition-colors border border-oriental-cream/30 rounded-md hover:border-oriental-cream"
               >
-                <span>Site des Girons</span>
+                <span>Site du Giron</span>
                 <ArrowRight className="h-4 w-4" />
               </a>
             )}
@@ -297,7 +297,7 @@ export function Navbar() {
                   className="flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium text-oriental-cream/70 hover:text-oriental-cream transition-colors border border-oriental-cream/30 hover:border-oriental-cream mt-2"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  <span>Site des Girons</span>
+                  <span>Site du Giron</span>
                   <ArrowRight className="h-4 w-4" />
                 </a>
               )}
