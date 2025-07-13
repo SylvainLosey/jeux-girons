@@ -14,17 +14,17 @@ import { formatTime, formatDate } from "~/app/_utils/date-utils";
 
 export default function AdminCreneauxPage() {
   const router = useRouter();
-  const { isAdmin } = useAdmin();
+  const { isAdmin, isLoading } = useAdmin();
   const [currentCreneauIndex, setCurrentCreneauIndex] = useState<number>(0);
   
-  // Redirect if not admin
+  // Redirect if not admin (but wait for loading to complete)
   useEffect(() => {
-    if (!isAdmin) {
+    if (!isLoading && !isAdmin) {
       router.push("/admin");
     }
-  }, [isAdmin, router]);
+  }, [isAdmin, isLoading, router]);
 
-  const { data: creneauxData, isLoading, error } = api.schedule.getCreneauxForAdmin.useQuery(undefined, {
+  const { data: creneauxData, isLoading: isLoadingCreneaux, error } = api.schedule.getCreneauxForAdmin.useQuery(undefined, {
     refetchOnWindowFocus: false,
     refetchInterval: 30000, // Refetch every 30 seconds as fallback
   });
@@ -36,11 +36,22 @@ export default function AdminCreneauxPage() {
     utils.schedule.getCreneauxForAdmin.invalidate();
   };
 
+  if (isLoading) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-oriental-gold mx-auto mb-4"></div>
+          <p className="text-lg">Vérification de l'authentification...</p>
+        </div>
+      </main>
+    );
+  }
+
   if (!isAdmin) {
     return null;
   }
 
-  if (isLoading) {
+  if (isLoadingCreneaux) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center">
         <div className="text-center">
@@ -138,7 +149,7 @@ export default function AdminCreneauxPage() {
                   Gestion des Scores
                 </h1>
                 <p className="text-lg text-muted-foreground">
-                  Gérez les scores par tour pour simplifier la saisie pendant les jeux
+                  Gérez les scores par tour
                 </p>
               </div>
             </div>
@@ -181,7 +192,7 @@ export default function AdminCreneauxPage() {
                 : "border-oriental-gold/30"
             }`}
           >
-            <CardHeader className="pb-4">
+            <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className={`rounded-full p-2 ${
@@ -265,6 +276,11 @@ export default function AdminCreneauxPage() {
                 </div>
               )}
             </CardContent>
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <p className="text-sm text-muted-foreground italic text-center">
+                💡 Veuillez entrer également les scores de 0 points
+              </p>
+            </div>
           </Card>
 
           {/* Navigation rapide simplifiée */}

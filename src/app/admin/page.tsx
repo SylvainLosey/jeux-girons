@@ -24,7 +24,6 @@ export default function AdminPage() {
       if (data.success && data.token) {
         // Store JWT token in localStorage
         localStorage.setItem("adminToken", data.token);
-        localStorage.setItem("adminAuthenticated", "true");
         setIsAdmin(true);
         router.push("/admin/creneaux");
       } else {

@@ -21,6 +21,7 @@ const AdminContext = createContext<{
   isAdmin: boolean;
   setIsAdmin: (admin: boolean) => void;
   logout: () => void;
+  isLoading: boolean;
 }>({
   isAdmin: false,
   setIsAdmin: () => {
@@ -29,6 +30,7 @@ const AdminContext = createContext<{
   logout: () => {
     // Default empty implementation
   },
+  isLoading: true,
 });
 
 export const useAdmin = () => useContext(AdminContext);
@@ -36,18 +38,30 @@ export const useAdmin = () => useContext(AdminContext);
 export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [token, setToken] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [tokenChecked, setTokenChecked] = useState(false);
   
   // Check for existing admin authentication on mount
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === "undefined") return;
+    
     const adminToken = localStorage.getItem("adminToken");
-    setToken(adminToken);
+    
+    if (adminToken) {
+      setToken(adminToken);
+      // Don't set isLoading to false yet - wait for validation
+    } else {
+      setIsLoading(false);
+      setTokenChecked(true);
+    }
   }, []);
   
   // Validate token using tRPC query
-  const { data: validation, error } = api.admin.validateToken.useQuery(
+  const { data: validation, error, isLoading: isValidating } = api.admin.validateToken.useQuery(
     { token: token! },
     { 
-      enabled: !!token,
+      enabled: !!token && !tokenChecked && typeof window !== "undefined",
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
       retry: false,
@@ -56,34 +70,47 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   
   // Update admin state based on validation result
   useEffect(() => {
-    if (validation) {
-      if (validation.isValid && validation.admin) {
+    if (token && !isValidating && !tokenChecked) {
+      if (validation && validation.isValid && validation.admin) {
         setIsAdmin(true);
-      } else {
+        setIsLoading(false);
+        setTokenChecked(true);
+      } else if (error || (validation && !validation.isValid)) {
         // Clear invalid tokens
-        localStorage.removeItem("adminAuthenticated");
-        localStorage.removeItem("adminToken");
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("adminToken");
+        }
         setIsAdmin(false);
         setToken(null);
+        setIsLoading(false);
+        setTokenChecked(true);
       }
-    } else if (error) {
-      // Clear invalid tokens on error
-      localStorage.removeItem("adminAuthenticated");
-      localStorage.removeItem("adminToken");
-      setIsAdmin(false);
-      setToken(null);
+    } else if (!token && !tokenChecked) {
+      setIsLoading(false);
+      setTokenChecked(true);
     }
-  }, [validation, error]);
+  }, [validation, error, token, isValidating, tokenChecked]);
 
   const logout = () => {
-    localStorage.removeItem("adminAuthenticated");
-    localStorage.removeItem("adminToken");
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("adminToken");
+    }
     setIsAdmin(false);
     setToken(null);
+    setTokenChecked(false);
+    setIsLoading(false);
+  };
+
+  // Update setIsAdmin to also handle token setting
+  const updateIsAdmin = (admin: boolean) => {
+    setIsAdmin(admin);
+    if (admin) {
+      setTokenChecked(true);
+    }
   };
   
   return (
-    <AdminContext.Provider value={{ isAdmin, setIsAdmin, logout }}>
+    <AdminContext.Provider value={{ isAdmin, setIsAdmin: updateIsAdmin, logout, isLoading }}>
       {children}
     </AdminContext.Provider>
   );
