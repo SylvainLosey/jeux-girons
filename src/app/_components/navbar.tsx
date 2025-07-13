@@ -203,8 +203,8 @@ export function Navbar() {
 
   return (
     <nav className="shadow-sm border-b border-[#0A222C]/20 sticky top-0 z-40" style={{ backgroundColor: '#0A222C' }}>
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20 py-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-20 py-4">
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-4">
               <img 
@@ -252,38 +252,34 @@ export function Navbar() {
 
             {/* External Link to Official Giron Site - Hidden in admin mode */}
             {!isAdmin && (
-              <a
-                href="https://murist2025.ch/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-oriental-cream/70 hover:text-oriental-cream transition-colors border border-oriental-cream/30 rounded-md hover:border-oriental-cream"
+              <Button
+                variant="outline"
+                size="sm"
+                asChild
+                className="border-oriental-cream/30 text-oriental-cream/70 hover:text-oriental-cream hover:border-oriental-cream bg-transparent hover:bg-oriental-cream/10"
               >
-                <span>Site du Giron</span>
-                <ArrowRight className="h-4 w-4" />
-              </a>
+                <a
+                  href="https://murist2025.ch/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span>Site du Giron</span>
+                  <ArrowRight className="h-4 w-4" />
+                </a>
+              </Button>
             )}
             
-            {/* Admin Status */}
+            {/* Admin Logout Button */}
             {isAdmin && (
-              <div className="flex items-center space-x-2 ml-4 pl-4 border-l">
-                <div className="flex items-center space-x-3">
-                  <div className="flex items-center space-x-2">
-                    <Shield className="h-4 w-4 text-oriental-cream" />
-                    <Label className="text-sm font-medium text-oriental-cream">
-                      Admin connecté
-                    </Label>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={logout}
-                    className="text-sm text-oriental-cream/70 hover:text-oriental-cream"
-                  >
-                    <LogOut className="h-4 w-4 mr-1" />
-                    Déconnexion
-                  </Button>
-                </div>
-              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={logout}
+                className="text-oriental-cream/70 hover:text-oriental-cream hover:bg-oriental-cream/10"
+              >
+                <LogOut className="h-4 w-4 mr-1" />
+                Déconnexion
+              </Button>
             )}
           </div>
           
@@ -324,27 +320,26 @@ export function Navbar() {
 
               {/* External Link for Mobile - Hidden in admin mode */}
               {!isAdmin && (
-                <a
-                  href="https://murist2025.ch/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium text-oriental-cream/70 hover:text-oriental-cream transition-colors border border-oriental-cream/30 hover:border-oriental-cream mt-2"
-                  onClick={() => setMobileMenuOpen(false)}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  asChild
+                  className="mt-2 border-oriental-cream/30 text-oriental-cream/70 hover:text-oriental-cream hover:border-oriental-cream bg-transparent hover:bg-oriental-cream/10"
                 >
-                  <span>Site du Giron</span>
-                  <ArrowRight className="h-4 w-4" />
-                </a>
+                  <a
+                    href="https://murist2025.ch/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <span>Site du Giron</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </a>
+                </Button>
               )}
               
-              {/* Mobile Admin Status */}
+              {/* Mobile Admin Logout */}
               {isAdmin && (
-              <div className="flex items-center justify-between px-3 py-2 border-t mt-2 pt-3">
-                <div className="flex items-center space-x-2">
-                  <Shield className="h-4 w-4 text-oriental-cream" />
-                  <Label className="text-sm font-medium text-oriental-cream">
-                    Admin connecté
-                  </Label>
-                </div>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -352,12 +347,11 @@ export function Navbar() {
                     logout();
                     setMobileMenuOpen(false);
                   }}
-                  className="text-sm text-oriental-cream/70 hover:text-oriental-cream"
+                  className="mt-2 text-oriental-cream/70 hover:text-oriental-cream hover:bg-oriental-cream/10"
                 >
                   <LogOut className="h-4 w-4 mr-1" />
                   Déconnexion
                 </Button>
-              </div>
               )}
             </div>
           </div>
