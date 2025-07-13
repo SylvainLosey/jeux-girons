@@ -11,9 +11,7 @@ export default function HomePage() {
       <div className="container mx-auto px-4 pb-16 max-w-4xl">
         <div className="space-y-8">
           {/* Top 5 Rankings Preview */}
-          <div className="pt-4 md:pt-8 md:pb-4">
-            <RankingsPreview />
-          </div>
+          <RankingsPreview />
 
           {/* Groups Preview */}
           <div className="pt-4 md:pt-8">

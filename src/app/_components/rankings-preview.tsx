@@ -244,7 +244,7 @@ export function RankingsPreview() {
   }
 
       return (
-      <div className="space-y-4">
+      <div className="space-y-4 pt-4 md:pt-8">
         <div className="flex items-center justify-between mb-6">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
