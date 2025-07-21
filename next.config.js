@@ -17,6 +17,12 @@ const config = {
     // Allow build to succeed with ESLint warnings, but still show them
     ignoreDuringBuilds: true,
   },
+
+  images: {
+    domains: [
+      "ilaomq0v0xxpqlmj.public.blob.vercel-storage.com"
+    ],
+  },
 };
 
 export default config;

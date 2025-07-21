@@ -7,6 +7,7 @@ import { Badge } from "~/components/ui/badge";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Gamepad2, Users, Sparkles } from "lucide-react";
 import { cn } from "~/lib/utils";
+import Image from "next/image";
 
 // Helper function to create URL-friendly slugs
 function createSlug(name: string): string {
@@ -92,9 +93,11 @@ export function GamesPreview() {
                   {/* Game Image - Square, full width */}
                   <div className="flex-shrink-0 w-32 h-32">
                     {game.imageUrl ? (
-                      <img
+                      <Image
                         src={game.imageUrl}
                         alt={game.name}
+                        width={86}
+                        height={86}
                         className="w-full h-full object-cover"
                       />
                     ) : (

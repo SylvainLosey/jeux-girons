@@ -15,6 +15,7 @@ import { DirectScoreEditor } from "./score-editor";
 import { ScoreDisplay as ReusableScoreDisplay } from "~/components/ui/score-display";
 import { InteractiveLink } from "~/components/ui/interactive-link";
 import { cn } from "~/lib/utils";
+import Image from "next/image";
 
 interface ScheduleEntry {
   startTime: Date;
@@ -59,9 +60,11 @@ export function ScheduleCard({ entry, viewType, showAdmin = false }: ScheduleCar
         {/* Game Image */}
         <div className="flex-shrink-0 w-32 h-32">
           {entry.game.imageUrl ? (
-            <img
+            <Image
               src={entry.game.imageUrl}
               alt={entry.game.name}
+              width={86}
+              height={86}
               className="w-full h-full object-cover"
             />
           ) : (

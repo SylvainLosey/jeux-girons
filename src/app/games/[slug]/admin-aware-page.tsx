@@ -13,6 +13,7 @@ import { createSlug } from "~/app/_utils/slug-utils";
 import { usePathname } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
+import Image from "next/image";
 
 interface LiveSchedule {
   schedule: unknown;
@@ -67,9 +68,11 @@ export function AdminAwareGamePage({ game, liveSchedule }: AdminAwareGamePagePro
               {/* Game Image */}
               <div className="flex-shrink-0 mx-auto md:mx-0">
                 {game.imageUrl ? (
-                  <img
+                  <Image
                     src={game.imageUrl}
                     alt={game.name}
+                    width={192}
+                    height={192}
                     className="w-48 h-48 object-cover rounded-lg border border-border shadow-sm"
                   />
                 ) : (
