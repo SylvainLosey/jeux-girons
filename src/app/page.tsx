@@ -4,13 +4,9 @@ import { useEffect } from "react";
 import { RankingsPreview } from "./_components/rankings-preview";
 import { GamesPreview } from "./_components/games-preview";
 import { GroupsPreview } from "./_components/groups-preview";
-import { analytics } from "~/lib/analytics";
 
 export default function HomePage() {
-  // Track home page view
-  useEffect(() => {
-    analytics.trackPageView("home");
-  }, []);
+  // Removed analytics import and useEffect
 
   return (
     <main className="flex min-h-screen flex-col items-center pt-8">

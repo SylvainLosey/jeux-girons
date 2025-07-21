@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Trophy, Medal, Award, ArrowUp, ArrowDown, Clock, TrendingUp, BarChart3 } from "lucide-react";
 import { cn } from "~/lib/utils";
-import { analytics } from "~/lib/analytics";
+// Removed analytics import
 
 // Helper function to create URL-friendly slugs
 function createSlug(name: string): string {
@@ -425,9 +425,7 @@ export function RankingsView() {
   const [rankingsUpdateId, setRankingsUpdateId] = useState<string>('');
   
   // Track rankings page view
-  useEffect(() => {
-    analytics.trackRankingsView();
-  }, []);
+  // Removed useEffect for analytics.trackRankingsView
   
   // Fetch all scores and groups with more frequent updates for live display
   const { data: scores, isLoading: isLoadingScores } = api.score.getAll.useQuery(undefined, {

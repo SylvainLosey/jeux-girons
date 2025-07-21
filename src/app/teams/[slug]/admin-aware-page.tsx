@@ -8,11 +8,11 @@ import { useAdmin } from "~/app/_components/navbar";
 import { Group } from "~/app/_types/schedule-types";
 import { ScoreProvider } from "~/components/ui/score-display";
 import { TotalPointsBadge } from "~/components/ui/total-points-badge";
-import { analytics } from "~/lib/analytics";
 import { createSlug } from "~/app/_utils/slug-utils";
 import { usePathname } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
+import { track } from "@vercel/analytics";
 
 interface LiveSchedule {
   schedule: unknown;
@@ -30,7 +30,6 @@ export function AdminAwareTeamPage({ group, liveSchedule }: AdminAwareTeamPagePr
   // Track team page view
   useEffect(() => {
     const teamSlug = createSlug(group.name);
-    analytics.trackTeamView(teamSlug);
   }, [group.name]);
 
   const handleShare = async () => {
@@ -42,6 +41,8 @@ export function AdminAwareTeamPage({ group, liveSchedule }: AdminAwareTeamPagePr
     };
     if (navigator.share) {
       try {
+        // Add analytics event for share button
+        track("share_clicked", { context: "team", name: group.name });
         await navigator.share(shareData);
         toast.success("Lien partagé !");
       } catch (err) {
@@ -49,6 +50,8 @@ export function AdminAwareTeamPage({ group, liveSchedule }: AdminAwareTeamPagePr
       }
     } else {
       try {
+        // Add analytics event for share button
+        track("share_clicked", { context: "team", name: group.name });
         await navigator.clipboard.writeText(url);
         toast.success("Lien copié dans le presse-papier !");
       } catch (err) {

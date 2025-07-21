@@ -36,7 +36,6 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { analytics } from "~/lib/analytics";
 
 const groupFormSchema = z.object({
   id: z.number().optional(),
@@ -56,7 +55,7 @@ export function GroupManager() {
 
   // Track groups page view
   useEffect(() => {
-    analytics.trackPageView("groups");
+    // Removed analytics.trackPageView("groups");
   }, []);
 
   const utils = api.useUtils();
@@ -74,10 +73,9 @@ export function GroupManager() {
 
   const createGroupMutation = api.group.create.useMutation({
     onSuccess: async () => {
-      // Track group creation
-      analytics.trackInteraction("group_created", {
-        group_name: form.getValues("name"),
-      });
+      // Removed analytics.trackInteraction("group_created", {
+      //   group_name: form.getValues("name"),
+      // });
       
       await utils.group.getAll.invalidate();
       setIsDialogOpen(false);
@@ -92,10 +90,9 @@ export function GroupManager() {
 
   const updateGroupMutation = api.group.update.useMutation({
     onSuccess: async () => {
-      // Track group update
-      analytics.trackInteraction("group_updated", {
-        group_name: form.getValues("name"),
-      });
+      // Removed analytics.trackInteraction("group_updated", {
+      //   group_name: form.getValues("name"),
+      // });
       
       await utils.group.getAll.invalidate();
       setIsDialogOpen(false);
@@ -110,10 +107,9 @@ export function GroupManager() {
 
   const deleteGroupMutation = api.group.delete.useMutation({
     onSuccess: async () => {
-      // Track group deletion
-      analytics.trackInteraction("group_deleted", {
-        group_id: groupToDelete ?? 0,
-      });
+      // Removed analytics.trackInteraction("group_deleted", {
+      //   group_id: groupToDelete ?? 0,
+      // });
       
       await utils.group.getAll.invalidate();
       toast.success("Jeunesse supprimée avec succès.");

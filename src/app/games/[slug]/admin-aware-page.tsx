@@ -8,12 +8,12 @@ import { UnifiedScheduleView } from "~/app/_components/unified-schedule-view";
 import { useAdmin } from "~/app/_components/navbar";
 import { Game } from "~/app/_types/schedule-types";
 import { ScoreProvider } from "~/components/ui/score-display";
-import { analytics } from "~/lib/analytics";
 import { createSlug } from "~/app/_utils/slug-utils";
 import { usePathname } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
 import Image from "next/image";
+import { track } from "@vercel/analytics";
 
 interface LiveSchedule {
   schedule: unknown;
@@ -31,7 +31,6 @@ export function AdminAwareGamePage({ game, liveSchedule }: AdminAwareGamePagePro
   // Track game page view
   useEffect(() => {
     const gameSlug = createSlug(game.name);
-    analytics.trackGameView(gameSlug);
   }, [game.name]);
 
   const handleShare = async () => {
@@ -43,6 +42,8 @@ export function AdminAwareGamePage({ game, liveSchedule }: AdminAwareGamePagePro
     };
     if (navigator.share) {
       try {
+        // Add analytics event for share button
+        track("share_clicked", { context: "game", name: game.name });
         await navigator.share(shareData);
         toast.success("Lien partagé !");
       } catch (err) {
@@ -50,6 +51,8 @@ export function AdminAwareGamePage({ game, liveSchedule }: AdminAwareGamePagePro
       }
     } else {
       try {
+        // Add analytics event for share button
+        track("share_clicked", { context: "game", name: game.name });
         await navigator.clipboard.writeText(url);
         toast.success("Lien copié dans le presse-papier !");
       } catch (err) {
