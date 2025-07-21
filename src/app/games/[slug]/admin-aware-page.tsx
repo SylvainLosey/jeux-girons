@@ -1,6 +1,6 @@
 "use client";
 
-import { Gamepad2 } from "lucide-react";
+import { Gamepad2, Share } from "lucide-react";
 import { useEffect } from "react";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
@@ -10,6 +10,9 @@ import { Game } from "~/app/_types/schedule-types";
 import { ScoreProvider } from "~/components/ui/score-display";
 import { analytics } from "~/lib/analytics";
 import { createSlug } from "~/app/_utils/slug-utils";
+import { usePathname } from "next/navigation";
+import { toast } from "sonner";
+import { Button } from "~/components/ui/button";
 
 interface LiveSchedule {
   schedule: unknown;
@@ -22,12 +25,37 @@ interface AdminAwareGamePageProps {
 
 export function AdminAwareGamePage({ game, liveSchedule }: AdminAwareGamePageProps) {
   const { isAdmin } = useAdmin();
+  const pathname = usePathname();
 
   // Track game page view
   useEffect(() => {
     const gameSlug = createSlug(game.name);
     analytics.trackGameView(gameSlug);
   }, [game.name]);
+
+  const handleShare = async () => {
+    const url = typeof window !== "undefined" ? window.location.origin + pathname : pathname;
+    const shareData = {
+      title: game.name + " - Horaire",
+      text: `Consultez l'horaire détaillé du jeu ${game.name}`,
+      url,
+    };
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+        toast.success("Lien partagé !");
+      } catch (err) {
+        // User cancelled or error
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(url);
+        toast.success("Lien copié dans le presse-papier !");
+      } catch (err) {
+        toast.error("Impossible de copier le lien");
+      }
+    }
+  };
 
   return (
     <ScoreProvider>
@@ -53,10 +81,21 @@ export function AdminAwareGamePage({ game, liveSchedule }: AdminAwareGamePagePro
               
               {/* Game Details */}
               <div className="flex-1 text-center md:text-left space-y-3">
-                <h1 className="text-3xl font-bold oriental-title flex items-center justify-center md:justify-start gap-3">
-                  <Gamepad2 className="h-8 w-8 text-oriental-accent" />
-                  <span className="text-oriental-accent">{game.name}</span>
-                </h1>
+                <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 justify-between">
+                  <h1 className="text-3xl font-bold oriental-title flex items-center gap-3">
+                    <Gamepad2 className="h-8 w-8 text-oriental-accent" />
+                    <span className="text-oriental-accent">{game.name}</span>
+                  </h1>
+                  <Button
+                    onClick={handleShare}
+                    variant="outline"
+                    size="sm"
+                    className="border-oriental-accent text-oriental-accent bg-transparent hover:bg-oriental-accent/10 hover:border-oriental-accent focus-visible:ring-oriental-accent md:mt-0 mt-2 w-full md:w-auto"
+                  >
+                    <Share className="h-4 w-4" />
+                    Partager
+                  </Button>
+                </div>
                 {game.description && (
                   <p className="text-muted-foreground text-lg leading-relaxed">
                     {game.description}

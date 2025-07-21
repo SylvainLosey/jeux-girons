@@ -15,7 +15,6 @@ export function TotalPointsBadge({ groupId, className, showRankingAward = false 
   const { data: groupScores, isLoading: isLoadingGroupScores } = api.score.getByGroup.useQuery(
     { groupId },
     {
-      refetchInterval: 5000, // Refresh every 5 seconds for more responsive live updates
       refetchOnWindowFocus: false,
       refetchOnMount: true, // Refetch when component mounts
     }
@@ -23,7 +22,6 @@ export function TotalPointsBadge({ groupId, className, showRankingAward = false 
 
   // Fetch all scores and groups for ranking calculation (only if showRankingAward is true)
   const { data: allScores, isLoading: isLoadingAllScores } = api.score.getAll.useQuery(undefined, {
-    refetchInterval: 5000,
     refetchOnWindowFocus: false,
     enabled: showRankingAward, // Only fetch if we need ranking
   });
