@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure, adminProcedure } from "~/server/api/trpc";
-import { games } from "~/server/db/schema";
+import { games, scheduleEntries } from "~/server/db/schema";
 import { eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { createSlug } from "~/app/_utils/slug-utils";
@@ -57,7 +57,28 @@ export const gameRouter = createTRPCRouter({
   delete: adminProcedure
     .input(z.object({ id: z.number() })) // Require ID for deleting
     .mutation(async ({ ctx, input }) => {
-      await ctx.db.delete(games).where(eq(games.id, input.id));
+      // Use a transaction to ensure all operations succeed or fail together
+      return await ctx.db.transaction(async (tx) => {
+        // Check if the game exists first
+        const game = await tx.query.games.findFirst({
+          where: eq(games.id, input.id),
+        });
+        
+        if (!game) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Game not found",
+          });
+        }
+        
+        // First, delete all schedule entries that reference this game
+        await tx.delete(scheduleEntries).where(eq(scheduleEntries.gameId, input.id));
+        
+        // Then delete the game (scores will be automatically deleted due to CASCADE)
+        await tx.delete(games).where(eq(games.id, input.id));
+        
+        return { success: true };
+      });
     }),
 
   // Get game by slug
