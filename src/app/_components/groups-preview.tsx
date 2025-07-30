@@ -69,7 +69,7 @@ export function GroupsPreview() {
         </div>
       </div>
       
-      <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
         {sortedGroups.map((group) => {
           const groupSlug = createSlug(group.name);
           
