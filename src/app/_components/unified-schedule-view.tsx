@@ -25,6 +25,7 @@ interface ScheduleEntry {
   round: number;
   opponents?: Group[];
   slotIndex: number;
+  isSecondChance?: boolean;
 }
 
 interface GameTimeSlot {
@@ -34,6 +35,8 @@ interface GameTimeSlot {
   round: number;
   groups: Group[];
   slotIndex: number;
+  hasSecondChance?: boolean;
+  secondChanceGroups?: Group[];
 }
 
 interface UnifiedScheduleViewProps {
@@ -59,11 +62,18 @@ function GameTimeSlotCard({ slot, showAdmin = false }: { slot: GameTimeSlot; sho
             <Clock className="h-4 w-4 text-oriental-gold-light" />
             <span className="text-base font-semibold text-oriental-accent">{formatTime(slot.startTime)}</span>
           </div>
-          {slot.round > 1 && (
-            <Badge variant="outline" className="text-xs text-slate-600">
-              Tour {slot.round}
-            </Badge>
-          )}
+          <div className="flex items-center gap-2">
+            {slot.round > 1 && (
+              <Badge variant="outline" className="text-xs text-slate-600">
+                Tour {slot.round}
+              </Badge>
+            )}
+            {slot.hasSecondChance && (
+              <Badge variant="secondary" className="text-xs bg-yellow-100 text-yellow-800">
+                PARTIE BONUS
+              </Badge>
+            )}
+          </div>
         </div>
       </CardHeader>
       
@@ -71,30 +81,34 @@ function GameTimeSlotCard({ slot, showAdmin = false }: { slot: GameTimeSlot; sho
         <div className="space-y-3">
           {/* Groups participating - one per line with score display */}
           <div className="space-y-1">
-            {slot.groups.map((group) => (
-              <div key={group.id} className="flex items-center justify-between p-2 rounded-md bg-slate-50 hover:bg-oriental-gold/10 transition-colors">
-                <InteractiveLink 
-                  href={`/teams/${createSlug(group.name)}`}
-                  className="text-sm font-medium text-slate-700 hover:text-oriental-accent transition-colors flex items-center gap-2"
-                  onClick={handleLinkClick}
-                >
-                  {group.name}
-                  {isNavigating && (
-                    <Loader2 className="h-3 w-3 animate-spin text-oriental-accent" />
-                  )}
-                </InteractiveLink>
-                <div className="flex-shrink-0">
-                  <ScoreDisplay
-                    groupId={group.id}
-                    gameId={slot.game.id}
-                    round={slot.round}
-                    groupName={group.name}
-                    gameName={slot.game.name}
-                    showAdmin={showAdmin}
-                  />
+            {slot.groups.map((group) => {
+              const isSecondChance = slot.secondChanceGroups?.some(g => g.id === group.id) ?? false;
+              return (
+                <div key={group.id} className="flex items-center justify-between p-2 rounded-md bg-slate-50 hover:bg-oriental-gold/10 transition-colors">
+                  <InteractiveLink 
+                    href={`/teams/${createSlug(group.name)}`}
+                    className="text-sm font-medium text-slate-700 hover:text-oriental-accent transition-colors flex items-center gap-2"
+                    onClick={handleLinkClick}
+                  >
+                    {group.name}
+                    {isSecondChance && " ⭐"}
+                    {isNavigating && (
+                      <Loader2 className="h-3 w-3 animate-spin text-oriental-accent" />
+                    )}
+                  </InteractiveLink>
+                  <div className="flex-shrink-0">
+                    <ScoreDisplay
+                      groupId={group.id}
+                      gameId={slot.game.id}
+                      round={slot.round}
+                      groupName={group.name}
+                      gameName={slot.game.name}
+                      showAdmin={showAdmin}
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </CardContent>
@@ -198,14 +212,24 @@ export function UnifiedScheduleView({ schedule, entity, viewType, showAdmin = fa
           return acc;
         }, {});
 
-        return Object.entries(slotsByRound).map(([round, entries]) => ({
-          slotIndex: slot.slotIndex,
-          startTime: slot.startTime,
-          endTime: slot.endTime,
-          game: entity as Game,
-          round: parseInt(round),
-          groups: (entries as any[]).map((entry: any) => entry.group),
-        }));
+        return Object.entries(slotsByRound).map(([round, entries]) => {
+          const allGroups = (entries as any[]).map((entry: any) => entry.group);
+          const secondChanceGroups = (entries as any[])
+            .filter((entry: any) => entry.isSecondChance)
+            .map((entry: any) => entry.group);
+          const hasSecondChance = secondChanceGroups.length > 0;
+          
+          return {
+            slotIndex: slot.slotIndex,
+            startTime: slot.startTime,
+            endTime: slot.endTime,
+            game: entity as Game,
+            round: parseInt(round),
+            groups: allGroups,
+            hasSecondChance,
+            secondChanceGroups,
+          };
+        });
       })
       .sort((a: GameTimeSlot, b: GameTimeSlot) => a.startTime.getTime() - b.startTime.getTime());
 
