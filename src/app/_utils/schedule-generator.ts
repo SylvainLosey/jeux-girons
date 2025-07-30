@@ -214,7 +214,7 @@ function scheduleMultiPlayerGame(
   const currentGroupId = currentGroup.id;
   const partnersNeeded = game.numberOfGroups - 1;
   
-  // Find suitable partner groups
+  // Find suitable partner groups who also need this game
   const potentialPartners = groups.filter(g => 
     g.id !== currentGroupId && 
     !groupScheduledInSlot.has(g.id) && 
@@ -224,7 +224,7 @@ function scheduleMultiPlayerGame(
     })
   );
   
-  // If enough partners found, schedule them
+  // If we have enough partners who need this game, schedule them
   if (potentialPartners.length >= partnersNeeded) {
     const selectedPartners = shuffleArray([...potentialPartners]).slice(0, partnersNeeded);
     const allParticipants = [currentGroup, ...selectedPartners];
@@ -251,6 +251,49 @@ function scheduleMultiPlayerGame(
     return true;
   }
   
+  // If we don't have enough partners who need this game, try to add filler groups
+  if (potentialPartners.length < partnersNeeded) {
+    // Find groups that have already completed all their requirements (potential fillers)
+    const fillerGroups = groups.filter(g => 
+      g.id !== currentGroupId && 
+      !groupScheduledInSlot.has(g.id) &&
+      (needsToPlay.get(g.id)?.size ?? 0) === 0
+    );
+    
+    // Add filler groups to reach the required number of partners
+    const additionalPartnersNeeded = partnersNeeded - potentialPartners.length;
+    const selectedFillers = shuffleArray([...fillerGroups]).slice(0, additionalPartnersNeeded);
+    const allPartners = [...potentialPartners, ...selectedFillers];
+    
+    // If we now have enough partners, schedule the game
+    if (allPartners.length >= partnersNeeded) {
+      const selectedPartners = shuffleArray([...allPartners]).slice(0, partnersNeeded);
+      const allParticipants = [currentGroup, ...selectedPartners];
+      
+      // Schedule all participants
+      allParticipants.forEach(group => {
+        // The primary group uses the provided key, partners need to find their own
+        const usingKey = group.id === currentGroupId ? gameRoundKey : undefined;
+        const isFiller = group.id !== currentGroupId && (needsToPlay.get(group.id)?.size ?? 0) === 0;
+        
+        markGroupAsScheduled(
+          group,
+          game,
+          round,
+          usingKey,
+          timeslotEntries,
+          groupScheduledInSlot,
+          needsToPlay,
+          unscheduledGroups,
+          isFiller // Mark as second chance if this is a filler group
+        );
+      });
+      
+      gameScheduledInSlot.add(game.id);
+      return true;
+    }
+  }
+  
   return false;
 }
 
@@ -270,8 +313,8 @@ function scheduleRemainingGroups(
   const groupsToTry = [...unscheduledGroups];
   
   for (const group of groupsToTry) {
-    // Skip if somehow just got scheduled or has no more games they need
-    if (groupScheduledInSlot.has(group.id) || (needsToPlay.get(group.id)?.size ?? 0) === 0) continue;
+    // Skip if somehow just got scheduled
+    if (groupScheduledInSlot.has(group.id)) continue;
     
     // Get all game-round combinations this group needs
     const neededGameRounds = [];
@@ -338,59 +381,72 @@ function scheduleRemainingGroups(
       }
     }
     
-    // Only try filler logic if the group has truly no more games they need AND
-    // there are very few groups left that need games (indicating we're near the end)
-    const totalGroupsWithNeeds = Array.from(needsToPlay.values()).filter(gameRoundSet => gameRoundSet.size > 0).length;
-    
-    if (!groupWasScheduled && 
-        (needsToPlay.get(group.id)?.size ?? 0) === 0 && 
-        totalGroupsWithNeeds <= Math.ceil(groups.length * 0.1)) { // Only when 90%+ of groups are done
-      
-      const availableGames = Array.from(gameRoundMap.values()).filter(info => 
-        !gameScheduledInSlot.has(info.game.id)
-      );
-      
-      // Sort by fewer required participants first (easier to schedule)
-      availableGames.sort((a, b) => a.game.numberOfGroups - b.game.numberOfGroups);
-      
-      for (const { game, round } of availableGames) {
+    // If the group still has needs but couldn't be scheduled normally, try filler logic
+    if (!groupWasScheduled && (needsToPlay.get(group.id)?.size ?? 0) > 0) {
+      // Try to find any available game that this group needs and use filler groups
+      for (const { key, game, round } of neededGameRounds) {
         if (gameScheduledInSlot.has(game.id)) continue;
         
         const partnersNeeded = game.numberOfGroups - 1;
         
-        // Find available partners who ALSO have no more games they need
-        const availablePartners = groups.filter(g => 
+        // First, try to find partners who also need this game
+        let availablePartners = groups.filter(g => 
           !groupScheduledInSlot.has(g.id) && 
           g.id !== group.id &&
-          (needsToPlay.get(g.id)?.size ?? 0) === 0
+          Array.from(needsToPlay.get(g.id) ?? []).some(partnerKey => {
+            const partnerInfo = parseGameRoundKey(partnerKey);
+            return partnerInfo.gameId === game.id && partnerInfo.round === round;
+          })
         );
         
-        // If we have enough partners, schedule the game as a bonus round
+        // If we don't have enough partners who need this game, add filler groups
+        if (availablePartners.length < partnersNeeded) {
+          // Find groups that have already completed all their requirements (potential fillers)
+          const fillerGroups = groups.filter(g => 
+            !groupScheduledInSlot.has(g.id) && 
+            g.id !== group.id &&
+            (needsToPlay.get(g.id)?.size ?? 0) === 0
+          );
+          
+          // Add filler groups to reach the required number of partners
+          const additionalPartnersNeeded = partnersNeeded - availablePartners.length;
+          const selectedFillers = shuffleArray([...fillerGroups]).slice(0, additionalPartnersNeeded);
+          availablePartners = [...availablePartners, ...selectedFillers];
+        }
+        
+        // If we now have enough partners, schedule the game
         if (availablePartners.length >= partnersNeeded) {
           const selectedPartners = shuffleArray([...availablePartners]).slice(0, partnersNeeded);
           const participants = [group, ...selectedPartners];
           
-          // Schedule all participants as regular games (not second chance)
-          // Since they've all completed their requirements, this is a legitimate bonus round for everyone
+          // Schedule all participants
           participants.forEach(g => {
+            const usingKey = g.id === group.id ? key : undefined;
+            const isFiller = g.id !== group.id && (needsToPlay.get(g.id)?.size ?? 0) === 0;
+            
             markGroupAsScheduled(
               g,
               game,
               round,
-              undefined, // No key to remove since this is a filler
+              usingKey,
               timeslotEntries,
               groupScheduledInSlot,
               needsToPlay,
               unscheduledGroups,
-              false // isSecondChance = false - all participants are equally "finished"
+              isFiller // Mark as second chance if this is a filler group
             );
           });
           
           gameScheduledInSlot.add(game.id);
+          groupWasScheduled = true;
           break; // This group is now scheduled
         }
       }
     }
+    
+    // Note: Removed the bonus games section to prevent unnecessary extra participations
+    // Groups that have completed all their requirements should not be scheduled for additional games
+    // unless they are specifically needed as fillers for other groups' required games
   }
 }
 
@@ -634,9 +690,9 @@ function generateScheduleInternal(
     return { error: "Aucun créneau horaire disponible dans les plages définies." };
   }
 
-  // Calculate a more generous MAX_SLOTS since we now have rounds
+  // Calculate a more generous MAX_SLOTS since we now have rounds and need to handle filler groups
   const totalGameRounds = games.reduce((sum, game) => sum + (game.rounds ?? 1), 0);
-  const MAX_SLOTS = Math.min(allTimeSlots.length, (N * totalGameRounds) + N); // Safety break
+  const MAX_SLOTS = Math.min(allTimeSlots.length, (N * totalGameRounds) + (N * 2)); // More generous for filler games
   
   let slotsUsed = 0;
 
@@ -674,9 +730,47 @@ function generateScheduleInternal(
     }
   }
 
-  // Check if all groups completed all games
+  // Final pass: If we still have groups with needs, try to schedule them with any available games
+  // This is a more aggressive approach to ensure all groups get to play
   const remainingNeeds = Array.from(needsToPlay.values()).some(gameRoundSet => gameRoundSet.size > 0);
-  if (remainingNeeds) {
+  if (remainingNeeds && slotsUsed < MAX_SLOTS) {
+    // Find remaining time slots
+    const remainingSlots = allTimeSlots.slice(0, allTimeSlots.length - slotsUsed);
+    
+    for (const timeSlot of remainingSlots) {
+      if (slotsUsed >= MAX_SLOTS) break;
+      
+      // Check if we still have groups that need to play games
+      const hasRemainingNeeds = Array.from(needsToPlay.values()).some(gameRoundSet => gameRoundSet.size > 0);
+      if (!hasRemainingNeeds) break;
+      
+      slotsUsed++;
+      
+      // Schedule this time slot with more aggressive filler logic
+      const { entries, hasScheduledGames } = scheduleTimeSlot(
+        groups,
+        needsToPlay,
+        gameRoundMap,
+        timeSlot.startTime,
+        timeSlot.endTime
+      );
+
+      // Add the completed timeslot to the schedule if any games were played
+      if (hasScheduledGames) {
+        const slotIndex = schedule.length + 1; // Continue numbering
+        schedule.push({ 
+          slotIndex, 
+          startTime: timeSlot.startTime, 
+          endTime: timeSlot.endTime, 
+          entries 
+        });
+      }
+    }
+  }
+
+  // Check if all groups completed all games
+  const finalRemainingNeeds = Array.from(needsToPlay.values()).some(gameRoundSet => gameRoundSet.size > 0);
+  if (finalRemainingNeeds) {
     return { error: buildErrorMessage(needsToPlay, groupMap, gameMap) };
   }
 

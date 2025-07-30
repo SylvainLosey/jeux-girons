@@ -141,58 +141,82 @@ export const scheduleRouter = createTRPCRouter({
   save: adminProcedure
     .input(saveScheduleSchema)
     .mutation(async ({ ctx, input }) => {
-      // Use a transaction to ensure all operations succeed or fail together
-      return await ctx.db.transaction(async (tx) => {
-        // 1. Create the schedule record
-        const [savedSchedule] = await tx.insert(schedules).values({
-          name: input.name,
-          description: input.description ?? null,
-          gameDurationMs: input.gameDurationMs,
-          transitionTimeMs: input.transitionTimeMs,
-        }).returning();
-
-        if (!savedSchedule) {
-          throw new Error("Failed to create schedule");
-        }
-
-        // 2. Save the time ranges
-        await tx.insert(timeRanges).values(
-          input.timeRanges.map((range) => ({
-            scheduleId: savedSchedule.id,
-            startTime: range.startTime,
-            endTime: range.endTime,
-          }))
-        );
-
-        // 3. Save each time slot and its entries
-        for (const slot of input.schedule) {
-          const [savedSlot] = await tx.insert(timeSlots).values({
-            scheduleId: savedSchedule.id,
-            slotIndex: slot.slotIndex,
-            startTime: slot.startTime,
-            endTime: slot.endTime,
+      try {
+        // Use a transaction to ensure all operations succeed or fail together
+        return await ctx.db.transaction(async (tx) => {
+          // 1. Create the schedule record
+          const [savedSchedule] = await tx.insert(schedules).values({
+            name: input.name,
+            description: input.description ?? null,
+            gameDurationMs: input.gameDurationMs,
+            transitionTimeMs: input.transitionTimeMs,
           }).returning();
 
-          if (!savedSlot) {
-            throw new Error("Failed to create time slot");
+          if (!savedSchedule) {
+            throw new Error("Failed to create schedule");
           }
 
-          // 4. Save all entries for this slot
-          if (slot.entries.length > 0) {
-            await tx.insert(scheduleEntries).values(
-              slot.entries.map((entry) => ({
-                timeSlotId: savedSlot.id,
-                groupId: entry.groupId,
-                gameId: entry.gameId,
-                round: entry.round,
-                isSecondChance: entry.isSecondChance,
+          // 2. Save the time ranges
+          if (input.timeRanges.length > 0) {
+            await tx.insert(timeRanges).values(
+              input.timeRanges.map((range) => ({
+                scheduleId: savedSchedule.id,
+                startTime: range.startTime,
+                endTime: range.endTime,
               }))
             );
           }
-        }
 
-        return savedSchedule;
-      });
+          // 3. Save time slots in batches to avoid overwhelming the database
+          const batchSize = 10; // Process 10 slots at a time
+          for (let i = 0; i < input.schedule.length; i += batchSize) {
+            const batch = input.schedule.slice(i, i + batchSize);
+            
+            for (const slot of batch) {
+              const [savedSlot] = await tx.insert(timeSlots).values({
+                scheduleId: savedSchedule.id,
+                slotIndex: slot.slotIndex,
+                startTime: slot.startTime,
+                endTime: slot.endTime,
+              }).returning();
+
+              if (!savedSlot) {
+                throw new Error(`Failed to create time slot ${slot.slotIndex}`);
+              }
+
+              // 4. Save all entries for this slot in a single batch
+              if (slot.entries.length > 0) {
+                await tx.insert(scheduleEntries).values(
+                  slot.entries.map((entry) => ({
+                    timeSlotId: savedSlot.id,
+                    groupId: entry.groupId,
+                    gameId: entry.gameId,
+                    round: entry.round,
+                    isSecondChance: entry.isSecondChance,
+                  }))
+                );
+              }
+            }
+          }
+
+          return savedSchedule;
+        });
+      } catch (error) {
+        console.error("Error saving schedule:", error);
+        
+        // Provide more specific error messages
+        if (error instanceof Error) {
+          if (error.message.includes("connection") || error.message.includes("stream")) {
+            throw new Error("Erreur de connexion à la base de données. Veuillez réessayer.");
+          }
+          if (error.message.includes("timeout")) {
+            throw new Error("L'opération a pris trop de temps. Veuillez réessayer.");
+          }
+          throw new Error(`Erreur lors de l'enregistrement: ${error.message}`);
+        }
+        
+        throw new Error("Erreur inconnue lors de l'enregistrement du planning");
+      }
     }),
 
   delete: adminProcedure
