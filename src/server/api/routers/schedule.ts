@@ -110,6 +110,7 @@ export const scheduleRouter = createTRPCRouter({
             game: entry.game,
             round: entry.round,
             timeSlotId: entry.timeSlotId,
+            isSecondChance: entry.isSecondChance,
           })),
         };
       });
@@ -305,6 +306,7 @@ export const scheduleRouter = createTRPCRouter({
             group: entry.group,
             game: entry.game,
             round: entry.round,
+            isSecondChance: entry.isSecondChance,
           }))
         }))
       };

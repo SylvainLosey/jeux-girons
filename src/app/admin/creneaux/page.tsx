@@ -252,11 +252,19 @@ export default function AdminCreneauxPage() {
                         <div className="flex items-center gap-2">
                           <Gamepad2 className="h-5 w-5 text-oriental-accent" />
                           <span className="font-medium">{gameEntry.game.name}</span>
+                          {gameEntry.isSecondChance && (
+                            <Badge variant="secondary" className="text-xs bg-yellow-100 text-yellow-800">
+                              PARTIE BONUS
+                            </Badge>
+                          )}
                         </div>
                         
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <Users className="h-4 w-4" />
-                          <span>{gameEntry.group.name}</span>
+                          <span className={gameEntry.isSecondChance ? "font-medium" : ""}>
+                            {gameEntry.group.name}
+                            {gameEntry.isSecondChance && " ⭐"}
+                          </span>
                         </div>
                       </div>
                       

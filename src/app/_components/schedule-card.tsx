@@ -121,7 +121,7 @@ export function ScheduleCard({ entry, viewType, showAdmin = false }: ScheduleCar
               )}
               {entry.isSecondChance && (
                 <Badge variant="secondary" className="text-xs flex-shrink-0 bg-yellow-100 text-yellow-800">
-                  DEUXIEME CHANCE
+                  PARTIE BONUS
                 </Badge>
               )}
             </div>

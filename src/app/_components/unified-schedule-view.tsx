@@ -119,6 +119,7 @@ export function UnifiedScheduleView({ schedule, entity, viewType, showAdmin = fa
               game: entry.game,
               group: entry.group,
               round: entry.round,
+              isSecondChance: entry.isSecondChance,
             };
 
             // Find opponents

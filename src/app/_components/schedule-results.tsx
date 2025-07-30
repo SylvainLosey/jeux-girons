@@ -159,7 +159,7 @@ export function ScheduleResults({ schedule }: ScheduleResultsProps) {
                                 {round && round > 1 ? ` (Tour ${round})` : ''}
                                 {hasSecondChance && (
                                   <Badge variant="secondary" className="text-xs">
-                                    DEUXIEME CHANCE
+                                    PARTIE BONUS
                                   </Badge>
                                 )}
                               </div>
