@@ -253,12 +253,37 @@ function scheduleMultiPlayerGame(
   
   // If we don't have enough partners who need this game, try to add filler groups
   if (potentialPartners.length < partnersNeeded) {
-    // Find groups that have already completed all their requirements (potential fillers)
-    const fillerGroups = groups.filter(g => 
-      g.id !== currentGroupId && 
-      !groupScheduledInSlot.has(g.id) &&
-      (needsToPlay.get(g.id)?.size ?? 0) === 0
-    );
+    // Find groups that could act as fillers - either groups that have completed all requirements
+    // OR groups that don't need this specific game-round (to distribute fillers more evenly)
+    const fillerGroups = groups.filter(g => {
+      if (g.id === currentGroupId || groupScheduledInSlot.has(g.id)) {
+        return false;
+      }
+      
+      const groupNeeds = needsToPlay.get(g.id) ?? new Set();
+      
+      // Groups that have completed all requirements are always good fillers
+      if (groupNeeds.size === 0) {
+        return true;
+      }
+      
+      // Groups that don't need this specific game-round can also act as fillers
+      // This helps distribute filler games throughout the schedule
+      const needsThisGameRound = Array.from(groupNeeds).some(key => {
+        const keyInfo = parseGameRoundKey(key);
+        return keyInfo.gameId === game.id && keyInfo.round === round;
+      });
+      
+      return !needsThisGameRound;
+    });
+    
+    // Sort filler groups by number of remaining needs (fewer needs first)
+    // This prioritizes groups closer to completion while still allowing distribution
+    fillerGroups.sort((a, b) => {
+      const aNeedsCount = needsToPlay.get(a.id)?.size ?? 0;
+      const bNeedsCount = needsToPlay.get(b.id)?.size ?? 0;
+      return aNeedsCount - bNeedsCount;
+    });
     
     // Add filler groups to reach the required number of partners
     const additionalPartnersNeeded = partnersNeeded - potentialPartners.length;
@@ -274,7 +299,14 @@ function scheduleMultiPlayerGame(
       allParticipants.forEach(group => {
         // The primary group uses the provided key, partners need to find their own
         const usingKey = group.id === currentGroupId ? gameRoundKey : undefined;
-        const isFiller = group.id !== currentGroupId && (needsToPlay.get(group.id)?.size ?? 0) === 0;
+        
+        // A group is a filler if it doesn't need this specific game-round
+        const groupNeeds = needsToPlay.get(group.id) ?? new Set();
+        const needsThisGameRound = group.id === currentGroupId || Array.from(groupNeeds).some(key => {
+          const keyInfo = parseGameRoundKey(key);
+          return keyInfo.gameId === game.id && keyInfo.round === round;
+        });
+        const isFiller = !needsThisGameRound;
         
         markGroupAsScheduled(
           group,
@@ -401,12 +433,37 @@ function scheduleRemainingGroups(
         
         // If we don't have enough partners who need this game, add filler groups
         if (availablePartners.length < partnersNeeded) {
-          // Find groups that have already completed all their requirements (potential fillers)
-          const fillerGroups = groups.filter(g => 
-            !groupScheduledInSlot.has(g.id) && 
-            g.id !== group.id &&
-            (needsToPlay.get(g.id)?.size ?? 0) === 0
-          );
+          // Find groups that could act as fillers - either groups that have completed all requirements
+          // OR groups that don't need this specific game-round (to distribute fillers more evenly)
+          const fillerGroups = groups.filter(g => {
+            if (groupScheduledInSlot.has(g.id) || g.id === group.id) {
+              return false;
+            }
+            
+            const groupNeeds = needsToPlay.get(g.id) ?? new Set();
+            
+            // Groups that have completed all requirements are always good fillers
+            if (groupNeeds.size === 0) {
+              return true;
+            }
+            
+            // Groups that don't need this specific game-round can also act as fillers
+            // This helps distribute filler games throughout the schedule
+            const needsThisGameRound = Array.from(groupNeeds).some(partnerKey => {
+              const partnerInfo = parseGameRoundKey(partnerKey);
+              return partnerInfo.gameId === game.id && partnerInfo.round === round;
+            });
+            
+            return !needsThisGameRound;
+          });
+          
+          // Sort filler groups by number of remaining needs (fewer needs first)
+          // This prioritizes groups closer to completion while still allowing distribution
+          fillerGroups.sort((a, b) => {
+            const aNeedsCount = needsToPlay.get(a.id)?.size ?? 0;
+            const bNeedsCount = needsToPlay.get(b.id)?.size ?? 0;
+            return aNeedsCount - bNeedsCount;
+          });
           
           // Add filler groups to reach the required number of partners
           const additionalPartnersNeeded = partnersNeeded - availablePartners.length;
@@ -422,7 +479,14 @@ function scheduleRemainingGroups(
           // Schedule all participants
           participants.forEach(g => {
             const usingKey = g.id === group.id ? key : undefined;
-            const isFiller = g.id !== group.id && (needsToPlay.get(g.id)?.size ?? 0) === 0;
+            
+            // A group is a filler if it doesn't need this specific game-round
+            const groupNeeds = needsToPlay.get(g.id) ?? new Set();
+            const needsThisGameRound = g.id === group.id || Array.from(groupNeeds).some(partnerKey => {
+              const partnerInfo = parseGameRoundKey(partnerKey);
+              return partnerInfo.gameId === game.id && partnerInfo.round === round;
+            });
+            const isFiller = !needsThisGameRound;
             
             markGroupAsScheduled(
               g,
