@@ -1,8 +1,10 @@
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, publicProcedure, adminProcedure } from "~/server/api/trpc";
 import { env } from "~/env";
 import jwt from "jsonwebtoken";
 import { TRPCError } from "@trpc/server";
+import { settings } from "~/server/db/schema";
+import { eq } from "drizzle-orm";
 
 // JWT payload interface
 interface JWTPayload {
@@ -129,6 +131,46 @@ export const adminRouter = createTRPCRouter({
     .mutation(async () => {
       // In a more complex setup, you'd maintain a blacklist of tokens
       // For now, we rely on client-side token removal
+      return { success: true };
+    }),
+
+  /**
+   * Get application settings
+   */
+  getSettings: publicProcedure
+    .query(async ({ ctx }) => {
+      const showScoresPublicly = await ctx.db.query.settings.findFirst({
+        where: eq(settings.key, "show_scores_publicly"),
+      });
+
+      return {
+        showScoresPublicly: showScoresPublicly ? showScoresPublicly.value === "true" : env.SHOW_SCORES_PUBLICLY,
+      };
+    }),
+
+  /**
+   * Update application settings (admin only)
+   */
+  updateSettings: adminProcedure
+    .input(z.object({
+      showScoresPublicly: z.boolean(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      // Upsert the show_scores_publicly setting
+      await ctx.db
+        .insert(settings)
+        .values({
+          key: "show_scores_publicly",
+          value: input.showScoresPublicly.toString(),
+        })
+        .onConflictDoUpdate({
+          target: settings.key,
+          set: {
+            value: input.showScoresPublicly.toString(),
+            updatedAt: new Date(),
+          },
+        });
+
       return { success: true };
     }),
 }); 

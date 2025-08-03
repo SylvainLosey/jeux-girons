@@ -11,6 +11,7 @@ import { ScoreDisplay, ScoreProvider } from "~/components/ui/score-display";
 import { api } from "~/trpc/react";
 import { useAdmin } from "~/app/_components/navbar";
 import { formatTime, formatDate } from "~/app/_utils/date-utils";
+import { AdminSettings } from "~/app/_components/admin-settings";
 
 export default function AdminCreneauxPage() {
   const router = useRouter();
@@ -335,6 +336,11 @@ export default function AdminCreneauxPage() {
                 ))}
               </div>
             </CardContent>
+          </Card>
+
+          {/* Settings */}
+          <Card className="mb-6">
+            <AdminSettings />
           </Card>
         </div>
       </main>

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Users, Gamepad2, CalendarClock, Menu, Settings, Shield, LogOut, Loader2, ArrowRight, ClipboardList } from "lucide-react";
+import { Users, Gamepad2, CalendarClock, Menu, Settings, Shield, LogOut, Loader2, ArrowRight, ClipboardList, Trophy } from "lucide-react";
 import { cn } from "~/lib/utils";
 import {
   NavigationMenu,
@@ -22,6 +22,8 @@ const AdminContext = createContext<{
   setIsAdmin: (admin: boolean) => void;
   logout: () => void;
   isLoading: boolean;
+  showScoresPublicly: boolean;
+  updateShowScoresPublicly: (show: boolean) => void;
 }>({
   isAdmin: false,
   setIsAdmin: () => {
@@ -31,15 +33,52 @@ const AdminContext = createContext<{
     // Default empty implementation
   },
   isLoading: true,
+  showScoresPublicly: true,
+  updateShowScoresPublicly: () => {
+    // Default empty implementation
+  },
 });
 
 export const useAdmin = () => useContext(AdminContext);
+
+export const useSettings = () => {
+  const { showScoresPublicly, updateShowScoresPublicly } = useAdmin();
+  return { showScoresPublicly, updateShowScoresPublicly };
+};
 
 export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [tokenChecked, setTokenChecked] = useState(false);
+  const [showScoresPublicly, setShowScoresPublicly] = useState(true);
+  
+  // Get settings
+  const { data: settings } = api.admin.getSettings.useQuery(undefined, {
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+
+  // Update settings mutation
+  const updateSettingsMutation = api.admin.updateSettings.useMutation({
+    onSuccess: () => {
+      // Refetch settings after update
+      window.location.reload();
+    },
+  });
+
+  // Update settings when they change
+  useEffect(() => {
+    if (settings) {
+      setShowScoresPublicly(settings.showScoresPublicly);
+    }
+  }, [settings]);
+
+  const updateShowScoresPublicly = (show: boolean) => {
+    if (isAdmin) {
+      updateSettingsMutation.mutate({ showScoresPublicly: show });
+    }
+  };
   
   // Check for existing admin authentication on mount
   useEffect(() => {
@@ -110,7 +149,14 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   };
   
   return (
-    <AdminContext.Provider value={{ isAdmin, setIsAdmin: updateIsAdmin, logout, isLoading }}>
+    <AdminContext.Provider value={{ 
+      isAdmin, 
+      setIsAdmin: updateIsAdmin, 
+      logout, 
+      isLoading,
+      showScoresPublicly,
+      updateShowScoresPublicly,
+    }}>
       {children}
     </AdminContext.Provider>
   );
@@ -144,7 +190,7 @@ function useNavigationState() {
 export function Navbar() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { isAdmin, logout } = useAdmin();
+  const { isAdmin, logout, showScoresPublicly } = useAdmin();
   const isNavigating = useNavigationState();
   
   const navItems = [
@@ -166,6 +212,13 @@ export function Navbar() {
       icon: CalendarClock,
       active: pathname === "/schedule"
     },
+    // Add rankings link only if scores are publicly visible or user is admin
+    ...(isAdmin || showScoresPublicly ? [{
+      name: "Classement",
+      href: "/rankings",
+      icon: Trophy,
+      active: pathname === "/rankings"
+    }] : []),
     // Add admin items
     ...(isAdmin ? [{
       name: "Scores",

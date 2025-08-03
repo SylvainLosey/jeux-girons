@@ -14,6 +14,7 @@ export const env = createEnv({
       .default("development"),
     ADMIN_PASSWORD: z.string().min(8, "Admin password must be at least 8 characters"),
     JWT_SECRET: z.string().min(32, "JWT secret must be at least 32 characters"),
+    SHOW_SCORES_PUBLICLY: z.boolean().default(true),
   },
 
   /**
@@ -35,6 +36,7 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,
     JWT_SECRET: process.env.JWT_SECRET,
+    SHOW_SCORES_PUBLICLY: process.env.SHOW_SCORES_PUBLICLY === "true",
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**

@@ -7,6 +7,8 @@ import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Trophy, Medal, Award, ChevronRight, BarChart3, TrendingUp } from "lucide-react";
 import { cn } from "~/lib/utils";
+import { useSettings } from "./navbar";
+import { useAdmin } from "./navbar";
 
 // Helper function to create URL-friendly slugs
 function createSlug(name: string): string {
@@ -63,6 +65,14 @@ type GroupScore = {
 };
 
 export function RankingsPreview() {
+  const { showScoresPublicly } = useSettings();
+  const { isAdmin } = useAdmin();
+  
+  // Don't show rankings if scores are hidden for public users and user is not admin
+  if (!isAdmin && !showScoresPublicly) {
+    return null;
+  }
+
   // Fetch all scores and groups
   const { data: scores, isLoading: isLoadingScores } = api.score.getAll.useQuery();
   const { data: groups, isLoading: isLoadingGroups } = api.group.getAll.useQuery();

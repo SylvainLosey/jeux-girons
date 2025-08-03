@@ -4,6 +4,8 @@ import { api } from "~/trpc/react";
 import { Badge } from "~/components/ui/badge";
 import { cn } from "~/lib/utils";
 import { Award, Trophy, Medal } from "lucide-react";
+import { useSettings } from "~/app/_components/navbar";
+import { useAdmin } from "~/app/_components/navbar";
 
 interface TotalPointsBadgeProps {
   groupId: number;
@@ -12,6 +14,14 @@ interface TotalPointsBadgeProps {
 }
 
 export function TotalPointsBadge({ groupId, className, showRankingAward = false }: TotalPointsBadgeProps) {
+  const { showScoresPublicly } = useSettings();
+  const { isAdmin } = useAdmin();
+  
+  // Don't show anything if scores are hidden for public users and user is not admin
+  if (!isAdmin && !showScoresPublicly) {
+    return null;
+  }
+
   const { data: groupScores, isLoading: isLoadingGroupScores } = api.score.getByGroup.useQuery(
     { groupId },
     {

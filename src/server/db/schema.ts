@@ -115,6 +115,21 @@ export const scores = createTable(
   ]
 );
 
+// Add settings table
+export const settings = createTable(
+  "setting",
+  (d) => ({
+    id: d.serial("id").primaryKey(),
+    key: d.varchar("key", { length: 256 }).notNull().unique(),
+    value: d.text("value").notNull(),
+    createdAt: d.timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: d.timestamp("updated_at", { withTimezone: true }).$onUpdate(() => new Date()),
+  }),
+  (t) => [index("setting_key_idx").on(t.key)],
+);
+
 // Define relations
 export const schedulesRelations = relations(schedules, ({ many }) => ({
   timeRanges: many(timeRanges),

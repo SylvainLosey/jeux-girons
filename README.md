@@ -1,4 +1,36 @@
-# Create T3 App
+# Jeux de Murist 2025
+
+Application web pour la gestion des jeux de jeunesse du Giron de Murist 2025.
+
+## Fonctionnalités
+
+- **Gestion des jeunesses** : Création et gestion des groupes de jeunesse
+- **Gestion des jeux** : Configuration des jeux avec images et descriptions
+- **Planification** : Génération automatique d'horaires équilibrés
+- **Scores** : Saisie et affichage des scores par créneau
+- **Classements** : Affichage des classements en temps réel
+- **Paramètres d'affichage** : Contrôle de la visibilité des scores pour les utilisateurs publics
+
+## Paramètres d'affichage
+
+L'application permet aux administrateurs de contrôler la visibilité des scores et classements pour les utilisateurs publics :
+
+- **Afficher les scores publiquement** : Quand activé, tous les utilisateurs peuvent voir les scores et classements
+- **Masquer les scores** : Quand désactivé, seuls les administrateurs peuvent voir les scores et classements
+
+### Configuration
+
+1. Connectez-vous en tant qu'administrateur
+2. Accédez à la page de gestion des scores (`/admin/creneaux`)
+3. Utilisez le panneau "Paramètres" pour contrôler la visibilité
+
+### Variables d'environnement
+
+```env
+SHOW_SCORES_PUBLICLY=true  # Valeur par défaut (true = visible, false = caché)
+```
+
+## Installation
 
 This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
 

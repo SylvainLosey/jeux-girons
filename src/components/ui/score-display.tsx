@@ -7,6 +7,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from "~/components/ui/badge";
 import { Pencil } from "lucide-react";
 import { DirectScoreEditor } from "~/app/_components/score-editor";
+import { useSettings } from "~/app/_components/navbar";
+import { useAdmin } from "~/app/_components/navbar";
 
 interface ScoreRequest {
   groupId: number;
@@ -125,6 +127,8 @@ export function ScoreDisplay({
 }: ScoreDisplayProps) {
   const { addScoreRequest, getScore, invalidateScores } = useScoreContext();
   const [isEditing, setIsEditing] = useState(false);
+  const { showScoresPublicly } = useSettings();
+  const { isAdmin } = useAdmin();
   
   const scoreRequest = { groupId, gameId, round };
   
@@ -139,6 +143,11 @@ export function ScoreDisplay({
     invalidateScores();
     onScoreUpdated?.();
   };
+  
+  // Don't show scores if they're hidden for public users and user is not admin
+  if (!isAdmin && !showScoresPublicly) {
+    return null;
+  }
   
   if (!score) {
     // Unplayed state - show nothing unless admin
